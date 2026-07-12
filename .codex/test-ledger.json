@@ -378,6 +378,19 @@
       "configuration": ["scripts/validate-config.mjs", "scripts/build-zip.ps1", ".distignore"],
       "environment_signature": "Windows|node-v24.18.0|pwsh-7.6.3",
       "notes": "Configuration validation parsed six JSON files and one YAML file. ZIP inspection passed with 11 allow-listed entries under image-usage-audit/."
+    },
+    {
+      "name": "Codex skills and workflow tooling",
+      "command": "rtk npm run validate:config; rtk npm run actionlint; rtk python C:\\Users\\ussma\\.codex\\skills\\.system\\skill-creator\\scripts\\quick_validate.py .agents\\skills\\iua-quality-gate",
+      "tool_version": "Node.js v24.18.0; Docker 29.6.1; actionlint 1.7.7; Python 3.12.10",
+      "date": "2026-07-12",
+      "commit_tested": "b5a6601e5b628906a349d096f6fe0e53023c9533+worktree",
+      "result": "pass",
+      "duration_ms": 12000,
+      "coverage": ["Dependabot YAML", "GitHub Actions workflow", "project skills metadata"],
+      "configuration": [".github/dependabot.yml", ".github/workflows/qa.yml", "package.json", ".agents/skills"],
+      "environment_signature": "Windows|node-v24.18.0|docker-29.6.1|python-3.12.10",
+      "notes": "validate:config parsed eight JSON files and one YAML file; actionlint ran from its pinned official image; iua-quality-gate frontmatter is valid."
     }
   ]
 }

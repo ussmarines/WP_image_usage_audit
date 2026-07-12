@@ -79,3 +79,34 @@ No maintained, licensed, distinct i18n-only skill appeared in the 2026-07-12 Git
 - [WP-CLI](https://wp-cli.org/) and [WP-CLI i18n command](https://developer.wordpress.org/cli/commands/i18n/)
 - [WordPress Plugin Handbook](https://developer.wordpress.org/plugins/)
 - [WordPress requirements](https://wordpress.org/about/requirements/)
+
+## 2026-07-12 targeted tooling update
+
+Project skills are detected from the existing `.agents/skills/` location in this Codex installation. Added without duplicating the five existing official skills:
+
+| Skill | Source and license | Reason |
+| --- | --- | --- |
+| `wp-performance` | WordPress/agent-skills `trunk`, GPL-2.0-or-later | Scanner scale, options, memory and autoload diagnostics. |
+| `wp-wpcli-and-ops` | WordPress/agent-skills `trunk`, GPL-2.0-or-later | Safe WP-CLI, Plugin Check, POT and multisite operations. |
+| `wp-i18n-workflow` | mralaminahamed/wp-dev-skills `trunk`, MIT | POT/PO/MO/JS translation workflow and translator comments. |
+| `wp-multisite` | mralaminahamed/wp-dev-skills `trunk`, MIT | Site switching, network activation and uninstall safety. |
+| `iua-quality-gate` | Local, project-specific | Scope-aware checks, ledger reuse, metadata and ZIP validation with read-only Git. |
+
+The official source was active on 2026-07-08; the community source was active on 2026-07-04. The selected community folders contain instructions, references and evals only; no installer or executable script. Their README, licence and `SKILL.md` files were reviewed before installation.
+
+Added tooling: Dependabot checks Composer, npm and GitHub Actions weekly in grouped updates; it has no auto-merge configuration. `npm run actionlint` runs the inspected MIT-licensed `rhysd/actionlint` 1.7.7 Linux image pinned to `sha256:1d74bfc9fd1963af8f89a7c22afaaafd42f49aad711a09951d02cb996398f61d`; the same command is a dedicated CI job. No production dependency was added.
+
+Global availability: `gh-fix-ci`, `skill-creator` and `skill-installer` are available from this Codex installation. `security-diff-scan`, `validation` and `fix-finding` are not callable here; no unsupported or duplicate global skill was installed.
+
+### À évaluer plus tard
+
+- `wp-plugin-release`: only for an explicit public release with synchronized version, changelog and POT.
+- `wp-org-submission`: only when runtime checks pass, a private security channel exists, and WordPress.org submission is imminent.
+- `wp-admin-browser`: only when automated admin visual/functional coverage is needed.
+- `blueprint`: only if Playground becomes a maintained test environment.
+- `wp-background-processing`: only after measurements show the synchronous scanner is inadequate.
+- `wp-database`: only for a custom table or schema migration.
+- `iua-scanner-regression`: only when scanner changes become frequent/complex.
+- `deep-security-scan`: only for an exceptional post-architecture or major-release audit.
+
+WordPress Playground CLI 3.1.44 (official GPL-2.0-or-later source) was evaluated but not added: `@wordpress/env` remains the primary runtime, and adding a WebAssembly/SQLite fallback now would duplicate the test chain without proving a complementary smoke path. Its network downloads would not resolve the observed Docker DNS blocker.

@@ -91,6 +91,7 @@ npm run plugin-check
 npm run pot
 npm run validate:metadata
 npm run validate:config
+npm run actionlint
 npm run build:zip
 npm run env:stop
 ```
