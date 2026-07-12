@@ -51,18 +51,17 @@ No maintained, licensed, distinct i18n-only skill appeared in the 2026-07-12 Git
 
 ## Current QA tools
 
-- Available: Git, RTK command proxy, Node.js `v24.18.0`, and `node --check`.
-- Unavailable on PATH during this audit: PHP and WP-CLI.
-- Not configured in the repository: Composer, npm/package scripts, PHPCS/WPCS, PHPStan, PHPUnit, Plugin Check, WordPress runtime, Playground blueprint, or CI.
+- Available: Git, RTK command proxy, Docker 29.6.1, Docker Compose 5.2.0, Node.js `v24.18.0`, npm 11.16.0, and PowerShell 7.6.3. PHP, Composer, and WP-CLI remain unavailable on the host PATH.
+- Configured in the repository: pinned Composer QA dependencies; PHPCS/WPCS/PHPCompatibilityWP; PHPStan WordPress stubs; PHPUnit/polyfills; `@wordpress/env` 11.10.0; and GitHub Actions.
+- Docker PHP 7.4 runs the full local QA sequence; Docker PHP 8.3 validated PHP syntax. PHPCompatibility 9.x must run under PHP 7.4 because its own sniff emits PHP 8.1+ deprecations.
+- `wp-env start` is configured but its first local build failed because Docker could not resolve `api.github.com` while installing PHPUnit. This is an external network/DNS blocker, not a project configuration failure.
 - Authoritative reusable results: `.codex/test-ledger.json`.
 
 ## Recommended next tooling
 
-1. Install a supported PHP runtime and Composer for development.
-2. Add Composer **development** dependencies for PHPCS + `wp-coding-standards/wpcs`, and PHPStan + a WordPress extension/stubs; pin configurations to PHP 7.4 and WordPress 5.9 compatibility.
-3. Add WP-CLI with the official `i18n` command to regenerate the POT and validate `readme.txt`/Plugin Check in a disposable site.
-4. Add a pinned WordPress Playground blueprint or equivalent container with WordPress 5.9/PHP 7.4 and current WordPress/PHP variants.
-5. Add PHPUnit/integration tests only after deciding which behavior requires WordPress bootstrap versus isolated scanner fixtures.
+1. Restore Docker DNS access to complete the local `wp-env` smoke, Plugin Check, and POT validation.
+2. Add WordPress integration fixtures for the highest-risk false-unused scenarios and multisite uninstall.
+3. Keep the current small PHP 7.4/8.3 CI matrix unless real compatibility coverage requires another lane.
 
 ## Verification sources
 

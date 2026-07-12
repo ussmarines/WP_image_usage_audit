@@ -1,0 +1,37 @@
+{
+  "name": "ussmarines/image-usage-audit",
+  "description": "Development tooling for the Image Usage Audit WordPress plugin.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {},
+  "require-dev": {
+    "php-stubs/wordpress-stubs": "6.8.0",
+    "phpcompatibility/php-compatibility": "9.3.5",
+    "phpcompatibility/phpcompatibility-wp": "2.1.5",
+    "phpstan/phpstan": "1.12.27",
+    "phpunit/phpunit": "9.6.24",
+    "squizlabs/php_codesniffer": "3.12.2",
+    "wp-coding-standards/wpcs": "3.1.0",
+    "yoast/phpunit-polyfills": "2.0.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "platform": {
+      "php": "7.4.0"
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "lint": "phpcs --standard=phpcs.xml.dist",
+    "lint:fix": "phpcbf --standard=phpcs.xml.dist",
+    "analyse": "phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G",
+    "test": "phpunit --configuration=phpunit.xml.dist --testsuite=unit",
+    "qa": [
+      "@lint",
+      "@analyse",
+      "@test"
+    ]
+  }
+}

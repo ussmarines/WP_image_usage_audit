@@ -34,7 +34,7 @@ class IUA_Scanner {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public function run() : array {
+	public function run(): array {
 		$iua_include_drafts = '1' === get_option( 'iua_include_drafts', '1' );
 
 		$this->load_cdn_settings();
@@ -113,7 +113,7 @@ class IUA_Scanner {
 	 *
 	 * @return void
 	 */
-	private function load_cdn_settings() : void {
+	private function load_cdn_settings(): void {
 		$iua_cdn_rewrites_raw = get_option( 'iua_cdn_rewrites', '' );
 		$iua_cdn_aliases_raw  = get_option( 'iua_cdn_aliases', '' );
 
@@ -157,12 +157,12 @@ class IUA_Scanner {
 	 *
 	 * @return array<int, int>
 	 */
-	private function get_image_attachment_ids() : array {
+	private function get_image_attachment_ids(): array {
 		$iua_image_mime_types = array_values(
 			array_unique(
 				array_filter(
 					get_allowed_mime_types(),
-					static function ( string $iua_mime_type ) : bool {
+					static function ( string $iua_mime_type ): bool {
 						return 0 === strpos( $iua_mime_type, 'image/' );
 					}
 				)
@@ -193,7 +193,7 @@ class IUA_Scanner {
 	 * @param array<int, int> $attachment_ids Attachment IDs.
 	 * @return array<string, int>
 	 */
-	private function build_attachment_map( array $attachment_ids ) : array {
+	private function build_attachment_map( array $attachment_ids ): array {
 		$iua_map = array();
 
 		foreach ( $attachment_ids as $iua_attachment_id ) {
@@ -203,7 +203,7 @@ class IUA_Scanner {
 				continue;
 			}
 
-			$iua_relative_file               = ltrim( (string) $iua_relative_file, '/\\' );
+			$iua_relative_file             = ltrim( (string) $iua_relative_file, '/\\' );
 			$iua_map[ $iua_relative_file ] = $iua_attachment_id;
 
 			$iua_metadata = wp_get_attachment_metadata( $iua_attachment_id );
@@ -231,7 +231,7 @@ class IUA_Scanner {
 	 * @param array<string, int> $path_map Attachment path map.
 	 * @return void
 	 */
-	private function scan_post_contents( array &$used_map, array $statuses, array $path_map ) : void {
+	private function scan_post_contents( array &$used_map, array $statuses, array $path_map ): void {
 		$iua_posts = $this->get_scannable_posts(
 			$statuses,
 			array(
@@ -269,7 +269,7 @@ class IUA_Scanner {
 	 * @param array<int, string> $statuses Allowed statuses.
 	 * @return void
 	 */
-	private function scan_meta_references( array &$used_map, array $statuses ) : void {
+	private function scan_meta_references( array &$used_map, array $statuses ): void {
 		$iua_post_ids = $this->get_scannable_posts(
 			$statuses,
 			array(
@@ -309,7 +309,7 @@ class IUA_Scanner {
 	 * @param array<string, int> $path_map Attachment path map.
 	 * @return void
 	 */
-	private function scan_builder_metas( array &$used_map, array $statuses, array $path_map ) : void {
+	private function scan_builder_metas( array &$used_map, array $statuses, array $path_map ): void {
 		$iua_builder_keys = array(
 			'_elementor_data',
 			'_elementor_draft',
@@ -358,7 +358,7 @@ class IUA_Scanner {
 	 * @param array<string, int> $path_map Attachment path map.
 	 * @return void
 	 */
-	private function scan_any_meta_uploads( array &$used_map, array $statuses, array $path_map ) : void {
+	private function scan_any_meta_uploads( array &$used_map, array $statuses, array $path_map ): void {
 		$iua_post_ids = $this->get_scannable_posts(
 			$statuses,
 			array(
@@ -398,7 +398,7 @@ class IUA_Scanner {
 	 * @param array<string, int> $path_map Attachment path map.
 	 * @return void
 	 */
-	private function scan_options_for_uploads( array &$used_map, array $path_map ) : void {
+	private function scan_options_for_uploads( array &$used_map, array $path_map ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Core options enumeration is required for the audit and WordPress has no API to list all options.
@@ -427,7 +427,7 @@ class IUA_Scanner {
 	 * @param array<string, int> $path_map Attachment path map.
 	 * @return void
 	 */
-	private function scan_terms( array &$used_map, array $path_map ) : void {
+	private function scan_terms( array &$used_map, array $path_map ): void {
 		$iua_terms = get_terms(
 			array(
 				'taxonomy'   => get_taxonomies( array(), 'names' ),
@@ -454,7 +454,7 @@ class IUA_Scanner {
 	 * @param array<int, bool> $used_map Usage map.
 	 * @return void
 	 */
-	private function scan_site_identity( array &$used_map ) : void {
+	private function scan_site_identity( array &$used_map ): void {
 		$iua_site_icon_id = (int) get_option( 'site_icon' );
 
 		if ( $iua_site_icon_id > 0 ) {
@@ -475,7 +475,7 @@ class IUA_Scanner {
 	 *
 	 * @return array<int, string>
 	 */
-	private function get_scannable_post_types() : array {
+	private function get_scannable_post_types(): array {
 		$iua_post_types = array_map( 'strval', get_post_types( array(), 'names' ) );
 
 		return array_values(
@@ -497,7 +497,7 @@ class IUA_Scanner {
 	 * @param array<string, mixed> $args Additional query arguments.
 	 * @return array<int, mixed>
 	 */
-	private function get_scannable_posts( array $statuses, array $args = array() ) : array {
+	private function get_scannable_posts( array $statuses, array $args = array() ): array {
 		$iua_post_types = $this->get_scannable_post_types();
 		$iua_statuses   = array_values( array_unique( array_map( 'sanitize_key', $statuses ) ) );
 
@@ -529,7 +529,7 @@ class IUA_Scanner {
 	 * @param array<int, string> $meta_keys Meta keys.
 	 * @return array<int, int>
 	 */
-	private function get_posts_with_meta_keys( array $statuses, array $meta_keys ) : array {
+	private function get_posts_with_meta_keys( array $statuses, array $meta_keys ): array {
 		$iua_post_ids = $this->get_scannable_posts(
 			$statuses,
 			array(
@@ -566,7 +566,7 @@ class IUA_Scanner {
 	 * @param string            $context Provenance label.
 	 * @return void
 	 */
-	private function scan_text_for_uploads( string $text, array $path_map, array &$used_map, string $context = '' ) : void {
+	private function scan_text_for_uploads( string $text, array $path_map, array &$used_map, string $context = '' ): void {
 		$iua_text = $this->normalize_text_rewrites( $text );
 
 		if ( '' === $iua_text ) {
@@ -578,7 +578,7 @@ class IUA_Scanner {
 				$iua_relative_file = ltrim( preg_replace( '#\?.*$#', '', (string) $iua_relative_file ), '/\\' );
 
 				if ( isset( $path_map[ $iua_relative_file ] ) ) {
-					$iua_attachment_id = $path_map[ $iua_relative_file ];
+					$iua_attachment_id              = $path_map[ $iua_relative_file ];
 					$used_map[ $iua_attachment_id ] = true;
 
 					if ( '' !== $context ) {
@@ -598,7 +598,7 @@ class IUA_Scanner {
 	 * @param string             $context Provenance label.
 	 * @return void
 	 */
-	private function scan_value_for_uploads( $value, array $path_map, array &$used_map, string $context ) : void {
+	private function scan_value_for_uploads( $value, array $path_map, array &$used_map, string $context ): void {
 		foreach ( $this->flatten_scan_strings( $value ) as $iua_text ) {
 			if ( '' === $iua_text || ! $this->text_might_reference_uploads( $iua_text ) ) {
 				continue;
@@ -616,7 +616,7 @@ class IUA_Scanner {
 	 * @param string           $context Provenance label.
 	 * @return void
 	 */
-	private function scan_builder_value_for_ids( $value, array &$used_map, string $context ) : void {
+	private function scan_builder_value_for_ids( $value, array &$used_map, string $context ): void {
 		if ( is_array( $value ) ) {
 			foreach ( $value as $iua_key => $iua_nested_value ) {
 				if ( 'id' === strtolower( (string) $iua_key ) ) {
@@ -661,7 +661,7 @@ class IUA_Scanner {
 	 * @param mixed $value Value to flatten.
 	 * @return array<int, string>
 	 */
-	private function flatten_scan_strings( $value ) : array {
+	private function flatten_scan_strings( $value ): array {
 		if ( is_string( $value ) ) {
 			return array( $value );
 		}
@@ -693,7 +693,7 @@ class IUA_Scanner {
 	 * @param mixed $value Value to inspect.
 	 * @return bool
 	 */
-	private function value_might_reference_uploads( $value ) : bool {
+	private function value_might_reference_uploads( $value ): bool {
 		foreach ( $this->flatten_scan_strings( $value ) as $iua_text ) {
 			if ( $this->text_might_reference_uploads( $iua_text ) ) {
 				return true;
@@ -709,7 +709,7 @@ class IUA_Scanner {
 	 * @param string $text Text to inspect.
 	 * @return bool
 	 */
-	private function text_might_reference_uploads( string $text ) : bool {
+	private function text_might_reference_uploads( string $text ): bool {
 		$iua_text     = $this->normalize_text_rewrites( $text );
 		$iua_patterns = $this->get_search_patterns();
 
@@ -728,7 +728,7 @@ class IUA_Scanner {
 	 * @param string $text Original text.
 	 * @return string
 	 */
-	private function normalize_text_rewrites( string $text ) : string {
+	private function normalize_text_rewrites( string $text ): string {
 		if ( '' === $text ) {
 			return $text;
 		}
@@ -768,7 +768,7 @@ class IUA_Scanner {
 	 * @param string $label Provenance label.
 	 * @return void
 	 */
-	private function add_provenance( int $attachment_id, string $label ) : void {
+	private function add_provenance( int $attachment_id, string $label ): void {
 		if ( $attachment_id <= 0 || '' === $label ) {
 			return;
 		}
@@ -787,7 +787,7 @@ class IUA_Scanner {
 	 *
 	 * @return array<int, array<int, string>>
 	 */
-	private function get_provenance_output() : array {
+	private function get_provenance_output(): array {
 		$iua_output = array();
 
 		foreach ( $this->provenance as $iua_attachment_id => $iua_labels ) {
@@ -804,7 +804,7 @@ class IUA_Scanner {
 	 * @param string          $basedir Uploads base dir.
 	 * @return array<int, string>
 	 */
-	private function find_orphans( array $attachment_ids, string $basedir ) : array {
+	private function find_orphans( array $attachment_ids, string $basedir ): array {
 		$iua_all_files = $this->find_upload_images( $basedir );
 		$iua_attached  = $this->collect_all_attachment_files( $attachment_ids, $basedir );
 
@@ -817,7 +817,7 @@ class IUA_Scanner {
 	 * @param string $basedir Uploads base dir.
 	 * @return array<int, string>
 	 */
-	private function find_upload_images( string $basedir ) : array {
+	private function find_upload_images( string $basedir ): array {
 		$iua_files      = array();
 		$iua_extensions = array( 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif' );
 
@@ -849,7 +849,7 @@ class IUA_Scanner {
 	 * @param string          $basedir Uploads base dir.
 	 * @return array<int, string>
 	 */
-	private function collect_all_attachment_files( array $attachment_ids, string $basedir ) : array {
+	private function collect_all_attachment_files( array $attachment_ids, string $basedir ): array {
 		$iua_files = array();
 
 		foreach ( $attachment_ids as $iua_attachment_id ) {
@@ -890,7 +890,7 @@ class IUA_Scanner {
 	 *
 	 * @return array<int, string>
 	 */
-	private function get_search_patterns() : array {
+	private function get_search_patterns(): array {
 		$iua_patterns = array( '/wp-content/uploads/' );
 
 		foreach ( $this->cdn_aliases as $iua_alias ) {

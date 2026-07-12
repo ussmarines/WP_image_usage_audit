@@ -14,7 +14,15 @@
     "wp_cli": "unavailable on PATH",
     "wordpress_runtime": "not present"
   },
-  "results_reused": [],
+  "results_reused": [
+    "JavaScript syntax",
+    "Plugin metadata version coherence",
+    "Translation domain coherence",
+    "Basic readme.txt metadata validation",
+    "GPL license completeness markers",
+    "Common secret-pattern scan",
+    "Test ledger JSON syntax"
+  ],
   "entries": [
     {
       "name": "JavaScript syntax",
@@ -151,6 +159,56 @@
       "coverage": [".codex/test-ledger.json"],
       "configuration": [],
       "environment_signature": "Windows|node-v24.18.0"
+    },
+    {
+      "name": "Composer dependency lock resolution",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app composer:2.2 update --no-interaction --no-scripts --no-plugins --prefer-dist",
+      "tool_version": "Composer 2.2 container",
+      "date": "2026-07-12",
+      "commit_tested": "fc5c0e3+worktree",
+      "result": "pass",
+      "duration_ms": 3337,
+      "coverage": ["composer.json", "composer.lock"],
+      "configuration": ["composer.json"],
+      "environment_signature": "Windows|Docker|composer-2.2|php-platform-7.4"
+    },
+    {
+      "name": "PHP 7.4 global QA",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli sh -lc 'vendor/bin/phpcs --standard=phpcs.xml.dist && vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G && vendor/bin/phpunit --configuration=phpunit.xml.dist --testsuite=unit'",
+      "tool_version": "PHP 7.4.33; PHPCS 3.12.2; PHPStan 1.12.27; PHPUnit 9.6.24",
+      "date": "2026-07-12",
+      "commit_tested": "fc5c0e3+worktree",
+      "result": "pass",
+      "duration_ms": 82000,
+      "coverage": ["image-usage-audit.php", "includes", "views", "uninstall.php", "tests/unit"],
+      "configuration": ["phpcs.xml.dist", "phpstan.neon.dist", "phpunit.xml.dist", "composer.json"],
+      "environment_signature": "Windows|Docker|php-7.4.33",
+      "notes": "PHPCS, PHPStan and 3 unit tests/7 assertions passed; PHPStan requires 1G when loading WordPress stubs under PHP 7.4."
+    },
+    {
+      "name": "PHP 8.3 syntax",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:8.3-cli -l <each plugin PHP file>",
+      "tool_version": "PHP 8.3.32",
+      "date": "2026-07-12",
+      "commit_tested": "fc5c0e3+worktree",
+      "result": "pass",
+      "duration_ms": 14500,
+      "coverage": ["image-usage-audit.php", "includes/class-iua-scanner.php", "views/admin-page.php", "uninstall.php"],
+      "configuration": [],
+      "environment_signature": "Windows|Docker|php-8.3.32"
+    },
+    {
+      "name": "WordPress environment smoke availability",
+      "command": "rtk npx wp-env start",
+      "tool_version": "@wordpress/env 11.10.0",
+      "date": "2026-07-12",
+      "commit_tested": "fc5c0e3+worktree",
+      "result": "blocked",
+      "duration_ms": 290000,
+      "coverage": ["plugin activation", "WP-CLI", "Plugin Check", "POT generation"],
+      "configuration": [".wp-env.json", "package.json"],
+      "environment_signature": "Windows|Docker|node-v24.18.0",
+      "notes": "Docker build could not resolve api.github.com while wp-env installed PHPUnit; no WordPress smoke, Plugin Check, or POT generation result exists."
     }
   ]
 }
