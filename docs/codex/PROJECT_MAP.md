@@ -84,6 +84,7 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 ## Commands and decisions
 
 - QA configuration: `composer.json`/`composer.lock`, `phpcs.xml.dist`, `phpstan.neon.dist`, `phpunit.xml.dist`, `package.json`/`package-lock.json`, `.wp-env.json`, and `.github/workflows/qa.yml`.
+- Workflow configuration also includes `.github/dependabot.yml`; run `npm run actionlint` for GitHub Actions semantic checks.
 - Composer development tools: PHPCS + WPCS + PHPCompatibilityWP, PHPStan with WordPress stubs, PHPUnit 9.6.35, and PHPUnit polyfills. `composer qa` runs lint, analysis, and isolated scanner tests; PHPStan uses a 1G limit for the WordPress stubs under PHP 7.4.
 - Reproducible runtime: `@wordpress/env` 11.10.0 with WordPress 6.8.2/PHP 7.4. It supplies WP-CLI, Plugin Check, and POT generation; CI also runs a current PHP 8.3 static/test lane.
 - Tests: `tests/unit` has 20 cases / 35 assertions for CDN validation, CSV formula neutralization, generated image-size URLs, builder IDs, and capped provenance. `tests/integration/smoke.php` is ready to exercise ZIP activation, role separation, a functional scan, concurrency, uninstall, and media preservation in wp-env; full AJAX and multisite request coverage remains future work.
