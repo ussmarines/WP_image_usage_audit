@@ -78,9 +78,11 @@ There is no Composer project, npm project, bundled WordPress runtime, automated 
 
 ## Commands and decisions
 
-- Current executable QA: `node --check assets/admin.js` and Git metadata/diff/secret checks.
-- Expected when PHP is installed: `php -l` for every PHP file.
-- Expected when WP-CLI is installed: `wp i18n make-pot . languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs` and Plugin Check in a disposable WordPress instance.
+- QA configuration: `composer.json`/`composer.lock`, `phpcs.xml.dist`, `phpstan.neon.dist`, `phpunit.xml.dist`, `package.json`/`package-lock.json`, `.wp-env.json`, and `.github/workflows/qa.yml`.
+- Composer development tools: PHPCS + WPCS + PHPCompatibilityWP, PHPStan with WordPress stubs, PHPUnit, and PHPUnit polyfills. `composer qa` runs lint, analysis, and isolated scanner tests; PHPStan uses a 1G limit for the WordPress stubs under PHP 7.4.
+- Reproducible runtime: `@wordpress/env` 11.10.0 with WordPress 6.8.2/PHP 7.4. It supplies WP-CLI, Plugin Check, and POT generation; CI also runs a current PHP 8.3 static/test lane.
+- Tests: `tests/unit` isolates CDN aliases/rewrites, generated image-size URLs, builder IDs, and capped provenance. Full WordPress/AJAX, CSV, uninstall, and multisite cases remain the next integration layer.
+- The local 2026-07-12 `wp-env start` attempt was blocked while Docker resolved `api.github.com` during image construction. No plugin, Plugin Check, or POT result is available locally until that external DNS failure is resolved.
 - Read `.codex/test-ledger.json` before testing and reuse valid passing baselines according to `AGENTS.md`.
 - Keep runtime dependency-free and the admin UI on WordPress/jQuery primitives.
 - Keep scans and settings non-destructive to media; only plugin options may be written or removed.
@@ -88,8 +90,6 @@ There is no Composer project, npm project, bundled WordPress runtime, automated 
 
 ## Next implementation steps
 
-1. Add Composer development tooling for WordPress Coding Standards and PHPStan WordPress stubs, without production dependencies.
-2. Add a disposable WordPress Playground or equivalent smoke environment covering activation, nonce/capability failures, settings, scan, CSV, and uninstall.
-3. Regenerate and validate the full POT catalog with WP-CLI.
-4. Add targeted scanner tests for path normalization, CDN rules, builder IDs, classification, and large-data behavior.
-5. Add release/CI checks only after the local commands and compatibility matrix are agreed.
+1. Resolve the Docker DNS failure, then run the configured WordPress smoke, Plugin Check, and POT generation locally.
+2. Add full WordPress integration coverage for posts/meta/options/drafts, manual marks, CSV, uninstall, and multisite.
+3. Expand scanner fixtures for classification and false-negative cases before adding broader coverage goals.

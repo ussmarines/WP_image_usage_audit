@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "scripts": {
+    "composer": "docker run --rm --volume \"%cd%:/app\" --workdir /app composer:2.2 composer",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "wp": "wp-env run cli wp",
+    "pot": "wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/image-usage-audit /var/www/html/wp-content/plugins/image-usage-audit/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules",
+    "plugin-check": "wp-env run cli wp plugin install plugin-check --activate && wp-env run cli wp plugin check image-usage-audit"
+  },
+  "devDependencies": {
+    "@wordpress/env": "11.10.0"
+  }
+}

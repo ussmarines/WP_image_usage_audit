@@ -69,25 +69,28 @@ Rules are applied to text in memory while scanning. They do not change posts, op
 
 ## Local development and checks
 
-This repository currently has no Composer or npm project and no bundled WordPress runtime. Use the commands that match the tools installed on your machine:
+The repository keeps runtime dependencies at zero. QA dependencies are locked in `composer.lock` and `package-lock.json`; Docker provides PHP and WordPress without a global PHP or WP-CLI installation.
 
 ```bash
-# PHP syntax (all PHP files)
-php -l image-usage-audit.php
-php -l includes/class-iua-scanner.php
-php -l views/admin-page.php
-php -l uninstall.php
+# Install locked development tools.
+npm ci
+npm run composer -- install
 
-# JavaScript syntax
-node --check assets/admin.js
+# Run Composer scripts on a host with PHP 7.4+.
+composer qa
 
-# Regenerate translations when WP-CLI is available
-wp i18n make-pot . languages/image-usage-audit.pot \
-  --domain=image-usage-audit \
-  --exclude=.agents,docs
+# Windows host without PHP: run the same QA sequence in Docker PHP 7.4.
+docker run --rm --volume "%cd%:/app" --workdir /app php:7.4-cli sh -lc \
+  'vendor/bin/phpcs --standard=phpcs.xml.dist && vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G && vendor/bin/phpunit --configuration=phpunit.xml.dist --testsuite=unit'
+
+# Disposable WordPress, WP-CLI, Plugin Check and POT generation.
+npm run env:start
+npm run plugin-check
+npm run pot
+npm run env:stop
 ```
 
-Consult `.codex/test-ledger.json` before rerunning checks. A passing result remains a valid baseline only while its command, tool, configuration, environment, and covered files remain unchanged.
+`@wordpress/env` pins WordPress 6.8.2/PHP 7.4 in `.wp-env.json`; use its documented core/PHP overrides when testing a newer supported combination. The `wordpress-smoke` CI job activates the plugin, runs Plugin Check, and rejects a POT generated from a stale catalog. Consult `.codex/test-ledger.json` before rerunning checks.
 
 ## Security and privacy
 

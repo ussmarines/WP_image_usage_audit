@@ -35,12 +35,12 @@ if ( ! defined( 'IUA_URL' ) ) {
 }
 
 spl_autoload_register(
-	static function ( $class ) {
-		if ( 0 !== strpos( $class, 'IUA_' ) ) {
+	static function ( $iua_class ) {
+		if ( 0 !== strpos( $iua_class, 'IUA_' ) ) {
 			return;
 		}
 
-		$file = IUA_PATH . 'includes/class-' . strtolower( str_replace( '_', '-', $class ) ) . '.php';
+		$file = IUA_PATH . 'includes/class-' . strtolower( str_replace( '_', '-', $iua_class ) ) . '.php';
 
 		if ( file_exists( $file ) ) {
 			require_once $file;
@@ -65,7 +65,7 @@ final class IUA_Plugin {
 	 *
 	 * @return IUA_Plugin
 	 */
-	public static function instance() : self {
+	public static function instance(): self {
 		if ( null === self::$instance ) {
 			self::$instance = new self();
 		}
@@ -78,7 +78,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public static function activate() : void {
+	public static function activate(): void {
 		self::ensure_default_options();
 	}
 
@@ -106,7 +106,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	private static function ensure_default_options() : void {
+	private static function ensure_default_options(): void {
 		if ( null === get_option( 'iua_include_drafts', null ) ) {
 			update_option( 'iua_include_drafts', '1' );
 		}
@@ -129,7 +129,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function register_menu() : void {
+	public function register_menu(): void {
 		add_media_page(
 			__( 'Image Usage Audit', 'image-usage-audit' ),
 			__( 'Image Usage Audit', 'image-usage-audit' ),
@@ -145,7 +145,7 @@ final class IUA_Plugin {
 	 * @param string $hook Current screen hook.
 	 * @return void
 	 */
-	public function enqueue_admin( string $hook ) : void {
+	public function enqueue_admin( string $hook ): void {
 		if ( 'media_page_iua-audit' !== $hook ) {
 			return;
 		}
@@ -201,7 +201,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function render_admin_page() : void {
+	public function render_admin_page(): void {
 		if ( ! $this->current_user_can_manage() ) {
 			wp_die( esc_html__( 'Permission denied.', 'image-usage-audit' ) );
 		}
@@ -214,12 +214,12 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function handle_save_settings() : void {
+	public function handle_save_settings(): void {
 		if ( ! $this->current_user_can_manage() ) {
 			wp_die( esc_html__( 'Permission denied.', 'image-usage-audit' ) );
 		}
 
-		$iua_section = '';
+		$iua_section     = '';
 		$iua_raw_section = filter_input( INPUT_POST, 'iua_section', FILTER_UNSAFE_RAW );
 
 		if ( is_string( $iua_raw_section ) ) {
@@ -233,10 +233,10 @@ final class IUA_Plugin {
 		} elseif ( 'cdn' === $iua_section ) {
 			check_admin_referer( 'iua_save_cdn_settings', 'iua_settings_nonce' );
 
-			$iua_cdn_aliases_raw = filter_input( INPUT_POST, 'iua_cdn_aliases', FILTER_UNSAFE_RAW );
+			$iua_cdn_aliases_raw  = filter_input( INPUT_POST, 'iua_cdn_aliases', FILTER_UNSAFE_RAW );
 			$iua_cdn_rewrites_raw = filter_input( INPUT_POST, 'iua_cdn_rewrites', FILTER_UNSAFE_RAW );
 
-			$iua_cdn_aliases = is_string( $iua_cdn_aliases_raw ) ? sanitize_text_field( $iua_cdn_aliases_raw ) : '';
+			$iua_cdn_aliases  = is_string( $iua_cdn_aliases_raw ) ? sanitize_text_field( $iua_cdn_aliases_raw ) : '';
 			$iua_cdn_rewrites = is_string( $iua_cdn_rewrites_raw ) ? sanitize_textarea_field( $iua_cdn_rewrites_raw ) : '';
 
 			update_option( 'iua_cdn_aliases', $iua_cdn_aliases );
@@ -260,7 +260,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function ajax_run_scan() : void {
+	public function ajax_run_scan(): void {
 		check_ajax_referer( 'iua_scan', 'nonce' );
 
 		if ( ! $this->current_user_can_manage() ) {
@@ -293,7 +293,7 @@ final class IUA_Plugin {
 	 * @param bool  $add Whether to add or remove.
 	 * @return array<int, int>
 	 */
-	private function add_manual_ids( array $ids, bool $add = true ) : array {
+	private function add_manual_ids( array $ids, bool $add = true ): array {
 		$iua_ids    = $this->filter_attachment_ids( $ids );
 		$iua_manual = array_map( 'intval', (array) get_option( 'iua_manual_used_ids', array() ) );
 
@@ -314,7 +314,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function ajax_mark_manual_used() : void {
+	public function ajax_mark_manual_used(): void {
 		check_ajax_referer( 'iua_scan', 'nonce' );
 
 		if ( ! $this->current_user_can_manage() ) {
@@ -351,7 +351,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function ajax_unmark_manual_used() : void {
+	public function ajax_unmark_manual_used(): void {
 		check_ajax_referer( 'iua_scan', 'nonce' );
 
 		if ( ! $this->current_user_can_manage() ) {
@@ -388,7 +388,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function ajax_mark_manual_used_bulk() : void {
+	public function ajax_mark_manual_used_bulk(): void {
 		check_ajax_referer( 'iua_scan', 'nonce' );
 
 		if ( ! $this->current_user_can_manage() ) {
@@ -416,7 +416,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function ajax_unmark_manual_used_bulk() : void {
+	public function ajax_unmark_manual_used_bulk(): void {
 		check_ajax_referer( 'iua_scan', 'nonce' );
 
 		if ( ! $this->current_user_can_manage() ) {
@@ -444,17 +444,17 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public function export_csv() : void {
+	public function export_csv(): void {
 		if ( ! $this->current_user_can_manage() ) {
 			wp_die( esc_html__( 'Permission denied.', 'image-usage-audit' ) );
 		}
 
 		check_admin_referer( 'iua_export_csv' );
 
-		$iua_tab = '';
+		$iua_tab    = '';
 		$iua_filter = '';
 
-		$iua_raw_tab = filter_input( INPUT_GET, 'tab', FILTER_UNSAFE_RAW );
+		$iua_raw_tab    = filter_input( INPUT_GET, 'tab', FILTER_UNSAFE_RAW );
 		$iua_raw_filter = filter_input( INPUT_GET, 'filter', FILTER_UNSAFE_RAW );
 
 		if ( is_string( $iua_raw_tab ) ) {
@@ -556,7 +556,7 @@ final class IUA_Plugin {
 	 *
 	 * @return bool
 	 */
-	private function current_user_can_manage() : bool {
+	private function current_user_can_manage(): bool {
 		return current_user_can( 'upload_files' );
 	}
 
@@ -565,7 +565,7 @@ final class IUA_Plugin {
 	 *
 	 * @return int
 	 */
-	private function get_posted_attachment_id() : int {
+	private function get_posted_attachment_id(): int {
 		$iua_raw_id = filter_input( INPUT_POST, 'id', FILTER_UNSAFE_RAW );
 
 		if ( is_string( $iua_raw_id ) || is_numeric( $iua_raw_id ) ) {
@@ -580,7 +580,7 @@ final class IUA_Plugin {
 	 *
 	 * @return array<int, int>
 	 */
-	private function get_posted_attachment_ids() : array {
+	private function get_posted_attachment_ids(): array {
 		$iua_raw_ids = filter_input( INPUT_POST, 'ids', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
 		$iua_ids     = is_array( $iua_raw_ids ) ? array_map( 'absint', $iua_raw_ids ) : array();
 
@@ -593,7 +593,7 @@ final class IUA_Plugin {
 	 * @param int $attachment_id Attachment ID.
 	 * @return bool
 	 */
-	private function is_valid_attachment_id( int $attachment_id ) : bool {
+	private function is_valid_attachment_id( int $attachment_id ): bool {
 		return $attachment_id > 0 && 'attachment' === get_post_type( $attachment_id );
 	}
 
@@ -603,7 +603,7 @@ final class IUA_Plugin {
 	 * @param array $ids Candidate IDs.
 	 * @return array<int, int>
 	 */
-	private function filter_attachment_ids( array $ids ) : array {
+	private function filter_attachment_ids( array $ids ): array {
 		$iua_filtered_ids = array();
 
 		foreach ( $ids as $id ) {
@@ -622,7 +622,7 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	private function maybe_raise_resource_limits() : void {
+	private function maybe_raise_resource_limits(): void {
 		if ( function_exists( 'wp_raise_memory_limit' ) ) {
 			wp_raise_memory_limit( 'admin' );
 		}
@@ -630,14 +630,4 @@ final class IUA_Plugin {
 }
 
 register_activation_hook( __FILE__, array( 'IUA_Plugin', 'activate' ) );
-
-/**
- * Boot plugin.
- *
- * @return void
- */
-function iua_boot() : void {
-	IUA_Plugin::instance();
-}
-
-iua_boot();
+IUA_Plugin::instance();

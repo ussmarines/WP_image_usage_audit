@@ -182,7 +182,19 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 	</div>
 
 	<h2 class="nav-tab-wrapper iua-tabs">
-		<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'iua-audit', 'iua_tab' => 'unused' ), admin_url( 'upload.php' ) ) ); ?>" class="nav-tab <?php echo esc_attr( 'unused' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
+		<a href="
+		<?php
+		echo esc_url(
+			add_query_arg(
+				array(
+					'page'    => 'iua-audit',
+					'iua_tab' => 'unused',
+				),
+				admin_url( 'upload.php' )
+			)
+		);
+		?>
+		" class="nav-tab <?php echo esc_attr( 'unused' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
 			<?php
 			echo esc_html(
 				sprintf(
@@ -193,7 +205,19 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 			);
 			?>
 		</a>
-		<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'iua-audit', 'iua_tab' => 'draft' ), admin_url( 'upload.php' ) ) ); ?>" class="nav-tab <?php echo esc_attr( 'draft' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
+		<a href="
+		<?php
+		echo esc_url(
+			add_query_arg(
+				array(
+					'page'    => 'iua-audit',
+					'iua_tab' => 'draft',
+				),
+				admin_url( 'upload.php' )
+			)
+		);
+		?>
+		" class="nav-tab <?php echo esc_attr( 'draft' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
 			<?php
 			echo esc_html(
 				sprintf(
@@ -204,7 +228,19 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 			);
 			?>
 		</a>
-		<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'iua-audit', 'iua_tab' => 'used' ), admin_url( 'upload.php' ) ) ); ?>" class="nav-tab <?php echo esc_attr( 'used' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
+		<a href="
+		<?php
+		echo esc_url(
+			add_query_arg(
+				array(
+					'page'    => 'iua-audit',
+					'iua_tab' => 'used',
+				),
+				admin_url( 'upload.php' )
+			)
+		);
+		?>
+		" class="nav-tab <?php echo esc_attr( 'used' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
 			<?php
 			echo esc_html(
 				sprintf(
