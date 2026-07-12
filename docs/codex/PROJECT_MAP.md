@@ -2,7 +2,7 @@
 
 ## Audit baseline
 
-- Audited source commit: `54e640aaeb0ded2999273cd08ba16c8a70e3260c` (`main`, inspected locally and in the public GitHub Actions run on 2026-07-12).
+- Audited source commit: `def18f0be8fe0b2ebe248dbc33e39d9f86847efa` (`main`, inspected locally and in the successful public GitHub Actions run `29207713713` on 2026-07-12).
 - Plugin version: `2.2.5`.
 - Declared compatibility: WordPress 5.9+, PHP 7.4+, tested through WordPress 7.0.
 - Entry point: `image-usage-audit.php`.
@@ -24,7 +24,7 @@
 | `scripts/build-zip.ps1` | Builds and inspects an allow-listed `image-usage-audit/` distribution ZIP. |
 | `scripts/validate-metadata.mjs` | Checks version, text-domain, GPL, tags, short-description, and screenshot metadata invariants. |
 | `readme.txt` | WordPress plugin metadata, end-user description, changelog, and privacy statement. |
-| `languages/image-usage-audit.pot` | Translation-template metadata. The audited file contains no source messages and must be fully regenerated with WP-CLI before release. |
+| `languages/image-usage-audit.pot` | Reproducible translation template generated from the PHP and JavaScript source with the `image-usage-audit` text domain. |
 
 Runtime code remains dependency-free. Composer/npm are development-only, WordPress is supplied ephemerally by wp-env, unit and disposable integration-smoke tests live under `tests/`, and GitHub Actions runs the locked QA workflow.
 
@@ -79,7 +79,7 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 - Only a fixed image-extension list participates in orphan detection.
 - Results are snapshots and become stale until the next manual scan.
 - Provenance is capped at 12 labels per attachment.
-- The POT at the audit baseline has metadata only, so runtime strings are not available to translators yet.
+- The POT is reproducible and contains the current runtime strings. Release changes must keep its project version and catalog synchronized with the source.
 
 ## Commands and decisions
 
@@ -88,7 +88,7 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 - Composer development tools: PHPCS + WPCS + PHPCompatibilityWP, PHPStan with WordPress stubs, PHPUnit 9.6.35, and PHPUnit polyfills. `composer qa` runs lint, analysis, and isolated scanner tests; PHPStan uses a 1G limit for the WordPress stubs under PHP 7.4.
 - Reproducible runtime: `@wordpress/env` 11.10.0 with WordPress 6.8.2/PHP 7.4. It supplies WP-CLI, Plugin Check, and POT generation; CI also runs a current PHP 8.3 static/test lane.
 - Tests: `tests/unit` has 20 cases / 35 assertions for CDN validation, CSV formula neutralization, generated image-size URLs, builder IDs, and capped provenance. `tests/integration/smoke.php` is ready to exercise ZIP activation, role separation, a functional scan, concurrency, uninstall, and media preservation in wp-env; full AJAX and multisite request coverage remains future work.
-- The public CI run for the source commit proved PHP 7.4/8.3 PHPCS, PHPStan, PHPUnit, syntax, npm install, and wp-env startup, but failed because `rg` was absent and the mounted plugin slug was wrong. Those workflow defects are corrected. The single local post-change `wp-env start` attempt remained blocked by Docker DNS resolution of `api.github.com`, so local Plugin Check, POT generation, and runtime smoke remain unexecuted.
+- Public GitHub Actions run `29207713713` passed all four jobs at the audited commit. It covered actionlint, PHP 7.4/8.3 analysis/tests/syntax, dependency audits, metadata/config validation, ZIP construction, ZIP installation and activation, functional smoke assertions, Plugin Check, deterministic POT regeneration, and environment shutdown. Local `wp-env` may still depend on Docker networking, but the successful CI result is the current reusable runtime baseline.
 - Read `.codex/test-ledger.json` before testing and reuse valid passing baselines according to `AGENTS.md`.
 - Keep runtime dependency-free and the admin UI on WordPress/jQuery primitives.
 - Keep scans and settings non-destructive to media; only plugin options may be written or removed.
@@ -96,6 +96,5 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 
 ## Next implementation steps
 
-1. Resolve the Docker DNS failure, then run the configured WordPress smoke, Plugin Check, and POT generation locally.
-2. Add full WordPress integration coverage for posts/meta/options/drafts, manual marks, CSV, uninstall, and multisite.
-3. Expand scanner fixtures for classification and false-negative cases before adding broader coverage goals.
+1. Add full WordPress integration coverage for posts/meta/options/drafts, manual marks, CSV, uninstall, and multisite.
+2. Expand scanner fixtures for classification and false-negative cases before adding broader coverage goals.
