@@ -22,7 +22,7 @@ Features:
 * Support CDN aliases and advanced read-only rewrite rules during scans.
 * Stay non-destructive: the plugin does not delete attachments or modify Media Library behavior.
 
-Supported builders and editors include WordPress core, Elementor, Divi, Beaver Builder, Bricks, SiteOrigin, and WPBakery.
+Supported builders and editors include WordPress core, Elementor, Divi, Beaver Builder, Oxygen, Bricks, SiteOrigin, and WPBakery.
 
 Important:
 Images referenced only in custom CSS, raw HTML widgets, theme files, plugin files, or some external/CDN setups may still require manual review. Always make a full backup before deleting media.
@@ -42,12 +42,6 @@ No. Run a new scan to refresh the results.
 = Why can a used image still appear as unused? =
 
 Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domains, or third-party integrations. Use the manual mark feature when needed.
-
-== Screenshots ==
-
-1. Main audit screen and scan settings.
-2. CSV export with provenance.
-3. Manual false-negative filter.
 
 == Changelog ==
 
@@ -82,4 +76,12 @@ Maintenance release focused on removing the last Plugin Check SQL preparation er
 
 == Privacy ==
 
-This plugin does not collect or transmit personal data. All processing happens on your own site.
+This plugin does not collect, track, or transmit personal data. It makes no remote requests and loads no remote executable code.
+
+It stores plugin settings, manual image decisions, scan timestamps, attachment classifications, orphan upload paths, and short provenance labels in WordPress options. Administrators can export the current snapshot as CSV. Uninstalling the plugin removes only these plugin-owned options; it never deletes or modifies media, posts, metadata, terms, or files.
+
+Option names, filenames, paths, and provenance may reveal private site structure. Restrict plugin access and exported CSV files to trusted administrators. Formula-leading CSV values are neutralized, but exports should still be treated as untrusted files.
+
+== Development ==
+
+Human-readable source, development instructions, tests, and the reproducible ZIP command are available at https://github.com/ussmarines/WP_image_usage_audit.
