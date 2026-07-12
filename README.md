@@ -14,16 +14,16 @@ The current plugin version is `2.2.5`. It supports WordPress 5.9 or later and PH
 - Supports comma-separated CDN host aliases and read-only `FROM => TO` rewrite rules.
 - Records up to 12 provenance labels per attachment.
 - Supports reversible manual “used” markings and bulk actions.
-- Exports used, draft-only, or unused results to CSV.
+- Exports used, draft-only, or unused results to CSV with spreadsheet-formula neutralization.
 - Reports orphan image files found under the WordPress uploads directory.
 
-The plugin does not delete, edit, move, or rewrite media files. Its only persistent writes are its own WordPress options; uninstalling the plugin removes those options, including scan results and settings.
+The plugin does not delete, edit, move, or rewrite media files. Its only persistent writes are its own WordPress options; uninstalling the plugin removes those options, including scan results, settings, manual marks, and the temporary scan lock.
 
 ## Detection limits
 
 The scanner is heuristic, not proof that an image can safely be deleted. It can miss references in theme or plugin files, custom CSS, dynamically generated URLs, external services, unsupported builders, attachment IDs stored outside recognized builder structures, non-standard upload paths, or CDN transformations not covered by configured aliases or rewrites. It may report false positives when a builder's generic nested `id` happens to equal an image attachment ID.
 
-The orphan scan only covers `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, and `avif` files under the current uploads directory. Large sites may hit request time or memory limits because scans run as one authenticated AJAX request and enumerate posts, metadata, options, terms, attachments, and upload files without batching. Always inspect provenance and make a verified backup before deleting media manually in WordPress.
+The orphan scan only covers `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, and `avif` files under the current uploads directory. Large sites may hit request time or memory limits because scans run as one authenticated AJAX request and enumerate posts, metadata, terms, attachments, and upload files. Option rows are read in bounded batches and concurrent scans are rejected, but the wider scan is not asynchronous or resumable. Always inspect provenance and make a verified backup before deleting media manually in WordPress.
 
 ## Installation
 
@@ -59,6 +59,7 @@ Rules are applied to text in memory while scanning. They do not change posts, op
 
 - `image-usage-audit.php`: plugin header, bootstrap, admin hooks, authenticated AJAX actions, settings, and CSV export.
 - `includes/class-iua-scanner.php`: attachment map, content/meta/option/term scans, CDN normalization, provenance, and orphan detection.
+- `includes/class-iua-cdn-settings.php` and `includes/class-iua-csv.php`: bounded CDN validation and CSV formula neutralization.
 - `views/admin-page.php`: escaped administration screen, filters, pagination, and settings forms.
 - `assets/admin.js` and `assets/admin.css`: admin interactions and presentation.
 - `languages/image-usage-audit.pot`: translation template metadata; regenerate the complete catalog before a release.
@@ -66,6 +67,7 @@ Rules are applied to text in memory while scanning. They do not change posts, op
 - `docs/codex/`: persistent project map and tooling decisions for future Codex sessions.
 - `.codex/test-ledger.json`: reusable, scope-aware validation history.
 - `.agents/skills/`: project-scoped WordPress skills from `WordPress/agent-skills`.
+- `scripts/build-zip.ps1`: allow-listed, inspected WordPress ZIP construction.
 
 ## Local development and checks
 
@@ -87,16 +89,21 @@ docker run --rm --volume "%cd%:/app" --workdir /app php:7.4-cli sh -lc \
 npm run env:start
 npm run plugin-check
 npm run pot
+npm run validate:metadata
+npm run validate:config
+npm run build:zip
 npm run env:stop
 ```
 
-`@wordpress/env` pins WordPress 6.8.2/PHP 7.4 in `.wp-env.json`; use its documented core/PHP overrides when testing a newer supported combination. The `wordpress-smoke` CI job activates the plugin, runs Plugin Check, and rejects a POT generated from a stale catalog. Consult `.codex/test-ledger.json` before rerunning checks.
+`@wordpress/env` pins WordPress 6.8.2/PHP 7.4 in `.wp-env.json`; use its documented core/PHP overrides when testing a newer supported combination. The `wordpress-smoke` CI job activates the plugin, runs Plugin Check, and rejects a POT generated from a stale catalog. `npm run build:zip` creates `dist/image-usage-audit.zip`, verifies its single root folder and required metadata, and rejects development-only paths. Consult `.codex/test-ledger.json` before rerunning checks.
 
 ## Security and privacy
 
-The admin page and all mutating or export actions require the `upload_files` capability. Settings and exports use WordPress admin nonces; AJAX actions use the `iua_scan` nonce. Request values are allow-listed or sanitized, attachment IDs are validated, URLs and HTML are escaped at output, and the one direct SQL query is a static read-only enumeration of the current site's options table.
+The admin page and all scan, settings, manual-mark, and export actions require `manage_options`. Settings, exports, and each AJAX action have server-verified nonces. Request values are allow-listed or sanitized, bulk IDs are bounded and validated, CDN hosts/rules are structurally checked, URLs and HTML are escaped at output, and the direct options query is read-only and batched. A short-lived atomic lock prevents concurrent scans.
 
-Scans run locally inside WordPress and do not transmit content or personal data. Scan results store attachment IDs, timestamps, orphan file paths, and short provenance labels in the WordPress database. Because option names, paths, and exported filenames can reveal site structure, restrict administration and exported CSV files to trusted users. Treat CSV exports as untrusted input when opening them in spreadsheet software.
+Scans run locally inside WordPress and do not transmit content or personal data. Scan results store attachment IDs, timestamps, orphan file paths, and short provenance labels in a non-autoloaded WordPress option. Because option names, paths, and exported filenames can reveal site structure, restrict administration and exported CSV files to trusted users. Formula-leading CSV values are prefixed defensively, but exported files should still be treated as untrusted input.
+
+Security reports must not be filed publicly while unpatched. See [`SECURITY.md`](SECURITY.md); the repository owner still needs to enable a verified private reporting channel before public distribution.
 
 ## Contributing
 

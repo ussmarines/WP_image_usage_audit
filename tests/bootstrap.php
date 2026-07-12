@@ -17,4 +17,10 @@ function trailingslashit( $value ) {
 	return rtrim( $value, '/\\' ) . '/';
 }
 
+function wp_parse_url( $url ) {
+	return parse_url( $url );
+}
+
 require_once dirname( __DIR__ ) . '/includes/class-iua-scanner.php';
+require_once dirname( __DIR__ ) . '/includes/class-iua-csv.php';
+require_once dirname( __DIR__ ) . '/includes/class-iua-cdn-settings.php';

@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Scanner for image usage in content, meta, options and common builders.
  */
 class IUA_Scanner {
+	private const OPTION_BATCH_SIZE = 500;
 
 	/**
 	 * Provenance indexed by attachment ID.
@@ -85,7 +86,12 @@ class IUA_Scanner {
 		$iua_draft_only_ids = array_values( array_diff( $iua_draft_ids, $iua_used_ids ) );
 		$iua_unused_ids     = array_values( array_diff( $iua_all_ids, array_unique( array_merge( $iua_used_ids, $iua_draft_only_ids ) ) ) );
 
-		$iua_manual_ids = array_map( 'intval', (array) get_option( 'iua_manual_used_ids', array() ) );
+		$iua_manual_ids = array_values(
+			array_intersect(
+				array_map( 'intval', (array) get_option( 'iua_manual_used_ids', array() ) ),
+				$iua_all_ids
+			)
+		);
 
 		if ( ! empty( $iua_manual_ids ) ) {
 			$iua_used_ids       = array_values( array_unique( array_merge( $iua_used_ids, $iua_manual_ids ) ) );
@@ -116,11 +122,12 @@ class IUA_Scanner {
 	private function load_cdn_settings(): void {
 		$iua_cdn_rewrites_raw = get_option( 'iua_cdn_rewrites', '' );
 		$iua_cdn_aliases_raw  = get_option( 'iua_cdn_aliases', '' );
+		$iua_validated        = IUA_CDN_Settings::validate( (string) $iua_cdn_aliases_raw, (string) $iua_cdn_rewrites_raw );
 
 		$this->cdn_rewrites = array();
 
-		if ( is_string( $iua_cdn_rewrites_raw ) && '' !== trim( $iua_cdn_rewrites_raw ) ) {
-			$iua_lines = preg_split( '/\r?\n/', $iua_cdn_rewrites_raw );
+		if ( $iua_validated['valid'] && '' !== trim( $iua_validated['rewrites'] ) ) {
+			$iua_lines = preg_split( '/\r?\n/', $iua_validated['rewrites'] );
 
 			if ( is_array( $iua_lines ) ) {
 				foreach ( $iua_lines as $iua_line ) {
@@ -146,7 +153,7 @@ class IUA_Scanner {
 			array_filter(
 				array_map(
 					'trim',
-					explode( ',', (string) $iua_cdn_aliases_raw )
+					explode( ',', $iua_validated['valid'] ? $iua_validated['aliases'] : '' )
 				)
 			)
 		);
@@ -400,24 +407,43 @@ class IUA_Scanner {
 	 */
 	private function scan_options_for_uploads( array &$used_map, array $path_map ): void {
 		global $wpdb;
+		$iua_last_option_id = 0;
+		$iua_excluded       = array(
+			'iua_usage_results',
+			'iua_include_drafts',
+			'iua_manual_used_ids',
+			'iua_cdn_aliases',
+			'iua_cdn_rewrites',
+			'iua_scan_lock',
+		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Core options enumeration is required for the audit and WordPress has no API to list all options.
-		$iua_rows = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options}" );
+		do {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Core options enumeration is required for the audit and WordPress has no API to list all options.
+			$iua_rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT option_id, option_name, option_value FROM {$wpdb->options} WHERE option_id > %d ORDER BY option_id ASC LIMIT 500",
+					$iua_last_option_id
+				)
+			);
 
-		if ( ! is_array( $iua_rows ) ) {
-			return;
-		}
-
-		foreach ( $iua_rows as $iua_row ) {
-			$iua_option_name  = isset( $iua_row->option_name ) ? (string) $iua_row->option_name : '';
-			$iua_option_value = isset( $iua_row->option_value ) ? (string) $iua_row->option_value : '';
-
-			if ( '' === $iua_option_name || ! $this->text_might_reference_uploads( $iua_option_value ) ) {
-				continue;
+			if ( ! is_array( $iua_rows ) || empty( $iua_rows ) ) {
+				break;
 			}
 
-			$this->scan_text_for_uploads( $iua_option_value, $path_map, $used_map, 'option:' . $iua_option_name );
-		}
+			foreach ( $iua_rows as $iua_row ) {
+				$iua_last_option_id = isset( $iua_row->option_id ) ? (int) $iua_row->option_id : $iua_last_option_id;
+				$iua_option_name    = isset( $iua_row->option_name ) ? (string) $iua_row->option_name : '';
+				$iua_option_value   = isset( $iua_row->option_value ) ? (string) $iua_row->option_value : '';
+
+				if ( '' === $iua_option_name || in_array( $iua_option_name, $iua_excluded, true ) || ! $this->text_might_reference_uploads( $iua_option_value ) ) {
+					continue;
+				}
+
+				$this->scan_text_for_uploads( $iua_option_value, $path_map, $used_map, 'option:' . $iua_option_name );
+			}
+
+			$iua_row_count = count( $iua_rows );
+		} while ( self::OPTION_BATCH_SIZE === $iua_row_count );
 	}
 
 	/**
@@ -825,18 +851,22 @@ class IUA_Scanner {
 			return $iua_files;
 		}
 
-		$iua_iterator = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator( $basedir, FilesystemIterator::SKIP_DOTS )
-		);
+		try {
+			$iua_iterator = new RecursiveIteratorIterator(
+				new RecursiveDirectoryIterator( $basedir, FilesystemIterator::SKIP_DOTS )
+			);
 
-		foreach ( $iua_iterator as $iua_file ) {
-			if ( $iua_file->isFile() ) {
-				$iua_extension = strtolower( pathinfo( $iua_file->getFilename(), PATHINFO_EXTENSION ) );
+			foreach ( $iua_iterator as $iua_file ) {
+				if ( $iua_file->isFile() ) {
+					$iua_extension = strtolower( pathinfo( $iua_file->getFilename(), PATHINFO_EXTENSION ) );
 
-				if ( in_array( $iua_extension, $iua_extensions, true ) ) {
-					$iua_files[] = wp_normalize_path( $iua_file->getPathname() );
+					if ( in_array( $iua_extension, $iua_extensions, true ) ) {
+						$iua_files[] = wp_normalize_path( $iua_file->getPathname() );
+					}
 				}
 			}
+		} catch ( UnexpectedValueException $iua_exception ) {
+			return $iua_files;
 		}
 
 		return $iua_files;

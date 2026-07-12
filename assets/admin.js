@@ -100,7 +100,7 @@
 
 		$.post(IUAAdmin.ajax_url, {
 			action: 'iua_run_scan',
-			nonce: IUAAdmin.nonce
+			nonce: IUAAdmin.nonces.run_scan
 		})
 			.done(function (response) {
 				if (response && response.success) {
@@ -129,7 +129,7 @@
 
 		$.post(IUAAdmin.ajax_url, {
 			action: 'iua_mark_manual_used',
-			nonce: IUAAdmin.nonce,
+			nonce: IUAAdmin.nonces.mark_manual,
 			id: id
 		})
 			.done(function (response) {
@@ -157,7 +157,7 @@
 
 		$.post(IUAAdmin.ajax_url, {
 			action: 'iua_unmark_manual_used',
-			nonce: IUAAdmin.nonce,
+			nonce: IUAAdmin.nonces.unmark_manual,
 			id: id
 		})
 			.done(function (response) {
@@ -187,7 +187,7 @@
 
 		$.post(IUAAdmin.ajax_url, {
 			action: 'iua_mark_manual_used_bulk',
-			nonce: IUAAdmin.nonce,
+			nonce: IUAAdmin.nonces.mark_manual_bulk,
 			ids: ids
 		})
 			.done(function (response) {
@@ -217,7 +217,7 @@
 
 		$.post(IUAAdmin.ajax_url, {
 			action: 'iua_unmark_manual_used_bulk',
-			nonce: IUAAdmin.nonce,
+			nonce: IUAAdmin.nonces.unmark_bulk,
 			ids: ids
 		})
 			.done(function (response) {

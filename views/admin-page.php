@@ -103,6 +103,10 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 		<div class="notice notice-success is-dismissible">
 			<p><?php esc_html_e( 'Settings saved.', 'image-usage-audit' ); ?></p>
 		</div>
+	<?php elseif ( 'invalid-cdn-settings' === $iua_notice ) : ?>
+		<div class="notice notice-error is-dismissible">
+			<p><?php esc_html_e( 'CDN settings were not saved. Use at most 20 host-only aliases and 20 FROM => /wp-content/uploads rewrite rules.', 'image-usage-audit' ); ?></p>
+		</div>
 	<?php endif; ?>
 
 	<div class="iua-hero">

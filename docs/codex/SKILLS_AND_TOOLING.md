@@ -2,6 +2,14 @@
 
 Verified on 2026-07-12. Project-specific skills are stored in `.agents/skills`, the repo location documented by current Codex customization guidance.
 
+## 2026-07-12 corrective audit usage
+
+The corrective audit used the existing project skills `wp-project-triage`, `wp-plugin-development`, `wp-plugin-directory-guidelines`, `wp-phpstan`, and `wp-playground`, plus the environment-provided `security-threat-model` and `openai-docs` skills. No skill was installed or updated.
+
+The official Codex Security documentation confirms that `$codex-security:deep-security-scan` is intended for repeated repository discovery/validation and `$codex-security:security-diff-scan` for a working-tree patch. The Codex Security plugin and those callable skills were not installed in this session, so neither workflow was claimed or simulated. The fallback was a repository-grounded threat model, complete manual/static WordPress audit, targeted validation, and final diff security review.
+
+The OpenAI Codex manual helper was attempted twice as required by `openai-docs`, but the remote response lacked the expected `x-content-sha256` integrity header. The official OpenAI developer-docs service was then used successfully for the Codex Security workflow documentation.
+
 ## Existing relevant capabilities
 
 Before this bootstrap, no WordPress-specific skill was installed globally or in the repository. The current Codex environment already provides built-in Git/diff/editing capabilities plus these relevant general skills:
@@ -53,7 +61,7 @@ No maintained, licensed, distinct i18n-only skill appeared in the 2026-07-12 Git
 
 - Available: Git, RTK command proxy, Docker 29.6.1, Docker Compose 5.2.0, Node.js `v24.18.0`, npm 11.16.0, and PowerShell 7.6.3. PHP, Composer, and WP-CLI remain unavailable on the host PATH.
 - Configured in the repository: pinned Composer QA dependencies; PHPCS/WPCS/PHPCompatibilityWP; PHPStan WordPress stubs; PHPUnit/polyfills; `@wordpress/env` 11.10.0; and GitHub Actions.
-- Docker PHP 7.4 runs the full local QA sequence; Docker PHP 8.3 validated PHP syntax. PHPCompatibility 9.x must run under PHP 7.4 because its own sniff emits PHP 8.1+ deprecations.
+- Docker PHP 7.4 runs the full local QA sequence; Docker PHP 8.3 validates PHP syntax. PHPCompatibility 9.x must run under PHP 7.4 because its own sniff emits PHP 8.1+ deprecations. PHPUnit was raised from 9.6.24 to 9.6.35 after Composer audit identified `CVE-2026-24765`; this remains a development-only dependency.
 - `wp-env start` is configured but its first local build failed because Docker could not resolve `api.github.com` while installing PHPUnit. This is an external network/DNS blocker, not a project configuration failure.
 - Authoritative reusable results: `.codex/test-ledger.json`.
 

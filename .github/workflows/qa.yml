@@ -1,5 +1,8 @@
 name: QA
 
+permissions:
+  contents: read
+
 on:
   pull_request:
   push:
@@ -10,20 +13,24 @@ jobs:
   qa:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         php: ['7.4', '8.3']
     steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # 2.35.5
         with:
           php-version: ${{ matrix.php }}
           tools: composer:v2
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
       - run: composer install --no-interaction --prefer-dist
+      - run: composer validate --strict --no-interaction
+      - if: matrix.php == '7.4'
+        run: composer audit --locked --no-interaction
       - run: composer analyse
       - run: composer test
       - if: matrix.php == '7.4'
@@ -33,20 +40,29 @@ jobs:
       - run: php -l views/admin-page.php
       - run: php -l uninstall.php
       - run: node --check assets/admin.js
-      - run: |
-          rg -n 'Version: 2\.2\.5|IUA_VERSION.*2\.2\.5|Stable tag: 2\.2\.5|Project-Id-Version: Image Usage Audit 2\.2\.5' image-usage-audit.php readme.txt languages/image-usage-audit.pot
-          rg -n 'Text Domain: image-usage-audit|image-usage-audit' image-usage-audit.php readme.txt languages/image-usage-audit.pot assets/admin.js views/admin-page.php includes/class-iua-scanner.php
+      - run: npm run validate:metadata
+      - if: matrix.php == '7.4'
+        run: npm run build:zip
   wordpress-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
       - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run validate:config
+      - run: npm run build:zip
       - run: npx wp-env start
+      - run: npx wp-env run cli wp plugin deactivate WP_image_usage_audit
+      - run: npx wp-env run cli wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/image-usage-audit.zip --activate
       - run: npx wp-env run cli wp plugin is-active image-usage-audit
+      - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/smoke.php
       - run: npx wp-env run cli wp plugin install plugin-check --activate
       - run: npx wp-env run cli wp plugin check image-usage-audit
-      - run: npx wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/image-usage-audit /var/www/html/wp-content/plugins/image-usage-audit/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules
+      - run: npx wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/WP_image_usage_audit /var/www/html/wp-content/plugins/WP_image_usage_audit/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist
       - run: git diff --exit-code -- languages/image-usage-audit.pot
+      - if: always()
+        run: npx wp-env stop
