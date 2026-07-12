@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Image Usage Audit
- * Plugin URI: https://wordpress.org/plugins/image-usage-audit/
+ * Plugin URI: https://github.com/ussmarines/WP_image_usage_audit
  * Description: Audit image usage in the Media Library with provenance, CSV export, manual false-negative handling, and CDN rewrite support.
  * Version: 2.2.5
  * Author: elliot
- * License: GPLv2 or later
+ * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: image-usage-audit
  * Domain Path: /languages
