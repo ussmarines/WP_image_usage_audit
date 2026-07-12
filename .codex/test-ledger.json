@@ -326,6 +326,58 @@
       "configuration": [],
       "environment_signature": "Windows|rtk",
       "notes": "ripgrep exit 1 means no matching secret patterns were found; duration is the shared final QA batch wall time."
+    },
+    {
+      "name": "GitHub Actions runtime validation",
+      "command": "rtk proxy curl.exe -L -sS -H \"Accept: application/vnd.github+json\" \"https://api.github.com/repos/ussmarines/WP_image_usage_audit/actions/runs?head_sha=b5a6601e5b628906a349d096f6fe0e53023c9533&per_page=20\"; rtk proxy curl.exe -L -sS -H \"Accept: application/vnd.github+json\" \"https://api.github.com/repos/ussmarines/WP_image_usage_audit/actions/runs/29207132911/jobs?per_page=20\"",
+      "tool_version": "GitHub Actions runner; WP-CLI via wp-env; Plugin Check",
+      "date": "2026-07-12",
+      "commit_tested": "b5a6601e5b628906a349d096f6fe0e53023c9533",
+      "result": "partial",
+      "duration_ms": 1500,
+      "coverage": ["ZIP build and installation", "activation", "functional smoke", "Plugin Check", "POT generation", "uninstall"],
+      "configuration": [".github/workflows/qa.yml", ".wp-env.json", "tests/integration/smoke.php"],
+      "environment_signature": "GitHub Actions|ubuntu-latest|run-29207132911",
+      "notes": "The PHP 7.4 and 8.3 jobs passed. In wordpress-smoke, ZIP build/install/activation, smoke, Plugin Check and POT generation passed. The only failed step was the final POT diff because WP-CLI emitted a dynamic POT-Creation-Date; this is corrected in the uncommitted worktree."
+    },
+    {
+      "name": "WordPress runtime availability retry",
+      "command": "rtk npm run env:start",
+      "tool_version": "@wordpress/env 11.10.0; Docker 29.6.1",
+      "date": "2026-07-12",
+      "commit_tested": "b5a6601e5b628906a349d096f6fe0e53023c9533",
+      "result": "blocked",
+      "duration_ms": 116000,
+      "coverage": ["local ZIP installation/activation", "functional smoke", "Plugin Check", "POT generation", "uninstall"],
+      "configuration": [".wp-env.json", "package.json", "tests/integration/smoke.php"],
+      "environment_signature": "Windows|Docker|node-v24.18.0|wp-env-11.10.0",
+      "notes": "Docker could not resolve api.github.com while the wp-env CLI image installed PHPUnit. This is an external DNS failure; no plugin code was changed to work around it."
+    },
+    {
+      "name": "Deterministic POT regeneration",
+      "command": "rtk docker run --rm --volume \"D:\\Program Files\\Documents\\GitHub\\WP_image_usage_audit:/app\" --workdir /app wordpress:cli-php7.4 wp i18n make-pot /app /app/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{\"POT-Creation-Date\":\"2026-07-12T20:07:43+00:00\",\"Report-Msgid-Bugs-To\":\"https://github.com/ussmarines/WP_image_usage_audit/issues\"}'",
+      "tool_version": "WP-CLI 2.7.1; Docker 29.6.1",
+      "date": "2026-07-12",
+      "commit_tested": "b5a6601e5b628906a349d096f6fe0e53023c9533+worktree",
+      "result": "pass",
+      "duration_ms": 3200,
+      "coverage": ["languages/image-usage-audit.pot", "all PHP and JavaScript translation strings", "translator comments"],
+      "configuration": [".github/workflows/qa.yml"],
+      "environment_signature": "Windows|Docker|wordpress-cli-php7.4|wp-cli-2.7.1",
+      "notes": "Two consecutive generations produced SHA-256 C68FD00E4E3FB98AD91157C1A6A1B145B849B897FF6465D863F4F973C23B8624. The catalog has domain image-usage-audit, version 2.2.5, no local absolute references, and the repository issue URL."
+    },
+    {
+      "name": "Targeted workflow configuration and ZIP inspection",
+      "command": "rtk npm run validate:config; rtk npm run build:zip",
+      "tool_version": "Node.js v24.18.0; PowerShell 7.6.3",
+      "date": "2026-07-12",
+      "commit_tested": "b5a6601e5b628906a349d096f6fe0e53023c9533+worktree",
+      "result": "pass",
+      "duration_ms": 1800,
+      "coverage": [".github/workflows/qa.yml", "distribution ZIP"],
+      "configuration": ["scripts/validate-config.mjs", "scripts/build-zip.ps1", ".distignore"],
+      "environment_signature": "Windows|node-v24.18.0|pwsh-7.6.3",
+      "notes": "Configuration validation parsed six JSON files and one YAML file. ZIP inspection passed with 11 allow-listed entries under image-usage-audit/."
     }
   ]
 }
