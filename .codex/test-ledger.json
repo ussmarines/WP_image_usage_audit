@@ -2,9 +2,9 @@
   "schema_version": 1,
   "project": "ussmarines/WP_image_usage_audit",
   "policy": "See AGENTS.md test reuse protocol.",
-  "baseline_commit": "4424ef226370e53cad06b68f10ae8cf994d293bb",
-  "tested_state": "4424ef226370e53cad06b68f10ae8cf994d293bb plus the Dependabot grouping policy worktree",
-  "tested_at": "2026-07-12T22:55:23+02:00",
+  "baseline_commit": "0b63ea128896e9e9eed3e2aa391b4aceaf61a805",
+  "tested_state": "0b63ea128896e9e9eed3e2aa391b4aceaf61a805 plus the PHPStan 2 migration branch worktree",
+  "tested_at": "2026-07-12T23:45:00+02:00",
   "environment": {
     "os": "Windows",
     "shell": "PowerShell 7.6.3",
@@ -471,6 +471,45 @@
       "configuration": ["scripts/validate-config.mjs", "package.json", ".github/dependabot.yml", ".github/workflows/qa.yml"],
       "environment_signature": "Windows|node-v24.18.0|docker-29.6.1|actionlint-1.7.7|git|rtk",
       "notes": "Composer minor and patch updates remain grouped; major updates are intentionally left as independent Dependabot pull requests. Runtime, dependency locks, translations and ZIP content are unchanged."
+    },
+    {
+      "name": "PHPStan 2 migration on PHP 7.4",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli sh -lc 'vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G --no-progress && vendor/bin/phpunit --configuration=phpunit.xml.dist --testsuite=unit && vendor/bin/phpcs --standard=phpcs.xml.dist'",
+      "tool_version": "PHP 7.4.33; PHPStan 2.2.5; PHPUnit 9.6.35; PHPCS 3.12.2; PHPCompatibilityWP 2.1.8",
+      "date": "2026-07-12",
+      "commit_tested": "6ca2446+worktree",
+      "result": "pass",
+      "duration_ms": 43000,
+      "coverage": ["PHPStan analysis", "20 unit tests and 35 assertions", "WPCS and PHPCompatibilityWP"],
+      "configuration": ["phpstan.neon.dist", "phpunit.xml.dist", "phpcs.xml.dist", "composer.lock"],
+      "environment_signature": "Windows|Docker|php-7.4.33",
+      "notes": "The optional PHPStan 2 exclude-path markers allow absent vendor and node_modules paths without lowering analysis scope."
+    },
+    {
+      "name": "PHPStan 2 migration on PHP 8.3",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:8.3-cli sh -lc 'vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G --no-progress && vendor/bin/phpunit --configuration=phpunit.xml.dist --testsuite=unit && vendor/bin/phpcs --standard=phpcs.xml.dist'",
+      "tool_version": "PHP 8.3.32; PHPStan 2.2.5; PHPUnit 9.6.35; PHPCS 3.12.2; PHPCompatibilityWP 2.1.8",
+      "date": "2026-07-12",
+      "commit_tested": "6ca2446+worktree",
+      "result": "partial",
+      "duration_ms": 35000,
+      "coverage": ["PHPStan analysis", "20 unit tests and 35 assertions", "diagnostic PHPCS run outside the PHP 8.3 CI lane"],
+      "configuration": ["phpstan.neon.dist", "phpunit.xml.dist", "phpcs.xml.dist", "composer.lock"],
+      "environment_signature": "Windows|Docker|php-8.3.32",
+      "notes": "PHPStan and PHPUnit passed. The extra PHPCS invocation, which CI intentionally runs only on PHP 7.4, aborted because PHPCompatibility 9.3.5 passes null to trim under PHP 8.3; the PHP 7.4 lint lane passed."
+    },
+    {
+      "name": "PHPStan 2 dependency and patch validation",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app composer:2 composer validate --strict --no-interaction; rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app composer:2 composer audit --locked --no-interaction; rtk node -e \"JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'))\"; rtk git diff --check",
+      "tool_version": "Composer 2 current container; Node.js v24.18.0; git via rtk",
+      "date": "2026-07-12",
+      "commit_tested": "6ca2446+worktree",
+      "result": "pass",
+      "duration_ms": 1700,
+      "coverage": ["composer.json", "composer.lock", ".codex/test-ledger.json", "complete tracked worktree diff"],
+      "configuration": ["Composer PHP platform 7.4.0", "phpstan.neon.dist"],
+      "environment_signature": "Windows|Docker|composer-2-current|node-v24.18.0|git|rtk",
+      "notes": "Composer metadata is strictly valid, the locked dependency graph has no security advisories, the ledger parses as JSON, and the patch has no whitespace errors."
     }
   ]
 }

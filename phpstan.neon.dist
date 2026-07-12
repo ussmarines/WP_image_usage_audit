@@ -6,8 +6,8 @@ parameters:
         - views
         - uninstall.php
     excludePaths:
-        - vendor
-        - node_modules
+        - vendor (?)
+        - node_modules (?)
         - tests
     scanFiles:
         - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
