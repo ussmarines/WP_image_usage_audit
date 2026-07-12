@@ -1,0 +1,169 @@
+:root {
+	--iua-border: #dcdfe5;
+	--iua-soft: #f6f7f7;
+	--iua-accent: #2271b1;
+	--iua-muted: #646970;
+}
+
+#iua-admin .iua-hero {
+	background: linear-gradient(180deg, #f6f7f7, #fff);
+	border: 1px solid var(--iua-border);
+	border-radius: 10px;
+	padding: 12px 16px;
+	margin-bottom: 12px;
+}
+
+#iua-admin .iua-sub,
+#iua-admin .description {
+	color: var(--iua-muted);
+}
+
+#iua-admin .iua-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	align-items: start;
+}
+
+#iua-admin .iua-card {
+	background: #fff;
+	border: 1px solid var(--iua-border);
+	border-radius: 10px;
+	padding: 16px;
+}
+
+#iua-admin .iua-card h2 {
+	margin-top: 0;
+}
+
+#iua-admin .iua-toolbar {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	margin: 8px 0 12px;
+}
+
+#iua-admin .iua-left,
+#iua-admin .iua-right,
+#iua-admin .iua-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+#iua-admin .iua-form-row {
+	display: block;
+	margin-bottom: 12px;
+}
+
+#iua-admin .iua-form-row input[type="text"],
+#iua-admin .iua-form-row textarea {
+	width: 100%;
+	margin-top: 6px;
+}
+
+#iua-admin .iua-quick input[type="search"] {
+	height: 30px;
+	border: 1px solid var(--iua-border);
+	border-radius: 8px;
+	padding: 0 10px;
+	min-width: 220px;
+}
+
+#iua-admin .iua-chip,
+#iua-admin .iua-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	background: #e9f3fb;
+	color: #165c96;
+	border: 1px solid #cfe6f8;
+}
+
+#iua-admin .iua-badge {
+	background: #f0f6fc;
+}
+
+#iua-admin table.widefat thead th {
+	position: sticky;
+	top: 0;
+	background: #f6f7f7;
+	z-index: 1;
+}
+
+#iua-admin .iua-thumb img {
+	border-radius: 6px;
+	border: 1px solid var(--iua-border);
+}
+
+#iua-admin.iua-compact table.widefat td,
+#iua-admin.iua-compact table.widefat th {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+
+#iua-admin.iua-compact .iua-thumb img {
+	max-width: 48px !important;
+}
+
+#iua-admin .iua-columns {
+	position: relative;
+}
+
+#iua-admin .iua-columns-panel {
+	position: absolute;
+	right: 0;
+	top: 36px;
+	z-index: 10;
+	background: #fff;
+	border: 1px solid var(--iua-border);
+	border-radius: 8px;
+	padding: 10px;
+	min-width: 220px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+#iua-admin .iua-columns-panel label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 6px 0;
+}
+
+#iua-admin .iua-columns-actions {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	align-items: center;
+	margin-top: 8px;
+}
+
+#iua-admin .iua-inline-form {
+	margin: 0;
+}
+
+#iua-admin .iua-prov-more ul,
+#iua-admin td[data-col="provenance"] ul {
+	margin: 0;
+	padding-left: 16px;
+}
+
+#iua-admin .iua-provenance-toggle {
+	margin: 6px 0 0;
+}
+
+#iua-admin .iua-muted-dash {
+	color: #888;
+}
+
+@media (max-width: 960px) {
+	#iua-admin .iua-grid {
+		grid-template-columns: 1fr;
+	}
+}
