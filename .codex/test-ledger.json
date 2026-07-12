@@ -2,9 +2,9 @@
   "schema_version": 1,
   "project": "ussmarines/WP_image_usage_audit",
   "policy": "See AGENTS.md test reuse protocol.",
-  "baseline_commit": "54e640aaeb0ded2999273cd08ba16c8a70e3260c",
-  "tested_state": "54e640aaeb0ded2999273cd08ba16c8a70e3260c plus the uncommitted corrective audit worktree",
-  "tested_at": "2026-07-12T23:00:00+02:00",
+  "baseline_commit": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa",
+  "tested_state": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa plus the uncommitted final licensing and distribution audit worktree",
+  "tested_at": "2026-07-12T22:40:26+02:00",
   "environment": {
     "os": "Windows",
     "shell": "PowerShell 7.6.3",
@@ -21,7 +21,9 @@
     "Basic readme.txt metadata validation",
     "GPL license completeness markers",
     "Common secret-pattern scan",
-    "Test ledger JSON syntax"
+    "Test ledger JSON syntax",
+    "GitHub Actions run 29207713713: full QA, WordPress smoke, Plugin Check and POT",
+    "Runtime source, dependency locks, metadata, translations and workflow checks at def18f0"
   ],
   "entries": [
     {
@@ -391,6 +393,70 @@
       "configuration": [".github/dependabot.yml", ".github/workflows/qa.yml", "package.json", ".agents/skills"],
       "environment_signature": "Windows|node-v24.18.0|docker-29.6.1|python-3.12.10",
       "notes": "validate:config parsed eight JSON files and one YAML file; actionlint ran from its pinned official image; iua-quality-gate frontmatter is valid."
+    },
+    {
+      "name": "Successful public GitHub Actions final baseline",
+      "command": "rtk proxy curl.exe -L -sS -H \"Accept: application/vnd.github+json\" \"https://api.github.com/repos/ussmarines/WP_image_usage_audit/actions/runs/29207713713/jobs?per_page=20\"",
+      "tool_version": "GitHub Actions; PHP 7.4/8.3; Node.js 24; WP-CLI via wp-env; Plugin Check",
+      "date": "2026-07-12",
+      "commit_tested": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa",
+      "result": "pass",
+      "duration_ms": 132000,
+      "coverage": ["actionlint", "PHPCS/WPCS/PHPCompatibilityWP", "PHPStan", "PHPUnit", "PHP/JavaScript syntax", "Composer/npm audits", "metadata/config", "ZIP build/install/activation", "role and functional smoke", "scan lock", "uninstall/media preservation", "Plugin Check", "POT reproducibility"],
+      "configuration": [".github/workflows/qa.yml", ".wp-env.json", "composer.lock", "package-lock.json", "scripts/build-zip.ps1", "tests/integration/smoke.php"],
+      "environment_signature": "GitHub Actions|ubuntu-latest|run-29207713713",
+      "notes": "All four jobs and every required step completed successfully at the current source commit. This is the reusable runtime baseline for the documentation-only final pass."
+    },
+    {
+      "name": "Final licensing-pass ZIP build",
+      "command": "rtk npm run build:zip",
+      "tool_version": "Node.js v24.18.0; PowerShell 7.6.3",
+      "date": "2026-07-12",
+      "commit_tested": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa+docs-worktree",
+      "result": "pass",
+      "duration_ms": 1300,
+      "coverage": ["distribution ZIP root", "11-file runtime allow-list", "required metadata", "GPL license", "development-path exclusions"],
+      "configuration": ["scripts/build-zip.ps1", ".distignore"],
+      "environment_signature": "Windows|node-v24.18.0|pwsh-7.6.3",
+      "notes": "Generated dist/image-usage-audit.zip with root image-usage-audit/ and 11 entries. The documentation changes are excluded from the runtime package."
+    },
+    {
+      "name": "Final ZIP entry and secret inspection",
+      "command": "rtk proxy pwsh -NoProfile -Command '$zip = (Resolve-Path -LiteralPath \"dist/image-usage-audit.zip\").Path; Add-Type -AssemblyName System.IO.Compression.FileSystem; $archive = [System.IO.Compression.ZipFile]::OpenRead($zip); try { $archive.Entries | Sort-Object FullName | ForEach-Object { $_.FullName }; $secretPattern = \"BEGIN [A-Z ]*PRIVATE KEY|sk-[A-Za-z0-9_-]{20,}|gh[opusr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}\"; $matches = @(); foreach ($entry in $archive.Entries) { if ($entry.Length -eq 0) { continue }; $reader = [System.IO.StreamReader]::new($entry.Open()); try { $content = $reader.ReadToEnd() } finally { $reader.Dispose() }; if ($content -match $secretPattern) { $matches += $entry.FullName } }; if ($matches.Count -gt 0) { throw \"Secret-like value found in ZIP: $($matches -join \", \")\" }; \"ZIP secret scan: pass\" } finally { $archive.Dispose() }; Get-FileHash -Algorithm SHA256 -LiteralPath $zip | Select-Object Algorithm,Hash,Path'",
+      "tool_version": "PowerShell 7.6.3; System.IO.Compression.FileSystem",
+      "date": "2026-07-12",
+      "commit_tested": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa+docs-worktree",
+      "result": "pass",
+      "duration_ms": 600,
+      "coverage": ["all 11 ZIP entries", "common secret patterns", "archive SHA-256"],
+      "configuration": ["dist/image-usage-audit.zip"],
+      "environment_signature": "Windows|pwsh-7.6.3",
+      "notes": "Every entry is under image-usage-audit/; no secret-like value was found. SHA-256: 9971C1096BBEAF0B60AFD340408EBF3914D11670FCD541DED9862745921347FA."
+    },
+    {
+      "name": "Final worktree secret-pattern scan",
+      "command": "rtk rg -n -I -i 'BEGIN [A-Z ]*PRIVATE KEY|sk-[A-Za-z0-9_-]{20,}|gh[opusr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}' . -g '!.git/**' -g '!node_modules/**' -g '!vendor/**' -g '!dist/**'",
+      "tool_version": "ripgrep via rtk",
+      "date": "2026-07-12",
+      "commit_tested": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa+docs-worktree",
+      "result": "pass",
+      "duration_ms": 300,
+      "coverage": ["entire worktree excluding Git, dependencies and generated ZIP"],
+      "configuration": [],
+      "environment_signature": "Windows|rtk",
+      "notes": "No common private-key or API-token pattern was found."
+    },
+    {
+      "name": "Final ledger syntax and Git patch integrity",
+      "command": "rtk node -e \"JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'))\"; rtk git diff --check",
+      "tool_version": "Node.js v24.18.0; git via rtk",
+      "date": "2026-07-12",
+      "commit_tested": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa+docs-worktree",
+      "result": "pass",
+      "duration_ms": 500,
+      "coverage": [".codex/test-ledger.json", "complete tracked worktree diff"],
+      "configuration": [],
+      "environment_signature": "Windows|node-v24.18.0|git|rtk"
     }
   ]
 }
