@@ -2,9 +2,9 @@
   "schema_version": 1,
   "project": "ussmarines/WP_image_usage_audit",
   "policy": "See AGENTS.md test reuse protocol.",
-  "baseline_commit": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa",
-  "tested_state": "def18f0be8fe0b2ebe248dbc33e39d9f86847efa plus the uncommitted final licensing and distribution audit worktree",
-  "tested_at": "2026-07-12T22:40:26+02:00",
+  "baseline_commit": "4424ef226370e53cad06b68f10ae8cf994d293bb",
+  "tested_state": "4424ef226370e53cad06b68f10ae8cf994d293bb plus the Dependabot grouping policy worktree",
+  "tested_at": "2026-07-12T22:55:23+02:00",
   "environment": {
     "os": "Windows",
     "shell": "PowerShell 7.6.3",
@@ -23,7 +23,8 @@
     "Common secret-pattern scan",
     "Test ledger JSON syntax",
     "GitHub Actions run 29207713713: full QA, WordPress smoke, Plugin Check and POT",
-    "Runtime source, dependency locks, metadata, translations and workflow checks at def18f0"
+    "Runtime source, dependency locks, metadata, translations and workflow checks at def18f0",
+    "GitHub Actions run 29208561077: full QA after pinned Actions update"
   ],
   "entries": [
     {
@@ -457,6 +458,19 @@
       "coverage": [".codex/test-ledger.json", "complete tracked worktree diff"],
       "configuration": [],
       "environment_signature": "Windows|node-v24.18.0|git|rtk"
+    },
+    {
+      "name": "Dependabot Composer grouping policy validation",
+      "command": "rtk npm run validate:config; rtk npm run actionlint; rtk node -e \"JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'))\"; rtk git diff --check",
+      "tool_version": "Node.js v24.18.0; actionlint 1.7.7; git via rtk",
+      "date": "2026-07-12",
+      "commit_tested": "4424ef226370e53cad06b68f10ae8cf994d293bb+dependabot-policy-worktree",
+      "result": "pass",
+      "duration_ms": 2000,
+      "coverage": [".github/dependabot.yml", ".github/workflows/qa.yml", "repository JSON configuration", ".codex/test-ledger.json", "tracked worktree diff"],
+      "configuration": ["scripts/validate-config.mjs", "package.json", ".github/dependabot.yml", ".github/workflows/qa.yml"],
+      "environment_signature": "Windows|node-v24.18.0|docker-29.6.1|actionlint-1.7.7|git|rtk",
+      "notes": "Composer minor and patch updates remain grouped; major updates are intentionally left as independent Dependabot pull requests. Runtime, dependency locks, translations and ZIP content are unchanged."
     }
   ]
 }
