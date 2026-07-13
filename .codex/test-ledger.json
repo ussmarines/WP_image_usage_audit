@@ -625,6 +625,19 @@
       "configuration": ["phpunit.xml.dist", "phpcs.xml.dist", "phpstan.neon.dist", "scripts/build-zip.ps1"],
       "environment_signature": "Windows|Docker-29.6.1|php-7.4.33|node-v24.18.0|pwsh-7.6.3",
       "notes": "The activation callback now accepts the legacy null value and normalizes it to bool internally. The rebuilt 11-entry ZIP is 35,343 bytes with SHA-256 8C391CB01E97EF21441B7FF0DC88D115AA044D23ED70D800B119A8285E76007B."
+    },
+    {
+      "name": "2.2.6 pull-request POT reference diagnostic and regeneration",
+      "command": "GitHub Actions run 29252489312, job 86824212515: git diff --exit-code -- languages/image-usage-audit.pot; then twice: rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app wordpress:cli-php7.4 wp i18n make-pot /app /app/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{\"POT-Creation-Date\":\"2026-07-13T12:43:54+00:00\",\"Report-Msgid-Bugs-To\":\"https://github.com/ussmarines/WP_image_usage_audit/issues\"}'; rtk npm run validate:metadata; rtk npm run build:zip; rtk git diff --check",
+      "tool_version": "GitHub Actions; WP-CLI 2.7.1; Docker 29.6.1; Node.js v24.18.0; PowerShell 7.6.3",
+      "date": "2026-07-13",
+      "commit_tested": "ae6947d85d49cc55f82d76f4895eeab2fb0921a8+pot-worktree",
+      "result": "pass",
+      "duration_ms": 7500,
+      "coverage": ["POT source references", "fixed catalog timestamp", "translation domain and 2.2.6 metadata", "POT reproducibility", "distribution ZIP", "tracked patch whitespace"],
+      "configuration": ["languages/image-usage-audit.pot", ".github/workflows/qa.yml", "scripts/validate-metadata.mjs", "scripts/build-zip.ps1"],
+      "environment_signature": "Windows|Docker-29.6.1|wordpress-cli-php7.4|wp-cli-2.7.1|node-v24.18.0|pwsh-7.6.3",
+      "notes": "The second PR run proved PHP 7.4, PHP 8.3, WordPress 5.9.13, WordPress 7.0.1 multisite and actionlint green. Only POT line references were stale after the two-line activation fix. Two regenerations produced SHA-256 CC5DC0D568D2AA91CA5ABFBDB6E22039BCF0D42B07896A35DD030D08EA2A2110. The rebuilt 11-entry ZIP is 35,340 bytes with SHA-256 5CF21736268CEA5AA62C2ACA4CA20642B0B82ABA79E2B044B61B1AE225D15A63."
     }
   ]
 }

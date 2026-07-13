@@ -15,8 +15,8 @@ msgstr ""
 "X-Domain: image-usage-audit\n"
 
 #. Plugin Name of the plugin
-#: image-usage-audit.php:187
-#: image-usage-audit.php:188
+#: image-usage-audit.php:189
+#: image-usage-audit.php:190
 #: views/admin-page.php:113
 msgid "Image Usage Audit"
 msgstr ""
@@ -37,121 +37,121 @@ msgstr ""
 msgid "https://github.com/ussmarines"
 msgstr ""
 
-#: image-usage-audit.php:240
-#: image-usage-audit.php:430
+#: image-usage-audit.php:242
+#: image-usage-audit.php:432
 msgid "Marked as used (manual)."
 msgstr ""
 
-#: image-usage-audit.php:241
-#: image-usage-audit.php:460
+#: image-usage-audit.php:243
+#: image-usage-audit.php:462
 msgid "Unmarked (manual)."
 msgstr ""
 
-#: image-usage-audit.php:242
+#: image-usage-audit.php:244
 msgid "Bulk action completed."
 msgstr ""
 
-#: image-usage-audit.php:243
+#: image-usage-audit.php:245
 msgid "An error occurred."
 msgstr ""
 
-#: image-usage-audit.php:244
+#: image-usage-audit.php:246
 #: views/admin-page.php:136
 msgid "Run scan"
 msgstr ""
 
-#: image-usage-audit.php:245
+#: image-usage-audit.php:247
 #: views/admin-page.php:136
 msgid "Run scan again"
 msgstr ""
 
-#: image-usage-audit.php:246
+#: image-usage-audit.php:248
 msgid "Scanning…"
 msgstr ""
 
-#: image-usage-audit.php:247
+#: image-usage-audit.php:249
 msgid "Scan error."
 msgstr ""
 
-#: image-usage-audit.php:248
+#: image-usage-audit.php:250
 msgid "No items selected."
 msgstr ""
 
-#: image-usage-audit.php:249
+#: image-usage-audit.php:251
 #: views/admin-page.php:411
 msgid "Show more"
 msgstr ""
 
-#: image-usage-audit.php:250
+#: image-usage-audit.php:252
 msgid "Show less"
 msgstr ""
 
 #. translators: %d: number of rows currently shown after filtering.
-#: image-usage-audit.php:252
+#: image-usage-audit.php:254
 msgid "%d shown"
 msgstr ""
 
-#: image-usage-audit.php:265
-#: image-usage-audit.php:278
-#: image-usage-audit.php:526
+#: image-usage-audit.php:267
+#: image-usage-audit.php:280
+#: image-usage-audit.php:528
 msgid "Permission denied."
 msgstr ""
 
-#: image-usage-audit.php:309
+#: image-usage-audit.php:311
 msgid "Invalid settings section."
 msgstr ""
 
-#: image-usage-audit.php:346
+#: image-usage-audit.php:348
 msgid "A scan is already running. Try again later."
 msgstr ""
 
-#: image-usage-audit.php:370
+#: image-usage-audit.php:372
 msgid "The scan stopped before completion. The previous complete results were preserved."
 msgstr ""
 
-#: image-usage-audit.php:378
+#: image-usage-audit.php:380
 msgid "Scan complete."
 msgstr ""
 
-#: image-usage-audit.php:420
-#: image-usage-audit.php:450
+#: image-usage-audit.php:422
+#: image-usage-audit.php:452
 msgid "Invalid attachment."
 msgstr ""
 
-#: image-usage-audit.php:478
-#: image-usage-audit.php:504
+#: image-usage-audit.php:480
+#: image-usage-audit.php:506
 msgid "Invalid attachment selection."
 msgstr ""
 
-#: image-usage-audit.php:486
+#: image-usage-audit.php:488
 msgid "Bulk marked as used (manual)."
 msgstr ""
 
-#: image-usage-audit.php:512
+#: image-usage-audit.php:514
 msgid "Bulk unmarked (manual)."
 msgstr ""
 
-#: image-usage-audit.php:587
+#: image-usage-audit.php:589
 msgid "Unable to create the CSV export."
 msgstr ""
 
-#: image-usage-audit.php:658
+#: image-usage-audit.php:660
 msgid "Authentication required."
 msgstr ""
 
-#: image-usage-audit.php:679
+#: image-usage-audit.php:681
 msgid "This action requires an HTTP POST request."
 msgstr ""
 
-#: image-usage-audit.php:693
+#: image-usage-audit.php:695
 msgid "Invalid AJAX action."
 msgstr ""
 
-#: image-usage-audit.php:702
+#: image-usage-audit.php:704
 msgid "Insufficient permissions."
 msgstr ""
 
-#: image-usage-audit.php:715
+#: image-usage-audit.php:717
 msgid "Security check failed."
 msgstr ""
 
