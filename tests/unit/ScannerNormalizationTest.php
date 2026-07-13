@@ -3,6 +3,11 @@
 use PHPUnit\Framework\TestCase;
 
 final class ScannerNormalizationTest extends TestCase {
+	protected function tearDown(): void {
+		$GLOBALS['iua_test_get_posts'] = null;
+		parent::tearDown();
+	}
+
 	/**
 	 * @return mixed
 	 */
@@ -54,6 +59,81 @@ final class ScannerNormalizationTest extends TestCase {
 			array( 11 => array( 'post:42 content:url' ) ),
 			$this->call_private( $scanner, 'get_provenance_output' )
 		);
+	}
+
+	/**
+	 * @dataProvider upload_reference_variants
+	 */
+	public function test_upload_reference_variants_are_normalized( string $reference ) : void {
+		$scanner  = new IUA_Scanner();
+		$used     = array();
+		$path_map = array( '2024/image.jpg' => 11 );
+
+		$this->call_private( $scanner, 'scan_text_for_uploads', array( $reference, $path_map, &$used, 'fixture' ) );
+
+		$this->assertSame( array( 11 => true ), $used );
+	}
+
+	public function upload_reference_variants(): array {
+		return array(
+			'full URL'          => array( 'https://example.test/wp-content/uploads/2024/image.jpg' ),
+			'relative URL'      => array( 'wp-content/uploads/2024/image.jpg' ),
+			'srcset'            => array( '<img srcset="/wp-content/uploads/2024/image.jpg 1x, /wp-content/uploads/2024/image-2.jpg 2x">' ),
+			'lazy-load field'   => array( '<img data-src="/wp-content/uploads/2024/image.jpg">' ),
+			'JSON escaped URL'  => array( '{"url":"https:\\/\\/example.test\\/wp-content\\/uploads\\/2024\\/image.jpg"}' ),
+			'HTML escaped URL'  => array( 'https:&#47;&#47;example.test&#47;wp-content&#47;uploads&#47;2024&#47;image.jpg' ),
+			'encoded URL'       => array( 'https%3A%2F%2Fexample.test%2Fwp-content%2Fuploads%2F2024%2Fimage.jpg' ),
+			'CSS URL'           => array( 'background-image:url(/wp-content/uploads/2024/image.jpg)' ),
+			'serialized data'   => array( 'a:1:{s:3:"url";s:46:"/wp-content/uploads/2024/image.jpg";}' ),
+			'query and fragment'=> array( '/wp-content/uploads/2024/image.jpg?fit=100#hero' ),
+		);
+	}
+
+	public function test_blocks_and_shortcodes_only_match_explicit_attachment_fields() : void {
+		$scanner = new IUA_Scanner();
+		$used    = array();
+
+		$this->call_private(
+			$scanner,
+			'scan_text_for_attachment_ids',
+			array( '<!-- wp:image {"id":27} --><figure></figure> [gallery ids="28, 29"] plain id=30', &$used, 'post:5 content' )
+		);
+
+		$this->assertSame( array( 27 => true, 28 => true, 29 => true ), $used );
+		$this->assertArrayNotHasKey( 30, $used );
+	}
+
+	public function test_close_filenames_and_duplicate_basenames_do_not_false_match() : void {
+		$scanner  = new IUA_Scanner();
+		$used     = array();
+		$path_map = array(
+			'2024/image.jpg' => 11,
+			'2025/image.jpg' => 12,
+		);
+
+		$this->call_private( $scanner, 'scan_text_for_uploads', array( '/wp-content/uploads/2024/image-copy.jpg', $path_map, &$used, 'fixture' ) );
+		$this->assertSame( array(), $used );
+
+		$this->call_private( $scanner, 'scan_text_for_uploads', array( '/wp-content/uploads/2025/image.jpg', $path_map, &$used, 'fixture' ) );
+		$this->assertSame( array( 12 => true ), $used );
+	}
+
+	public function test_attachment_queries_are_batched(): void {
+		$calls = array();
+		$GLOBALS['iua_test_get_posts'] = static function ( array $args ) use ( &$calls ): array {
+			$calls[] = $args;
+
+			return 1 === $args['paged'] ? range( 1, 200 ) : array( 201 );
+		};
+
+		$scanner = new IUA_Scanner();
+		$ids     = $this->call_private( $scanner, 'get_image_attachment_ids' );
+
+		$this->assertCount( 201, $ids );
+		$this->assertCount( 2, $calls );
+		$this->assertSame( 200, $calls[0]['posts_per_page'] );
+		$this->assertSame( 1, $calls[0]['paged'] );
+		$this->assertSame( 2, $calls[1]['paged'] );
 	}
 
 	public function test_builder_ids_are_detected_and_provenance_is_capped() : void {

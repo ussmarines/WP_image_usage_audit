@@ -3,7 +3,8 @@
 ## Audit baseline
 
 - Audited source commit: `def18f0be8fe0b2ebe248dbc33e39d9f86847efa` (`main`, inspected locally and in the successful public GitHub Actions run `29207713713` on 2026-07-12).
-- Plugin version: `2.2.5`.
+- Release preparation: `2.2.6` on `release/2.2.6`, based on audited `main` commit `146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c`.
+- Plugin version: `2.2.6`.
 - Declared compatibility: WordPress 5.9+, PHP 7.4+, tested through WordPress 7.0.
 - Entry point: `image-usage-audit.php`.
 - Text domain: `image-usage-audit`; translations live under `languages/`.
@@ -59,7 +60,7 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 | `iua_cdn_aliases` | Comma-separated CDN hosts. | Defaulted on bootstrap; deleted on uninstall. |
 | `iua_cdn_rewrites` | Newline-separated `FROM => TO` rules. | Defaulted on bootstrap; deleted on uninstall. |
 | `iua_usage_results` | Used/draft-only/unused IDs, orphan paths, timestamp, draft flag, and provenance. | Written after scans; deleted on uninstall. |
-| `iua_scan_lock` | Unix timestamp for the atomic, expiring concurrent-scan guard. | Written only during a scan; released afterward and deleted on uninstall. |
+| `iua_scan_lock` | Owner token and expiry for the atomic concurrent-scan guard. | Non-autoloaded; written only during a scan, owner-released afterward, and deleted on uninstall. |
 
 ## Security-sensitive surfaces
 
@@ -75,7 +76,7 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 
 - Heuristic results can contain false negatives for theme/plugin files, custom CSS, dynamic/external data, unsupported builders, IDs outside recognized structures, and unconfigured CDN transformations.
 - Generic builder `id` extraction can create false positives when an unrelated numeric ID equals an image attachment ID.
-- Scan work remains synchronous and may exhaust time/memory on large sites; options are batched and concurrent scans are rejected, but posts, relevant metadata, terms, attachments, and upload files may still be enumerated in one AJAX request.
+- Scan work remains synchronous and may exhaust time/memory on very large sites. Attachments, posts, metadata, terms, and options are queried in bounded batches and concurrent scans are rejected, but the complete attachment map and upload-file inventory still live in one request.
 - Only a fixed image-extension list participates in orphan detection.
 - Results are snapshots and become stale until the next manual scan.
 - Provenance is capped at 12 labels per attachment.
@@ -86,8 +87,8 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 - QA configuration: `composer.json`/`composer.lock`, `phpcs.xml.dist`, `phpstan.neon.dist`, `phpunit.xml.dist`, `package.json`/`package-lock.json`, `.wp-env.json`, and `.github/workflows/qa.yml`.
 - Workflow configuration also includes `.github/dependabot.yml`; run `npm run actionlint` for GitHub Actions semantic checks.
 - Composer development tools: PHPCS + WPCS + PHPCompatibilityWP, PHPStan with WordPress stubs, PHPUnit 9.6.35, and PHPUnit polyfills. `composer qa` runs lint, analysis, and isolated scanner tests; PHPStan uses a 1G limit for the WordPress stubs under PHP 7.4.
-- Reproducible runtime: `@wordpress/env` 11.10.0 with WordPress 6.8.2/PHP 7.4. It supplies WP-CLI, Plugin Check, and POT generation; CI also runs a current PHP 8.3 static/test lane.
-- Tests: `tests/unit` has 20 cases / 35 assertions for CDN validation, CSV formula neutralization, generated image-size URLs, builder IDs, and capped provenance. `tests/integration/smoke.php` is ready to exercise ZIP activation, role separation, a functional scan, concurrency, uninstall, and media preservation in wp-env; full AJAX and multisite request coverage remains future work.
+- Reproducible runtime: `@wordpress/env` 11.10.0 with WordPress 7.0.1/PHP 7.4. Dedicated configs exercise WordPress 5.9.13 and a WordPress 7.0.1 multisite network; CI also runs a PHP 8.3 static/test lane.
+- Tests: `tests/unit` has 39 cases / 131 assertions for AJAX envelopes, capabilities, action-specific nonces, bounded IDs, lock ownership, network activation, URL/block/shortcode normalization, batching, CDN validation, CSV neutralization, builder IDs, and provenance. Integration scripts exercise authenticated HTTP AJAX, more than one post/options batch, draft behavior, non-autoloaded results, stale locks, exact-ZIP activation, multisite isolation/uninstall, Plugin Check, and media/content preservation.
 - Public GitHub Actions run `29207713713` passed all four jobs at the audited commit. It covered actionlint, PHP 7.4/8.3 analysis/tests/syntax, dependency audits, metadata/config validation, ZIP construction, ZIP installation and activation, functional smoke assertions, Plugin Check, deterministic POT regeneration, and environment shutdown. Local `wp-env` may still depend on Docker networking, but the successful CI result is the current reusable runtime baseline.
 - Read `.codex/test-ledger.json` before testing and reuse valid passing baselines according to `AGENTS.md`.
 - Keep runtime dependency-free and the admin UI on WordPress/jQuery primitives.
@@ -96,5 +97,5 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 
 ## Next implementation steps
 
-1. Add full WordPress integration coverage for posts/meta/options/drafts, manual marks, CSV, uninstall, and multisite.
-2. Expand scanner fixtures for classification and false-negative cases before adding broader coverage goals.
+1. Keep the synchronous scale limit explicit and evaluate an asynchronous design only from measured production evidence.
+2. Add new heuristic fixtures whenever a supported builder or reference format is introduced.

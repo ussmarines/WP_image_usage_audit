@@ -4,7 +4,7 @@ Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.5
+Stable tag: 2.2.6
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,16 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 
 == Changelog ==
 
+= 2.2.6 =
+* Restricted every audit action to administrators with `manage_options` and gave each AJAX action its own nonce and stable validation responses.
+* Neutralized spreadsheet formulas in CSV exports and strictly bounded CDN aliases, rewrite rules, manual selections, and request values.
+* Added an atomic expiring scan lock, preserved the last complete result after interrupted scans, and kept large result options out of autoload.
+* Bounded attachment, post, term, metadata, and option processing while retaining the synchronous, dependency-free scanner.
+* Expanded detection for encoded and relative upload URLs, `srcset`, lazy-load fields, JSON, serialized values, CSS, shortcodes, blocks, builders, CDN aliases, query strings, and fragments.
+* Corrected network activation and multisite uninstall context restoration while preserving all media and content.
+* Strengthened GitHub Actions with pinned actions, reproducible ZIP/POT checks, PHP 7.4 and 8.3 QA, WordPress 5.9/current smoke tests, AJAX, multisite, large-site, uninstall, and heuristic coverage.
+* Updated PHPUnit and compatibility stubs, migrated static analysis to PHPStan 2, and enabled GitHub private vulnerability reporting.
+
 = 2.2.5 =
 * Removed the remaining Plugin Check SQL preparation and direct-parameter findings in the scanner.
 * Reworked scan queries to use WordPress query APIs where possible.
@@ -70,9 +80,9 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 
 == Upgrade Notice ==
 
-= 2.2.5 =
+= 2.2.6 =
 
-Maintenance release focused on removing the last Plugin Check SQL preparation errors while keeping the scanner fully functional.
+Security and robustness release with stricter administrator-only AJAX handling, bounded scanning, multisite lifecycle fixes, broader detection fixtures, and a reproducible validated package.
 
 == Privacy ==
 

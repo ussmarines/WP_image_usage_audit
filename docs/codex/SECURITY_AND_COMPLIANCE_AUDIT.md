@@ -115,7 +115,7 @@ The ZIP allow-list contains exactly 11 runtime files beneath `image-usage-audit/
 | 12 readme spam | Pass: five relevant tags, no affiliate link/keyword stuffing |
 | 13 core libraries | Pass: WordPress `jquery` handle; no bundled core library |
 | 14 SVN release use | Not applicable before submission; ZIP procedure is release-oriented |
-| 15 versions | Pass at 2.2.5; functional corrections justify a future coordinated bump |
+| 15 versions | Pass for the coordinated 2.2.6 functional release |
 | 16 complete plugin | Pass in the validated ZIP and runtime CI baseline |
 | 17 trademarks/copyright | Pass: functional name/slug, no third-party trademark prefix |
 | 18 directory discretion | Informational; future review may impose updated requirements |
@@ -153,10 +153,19 @@ Local `wp-env start` attempts failed during Docker image builds because the cont
 - Heuristic false negatives remain possible for custom CSS, theme/plugin files, dynamic/external data, unsupported builders, unusual ID structures, non-standard paths, and unconfigured CDN transforms. False positives remain possible for generic builder `id` keys.
 - Full server-level tests for missing/invalid nonces, AJAX error codes, manual actions, export headers/body, multisite uninstall, and partial scanner failures are authored only in part; the successful smoke covers role separation, scanning, locking, single-site uninstall, and media preservation.
 - Provenance is intentionally capped at 12 labels and snapshots become stale until rerun.
-- `SECURITY.md` cannot name a verified private channel. The owner must enable GitHub private vulnerability reporting or publish another real private contact before release.
+- GitHub private vulnerability reporting is enabled and linked from `SECURITY.md`; no public issue or email is required for an initial private report.
 - Plugin Check and the source-message POT catalog are verified by public CI run `29207713713`; complete AJAX request and multisite test coverage is still absent.
 - This is a time-bounded code/configuration audit, not a guarantee of perfect security or a penetration test of a production WordPress installation.
 
+## 2.2.6 release delta (2026-07-13)
+
+- GitHub Private Vulnerability Reporting was enabled through the official repository API and rechecked as enabled. `SECURITY.md` now links directly to the private `Report a vulnerability` flow without an email address.
+- AJAX handlers now require POST, validate the exact action, return stable JSON status codes for authentication/authorization/nonce/input failures, and expose matching unauthenticated hooks that return JSON 401 without performing work.
+- The expiring scan lock now carries an owner token. Expired takeover uses a conditional delete before atomic `add_option()`, and an older request cannot release a replacement lock. Scanner exceptions preserve the last complete snapshot and return a generic failure.
+- Attachment, post, metadata, term, and option reads are bounded. Result and lock options remain non-autoloaded; the synchronous full attachment map/upload traversal remains the documented scale boundary.
+- New unit and disposable WordPress coverage exercises 39 tests / 131 assertions, authenticated HTTP AJAX, WordPress 5.9.13 and 7.0.1, multisite isolation/network activation/uninstall, more than one post/options batch, stale/concurrent locks, draft behavior, heuristic variants, exact-ZIP activation, Plugin Check, and media/content preservation.
+- No new runtime dependency, custom table, cron, queue, background process, or destructive media behavior was introduced.
+
 ## Release recommendation
 
-The audited technical changes alter authorization, CSV output, settings acceptance, scan concurrency/storage, uninstall behavior, tests, dependencies, CI, and distribution. If version 2.2.5 was distributed before those corrections, publish them as **2.2.6 or later** through a deliberate release; Plugin Check, POT generation, and runtime smoke now pass, but release ownership/licensing and final release review remain explicit decisions. Documentation-only updates in the final licensing pass do not independently require a version bump. At release, synchronize the main PHP `Version`, `IUA_VERSION`, `readme.txt` stable tag/changelog/upgrade notice, POT project version/catalog, metadata validator constant, workflow metadata expectations if any, and ZIP verification expectation.
+The audited technical changes justify the coordinated `2.2.6` release. Publish only after the exact ZIP, checksum, compatibility jobs, Plugin Check, POT reproducibility, pull-request CI, and post-merge `main` validation pass. Documentation-only updates after this coordinated release do not independently justify another version bump.

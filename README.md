@@ -2,7 +2,7 @@
 
 Image Usage Audit is a read-only WordPress administration plugin for reviewing image usage before a human cleans up the Media Library. It classifies registered image attachments as used in published content, used only in drafts, or unused; records where matches were found; identifies image files in uploads that are not registered attachments; and exports the current result set as CSV.
 
-The current plugin version is `2.2.5`. It supports WordPress 5.9 or later and PHP 7.4 or later, and is tested up to the WordPress 7.0 release line.
+The current plugin version is `2.2.6`. It is maintained by [ussmarines](https://github.com/ussmarines), supports WordPress 5.9 or later and PHP 7.4 or later, and is validated on WordPress 5.9.13 and 7.0.1 (the WordPress 7.0 release line).
 
 ## Features
 
@@ -27,10 +27,12 @@ The orphan scan only covers `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, and `avi
 
 ## Installation
 
-1. Download or clone this repository into `wp-content/plugins/image-usage-audit`.
-2. Activate **Image Usage Audit** in WordPress.
-3. Open **Media → Image Usage Audit**.
+1. Download `image-usage-audit.zip` from the matching GitHub Release.
+2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin** and select the ZIP.
+3. Activate **Image Usage Audit**, then open **Media → Image Usage Audit**.
 4. Save the scan settings, then select **Run scan**.
+
+Developers may instead clone the canonical repository into `wp-content/plugins/image-usage-audit`. Build the same allow-listed installation archive locally with `npm run build:zip`.
 
 The WordPress.org slug is not currently published. The canonical project page is this GitHub repository.
 
@@ -96,7 +98,7 @@ npm run build:zip
 npm run env:stop
 ```
 
-`@wordpress/env` pins WordPress 6.8.2/PHP 7.4 in `.wp-env.json`; use its documented core/PHP overrides when testing a newer supported combination. The `wordpress-smoke` CI job activates the plugin, runs Plugin Check, and rejects a POT generated from a stale catalog. `npm run build:zip` creates `dist/image-usage-audit.zip`, verifies its single root folder and required metadata, and rejects development-only paths. Consult `.codex/test-ledger.json` before rerunning checks.
+`@wordpress/env` pins WordPress 7.0.1/PHP 7.4 in `.wp-env.json`; dedicated configurations also exercise WordPress 5.9.13 and multisite. The smoke jobs install the exact ZIP, exercise AJAX, large-site batching, multisite lifecycle and uninstall preservation, run Plugin Check, and reject a POT generated from a stale catalog. `npm run build:zip` creates `dist/image-usage-audit.zip`, verifies its single root folder and required metadata, and rejects development-only paths. Consult `.codex/test-ledger.json` before rerunning checks.
 
 ## Security and privacy
 
@@ -104,7 +106,7 @@ The admin page and all scan, settings, manual-mark, and export actions require `
 
 Scans run locally inside WordPress and do not transmit content or personal data. Scan results store attachment IDs, timestamps, orphan file paths, and short provenance labels in a non-autoloaded WordPress option. Because option names, paths, and exported filenames can reveal site structure, restrict administration and exported CSV files to trusted users. Formula-leading CSV values are prefixed defensively, but exported files should still be treated as untrusted input.
 
-Security reports must not be filed publicly while unpatched. See [`SECURITY.md`](SECURITY.md); the repository owner still needs to enable a verified private reporting channel before public distribution.
+Security reports must not be filed publicly while unpatched. Use GitHub's private **Report a vulnerability** flow as described in [`SECURITY.md`](SECURITY.md).
 
 ## Contributing
 

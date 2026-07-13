@@ -41,8 +41,7 @@ jobs:
       - if: matrix.php == '7.4'
         run: composer lint
       - run: php -l image-usage-audit.php
-      - run: php -l includes/class-iua-scanner.php
-      - run: php -l views/admin-page.php
+      - run: find includes views tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: php -l uninstall.php
       - run: node --check assets/admin.js
       - run: npm run validate:metadata
@@ -64,10 +63,50 @@ jobs:
       - run: npx wp-env run cli wp plugin deactivate WP_image_usage_audit
       - run: npx wp-env run cli wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/image-usage-audit.zip --activate
       - run: npx wp-env run cli wp plugin is-active image-usage-audit
+      - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/ajax-setup.php
+      - run: npm run test:ajax
       - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/smoke.php
       - run: npx wp-env run cli wp plugin install plugin-check --activate
       - run: npx wp-env run cli wp plugin check image-usage-audit
-      - run: npx wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/WP_image_usage_audit /var/www/html/wp-content/plugins/WP_image_usage_audit/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{"POT-Creation-Date":"2026-07-12T20:07:43+00:00","Report-Msgid-Bugs-To":"https://github.com/ussmarines/WP_image_usage_audit/issues"}'
+      - run: npx wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/WP_image_usage_audit /var/www/html/wp-content/plugins/WP_image_usage_audit/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{"POT-Creation-Date":"2026-07-13T12:43:54+00:00","Report-Msgid-Bugs-To":"https://github.com/ussmarines/WP_image_usage_audit/issues"}'
       - run: git diff --exit-code -- languages/image-usage-audit.pot
       - if: always()
         run: npx wp-env stop
+
+  wordpress-59:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build:zip
+      - run: npx wp-env start --config .wp-env.wp59.json
+      - run: npx wp-env run cli --config .wp-env.wp59.json wp plugin deactivate WP_image_usage_audit
+      - run: npx wp-env run cli --config .wp-env.wp59.json wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/image-usage-audit.zip --activate
+      - run: npx wp-env run cli --config .wp-env.wp59.json wp core version
+      - run: npx wp-env run cli --config .wp-env.wp59.json wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/smoke.php
+      - if: always()
+        run: npx wp-env stop --config .wp-env.wp59.json
+
+  wordpress-multisite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build:zip
+      - run: npx wp-env start --config .wp-env.multisite.json
+      - run: npx wp-env run cli --config .wp-env.multisite.json wp plugin deactivate WP_image_usage_audit
+      - run: npx wp-env run cli --config .wp-env.multisite.json wp core multisite-convert --title='Image Usage Audit Network'
+      - run: npx wp-env run cli --config .wp-env.multisite.json wp site create --slug=secondary --title='Secondary site' --email=secondary@example.test
+      - run: npx wp-env run cli --config .wp-env.multisite.json wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/image-usage-audit.zip --activate-network
+      - run: npx wp-env run cli --config .wp-env.multisite.json wp plugin is-active image-usage-audit --network
+      - run: npx wp-env run cli --config .wp-env.multisite.json wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/multisite-smoke.php
+      - if: always()
+        run: npx wp-env stop --config .wp-env.multisite.json

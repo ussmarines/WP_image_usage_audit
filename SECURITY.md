@@ -6,8 +6,8 @@ Only the latest released version of Image Usage Audit is intended to receive sec
 
 ## Reporting a vulnerability
 
-Do not disclose an unpatched vulnerability in a public issue. Before public distribution, the repository owner must enable GitHub private vulnerability reporting or publish another verified private contact method. No private reporting channel was verifiable during the 2026-07-12 audit, so this policy must be updated as soon as one is configured.
+Do not disclose an unpatched vulnerability in a public issue. Open the repository's [Security advisories](https://github.com/ussmarines/WP_image_usage_audit/security/advisories) area and select [Report a vulnerability](https://github.com/ussmarines/WP_image_usage_audit/security/advisories/new) to send the report privately through GitHub. Private vulnerability reporting was enabled and verified for this repository on 2026-07-13.
 
-When reporting privately, include the affected version, WordPress/PHP versions, required role or capability, reproduction conditions, impact, and any suggested mitigation. Remove credentials, personal data, and production content from evidence.
+Include a clear description, reproduction steps, the affected plugin version, WordPress and PHP versions, the required role or capability, and the estimated impact. Include a proposed fix or mitigation when available. Remove credentials, personal data, and production content from evidence.
 
-The maintainer should acknowledge a private report promptly and provide status updates when practical, but no fixed remediation deadline is promised before the issue is understood and validated.
+Reports are reviewed and disclosed in coordination with the reporter when practical. No fixed remediation deadline is promised before the issue is understood and validated.

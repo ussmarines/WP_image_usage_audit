@@ -3,8 +3,9 @@
  * Plugin Name: Image Usage Audit
  * Plugin URI: https://github.com/ussmarines/WP_image_usage_audit
  * Description: Audit image usage in the Media Library with provenance, CSV export, manual false-negative handling, and CDN rewrite support.
- * Version: 2.2.5
- * Author: elliot
+ * Version: 2.2.6
+ * Author: ussmarines
+ * Author URI: https://github.com/ussmarines
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: image-usage-audit
@@ -19,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'IUA_VERSION' ) ) {
-	define( 'IUA_VERSION', '2.2.5' );
+	define( 'IUA_VERSION', '2.2.6' );
 }
 
 if ( ! defined( 'IUA_SLUG' ) ) {
@@ -52,8 +53,9 @@ spl_autoload_register(
  * Main plugin bootstrap.
  */
 final class IUA_Plugin {
-	private const MAX_BULK_IDS  = 500;
-	private const SCAN_LOCK_TTL = 900;
+	private const MAX_BULK_IDS    = 500;
+	private const SCAN_LOCK_TTL   = 900;
+	private const SITE_BATCH_SIZE = 100;
 
 	/**
 	 * Singleton instance.
@@ -61,6 +63,13 @@ final class IUA_Plugin {
 	 * @var IUA_Plugin|null
 	 */
 	private static $instance = null;
+
+	/**
+	 * Token owned by the scan running in this request.
+	 *
+	 * @var string
+	 */
+	private $scan_lock_token = '';
 
 	/**
 	 * Get singleton instance.
@@ -80,7 +89,49 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public static function activate(): void {
+	public static function activate( $network_wide = false ): void {
+		$network_wide = (bool) $network_wide;
+
+		if ( $network_wide && is_multisite() ) {
+			$iua_offset = 0;
+
+			do {
+				$iua_site_ids = get_sites(
+					array(
+						'fields' => 'ids',
+						'number' => self::SITE_BATCH_SIZE,
+						'offset' => $iua_offset,
+					)
+				);
+
+				if ( ! is_array( $iua_site_ids ) || empty( $iua_site_ids ) ) {
+					break;
+				}
+
+				foreach ( $iua_site_ids as $iua_site_id ) {
+					$iua_switched = switch_to_blog( (int) $iua_site_id );
+
+					if ( ! $iua_switched ) {
+						continue;
+					}
+
+					try {
+						self::ensure_default_options();
+					} catch ( Throwable $iua_exception ) {
+						// Continue so one unavailable site does not block network activation.
+						continue;
+					} finally {
+						restore_current_blog();
+					}
+				}
+
+				$iua_count   = count( $iua_site_ids );
+				$iua_offset += $iua_count;
+			} while ( self::SITE_BATCH_SIZE === $iua_count );
+
+			return;
+		}
+
 		self::ensure_default_options();
 	}
 
@@ -99,6 +150,10 @@ final class IUA_Plugin {
 		add_action( 'wp_ajax_iua_unmark_manual_used', array( $this, 'ajax_unmark_manual_used' ) );
 		add_action( 'wp_ajax_iua_mark_manual_used_bulk', array( $this, 'ajax_mark_manual_used_bulk' ) );
 		add_action( 'wp_ajax_iua_unmark_manual_used_bulk', array( $this, 'ajax_unmark_manual_used_bulk' ) );
+
+		foreach ( $this->get_ajax_actions() as $iua_action ) {
+			add_action( 'wp_ajax_nopriv_' . $iua_action, array( $this, 'ajax_unauthorized' ) );
+		}
 	}
 
 	/**
@@ -285,15 +340,7 @@ final class IUA_Plugin {
 	 * @return void
 	 */
 	public function ajax_run_scan(): void {
-		if ( ! $this->current_user_can_manage() ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Insufficient permissions.', 'image-usage-audit' ),
-				)
-			);
-		}
-
-		check_ajax_referer( 'iua_run_scan', 'nonce' );
+		$this->verify_ajax_request( 'iua_run_scan', 'iua_run_scan' );
 
 		if ( ! $this->acquire_scan_lock() ) {
 			wp_send_json_error(
@@ -305,14 +352,27 @@ final class IUA_Plugin {
 		}
 
 		$this->maybe_raise_resource_limits();
+		$iua_results = array();
+		$iua_failed  = false;
 
 		try {
 			$iua_scanner = new IUA_Scanner();
 			$iua_results = $iua_scanner->run();
 
 			update_option( 'iua_usage_results', $iua_results, false );
+		} catch ( Throwable $iua_exception ) {
+			$iua_failed = true;
 		} finally {
 			$this->release_scan_lock();
+		}
+
+		if ( $iua_failed ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'The scan stopped before completion. The previous complete results were preserved.', 'image-usage-audit' ),
+				),
+				500
+			);
 		}
 
 		wp_send_json_success(
@@ -352,15 +412,7 @@ final class IUA_Plugin {
 	 * @return void
 	 */
 	public function ajax_mark_manual_used(): void {
-		if ( ! $this->current_user_can_manage() ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Insufficient permissions.', 'image-usage-audit' ),
-				)
-			);
-		}
-
-		check_ajax_referer( 'iua_mark_manual_used', 'nonce' );
+		$this->verify_ajax_request( 'iua_mark_manual_used', 'iua_mark_manual_used' );
 
 		$iua_id = $this->get_posted_attachment_id();
 
@@ -368,7 +420,8 @@ final class IUA_Plugin {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Invalid attachment.', 'image-usage-audit' ),
-				)
+				),
+				400
 			);
 		}
 
@@ -389,15 +442,7 @@ final class IUA_Plugin {
 	 * @return void
 	 */
 	public function ajax_unmark_manual_used(): void {
-		if ( ! $this->current_user_can_manage() ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Insufficient permissions.', 'image-usage-audit' ),
-				)
-			);
-		}
-
-		check_ajax_referer( 'iua_unmark_manual_used', 'nonce' );
+		$this->verify_ajax_request( 'iua_unmark_manual_used', 'iua_unmark_manual_used' );
 
 		$iua_id = $this->get_posted_attachment_id();
 
@@ -405,7 +450,8 @@ final class IUA_Plugin {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Invalid attachment.', 'image-usage-audit' ),
-				)
+				),
+				400
 			);
 		}
 
@@ -426,15 +472,7 @@ final class IUA_Plugin {
 	 * @return void
 	 */
 	public function ajax_mark_manual_used_bulk(): void {
-		if ( ! $this->current_user_can_manage() ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Insufficient permissions.', 'image-usage-audit' ),
-				)
-			);
-		}
-
-		check_ajax_referer( 'iua_mark_manual_used_bulk', 'nonce' );
+		$this->verify_ajax_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk' );
 
 		$iua_input = $this->get_posted_attachment_ids();
 
@@ -460,15 +498,7 @@ final class IUA_Plugin {
 	 * @return void
 	 */
 	public function ajax_unmark_manual_used_bulk(): void {
-		if ( ! $this->current_user_can_manage() ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Insufficient permissions.', 'image-usage-audit' ),
-				)
-			);
-		}
-
-		check_ajax_referer( 'iua_unmark_manual_used_bulk', 'nonce' );
+		$this->verify_ajax_request( 'iua_unmark_manual_used_bulk', 'iua_unmark_manual_used_bulk' );
 
 		$iua_input = $this->get_posted_attachment_ids();
 
@@ -605,6 +635,94 @@ final class IUA_Plugin {
 	}
 
 	/**
+	 * Return the AJAX action names exposed by the plugin.
+	 *
+	 * @return array<int, string>
+	 */
+	private function get_ajax_actions(): array {
+		return array(
+			'iua_run_scan',
+			'iua_mark_manual_used',
+			'iua_unmark_manual_used',
+			'iua_mark_manual_used_bulk',
+			'iua_unmark_manual_used_bulk',
+		);
+	}
+
+	/**
+	 * Return a stable response for unauthenticated plugin AJAX requests.
+	 *
+	 * @return void
+	 */
+	public function ajax_unauthorized(): void {
+		wp_send_json_error(
+			array(
+				'message' => __( 'Authentication required.', 'image-usage-audit' ),
+			),
+			401
+		);
+	}
+
+	/**
+	 * Validate the common AJAX request envelope.
+	 *
+	 * @param string $nonce_action Nonce action.
+	 * @param string $expected_action Expected AJAX action.
+	 * @return void
+	 */
+	private function verify_ajax_request( string $nonce_action, string $expected_action ): void {
+		$iua_method = isset( $_SERVER['REQUEST_METHOD'] ) && is_string( $_SERVER['REQUEST_METHOD'] )
+			? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) )
+			: '';
+
+		if ( 'POST' !== $iua_method ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'This action requires an HTTP POST request.', 'image-usage-audit' ),
+				),
+				405
+			);
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The action and nonce envelope must be read before the action-specific nonce can be verified.
+		$iua_action = isset( $_POST['action'] ) && is_scalar( $_POST['action'] )
+			? sanitize_key( wp_unslash( (string) $_POST['action'] ) )
+			: '';
+
+		if ( $expected_action !== $iua_action ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid AJAX action.', 'image-usage-audit' ),
+				),
+				400
+			);
+		}
+
+		if ( ! $this->current_user_can_manage() ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Insufficient permissions.', 'image-usage-audit' ),
+				),
+				403
+			);
+		}
+
+		$iua_nonce = isset( $_POST['nonce'] ) && is_scalar( $_POST['nonce'] )
+			? sanitize_text_field( wp_unslash( (string) $_POST['nonce'] ) )
+			: '';
+
+		if ( '' === $iua_nonce || strlen( $iua_nonce ) > 128 || ! wp_verify_nonce( $iua_nonce, $nonce_action ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Security check failed.', 'image-usage-audit' ),
+				),
+				403
+			);
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
 	 * Check current capability.
 	 *
 	 * @return bool
@@ -619,9 +737,13 @@ final class IUA_Plugin {
 	 * @return int
 	 */
 	private function get_posted_attachment_id(): int {
-		$iua_raw_id = filter_input( INPUT_POST, 'id', FILTER_UNSAFE_RAW );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Every caller completes verify_ajax_request() before reading the validated action payload.
+		$iua_raw_id = isset( $_POST['id'] ) && is_scalar( $_POST['id'] )
+			? trim( wp_unslash( (string) $_POST['id'] ) )
+			: '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		if ( is_string( $iua_raw_id ) || is_numeric( $iua_raw_id ) ) {
+		if ( '' !== $iua_raw_id && strlen( $iua_raw_id ) <= 20 && ctype_digit( $iua_raw_id ) ) {
 			return absint( $iua_raw_id );
 		}
 
@@ -634,7 +756,9 @@ final class IUA_Plugin {
 	 * @return array{valid: bool, ids: array<int, int>}
 	 */
 	private function get_posted_attachment_ids(): array {
-		$iua_raw_ids = filter_input( INPUT_POST, 'ids', FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Every caller completes verify_ajax_request() before reading the validated action payload.
+		$iua_raw_ids = isset( $_POST['ids'] ) ? wp_unslash( $_POST['ids'] ) : null;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! is_array( $iua_raw_ids ) || empty( $iua_raw_ids ) || count( $iua_raw_ids ) > self::MAX_BULK_IDS ) {
 			return array(
@@ -647,6 +771,15 @@ final class IUA_Plugin {
 
 		foreach ( $iua_raw_ids as $iua_raw_id ) {
 			if ( ! is_scalar( $iua_raw_id ) ) {
+				return array(
+					'valid' => false,
+					'ids'   => array(),
+				);
+			}
+
+			$iua_raw_id = trim( (string) $iua_raw_id );
+
+			if ( '' === $iua_raw_id || strlen( $iua_raw_id ) > 20 || ! ctype_digit( $iua_raw_id ) ) {
 				return array(
 					'valid' => false,
 					'ids'   => array(),
@@ -713,18 +846,55 @@ final class IUA_Plugin {
 	 * @return bool
 	 */
 	private function acquire_scan_lock(): bool {
-		$iua_now  = time();
-		$iua_lock = (int) get_option( 'iua_scan_lock', 0 );
+		global $wpdb;
 
-		if ( $iua_lock > 0 && ( $iua_now - $iua_lock ) < self::SCAN_LOCK_TTL ) {
+		$iua_now      = time();
+		$iua_existing = get_option( 'iua_scan_lock', false );
+		$iua_expires  = 0;
+
+		if ( is_array( $iua_existing ) && isset( $iua_existing['expires_at'] ) ) {
+			$iua_expires = (int) $iua_existing['expires_at'];
+		} elseif ( is_numeric( $iua_existing ) ) {
+			$iua_expires = (int) $iua_existing + self::SCAN_LOCK_TTL;
+		}
+
+		if ( $iua_expires > $iua_now ) {
 			return false;
 		}
 
-		if ( $iua_lock > 0 ) {
-			delete_option( 'iua_scan_lock' );
+		if ( false !== $iua_existing ) {
+			$iua_serialized = maybe_serialize( $iua_existing );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Conditional deletion provides compare-and-swap semantics for an expired lock.
+			$iua_deleted = $wpdb->delete(
+				$wpdb->options,
+				array(
+					'option_name'  => 'iua_scan_lock',
+					'option_value' => $iua_serialized,
+				),
+				array( '%s', '%s' )
+			);
+
+			if ( 1 !== $iua_deleted ) {
+				return false;
+			}
+
+			wp_cache_delete( 'iua_scan_lock', 'options' );
 		}
 
-		return add_option( 'iua_scan_lock', $iua_now, '', false );
+		$iua_token = wp_generate_uuid4();
+		$iua_lock  = array(
+			'token'      => $iua_token,
+			'expires_at' => $iua_now + self::SCAN_LOCK_TTL,
+		);
+
+		if ( ! add_option( 'iua_scan_lock', $iua_lock, '', false ) ) {
+			return false;
+		}
+
+		$this->scan_lock_token = $iua_token;
+
+		return true;
 	}
 
 	/**
@@ -733,7 +903,18 @@ final class IUA_Plugin {
 	 * @return void
 	 */
 	private function release_scan_lock(): void {
-		delete_option( 'iua_scan_lock' );
+		$iua_lock = get_option( 'iua_scan_lock', false );
+
+		if (
+			'' !== $this->scan_lock_token &&
+			is_array( $iua_lock ) &&
+			isset( $iua_lock['token'] ) &&
+			hash_equals( $this->scan_lock_token, (string) $iua_lock['token'] )
+		) {
+			delete_option( 'iua_scan_lock' );
+		}
+
+		$this->scan_lock_token = '';
 	}
 }
 
