@@ -599,6 +599,32 @@
       "configuration": ["scripts/build-zip.ps1", ".distignore"],
       "environment_signature": "Windows|pwsh-7.6.3",
       "notes": "The ZIP is 35,335 bytes with SHA-256 FA826815E1A865E528F4DA9DFE3EB0FDED9326F3A3A42A9E3883165E16BB1DC9. The checksum file dist/image-usage-audit-2.2.6.zip.sha256 contains the matching value and is ignored by Git."
+    },
+    {
+      "name": "2.2.6 pull-request WordPress 5.9 activation diagnostic",
+      "command": "GitHub Actions run 29252229592, job 86823365615: npx wp-env start --config .wp-env.wp59.json",
+      "tool_version": "GitHub Actions ubuntu-24.04; Node.js 24.18.0; @wordpress/env 11.10.0; WordPress 5.9.13; PHP 7.4",
+      "date": "2026-07-13",
+      "commit_tested": "db10dde0e5fbbe11d23bb4cba2744253b868a50c",
+      "result": "fail",
+      "duration_ms": 84000,
+      "coverage": ["WordPress 5.9.13 installation", "plugin activation hook compatibility"],
+      "configuration": [".wp-env.wp59.json", ".github/workflows/qa.yml"],
+      "environment_signature": "GitHub Actions|ubuntu-24.04|wp-env-11.10.0|wordpress-5.9.13|php-7.4",
+      "notes": "WordPress 5.9/WP-CLI passed null to the activation callback. The strict bool parameter raised a TypeError before the environment finished starting."
+    },
+    {
+      "name": "2.2.6 WordPress 5.9 activation compatibility correction",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli sh -lc 'php -l image-usage-audit.php && vendor/bin/phpunit --configuration=phpunit.xml.dist --filter PluginSecurityTest'; rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli vendor/bin/phpcs --standard=phpcs.xml.dist image-usage-audit.php; rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli vendor/bin/phpstan analyse image-usage-audit.php --configuration=phpstan.neon.dist --memory-limit=1G --no-progress; rtk npm run build:zip; rtk git diff --check",
+      "tool_version": "PHP 7.4.33; PHPUnit 9.6.35; PHPCS 3.12.2; WPCS 3.1.0; PHPCompatibilityWP 2.1.8; PHPStan 2.2.5; Node.js v24.18.0; PowerShell 7.6.3",
+      "date": "2026-07-13",
+      "commit_tested": "db10dde0e5fbbe11d23bb4cba2744253b868a50c+activation-fix-worktree",
+      "result": "pass",
+      "duration_ms": 28600,
+      "coverage": ["PHP 7.4 syntax", "activation and multisite unit behavior", "6 PluginSecurityTest cases and 77 assertions", "WordPress Coding Standards and PHP compatibility", "PHPStan 2", "distribution ZIP", "tracked patch whitespace"],
+      "configuration": ["phpunit.xml.dist", "phpcs.xml.dist", "phpstan.neon.dist", "scripts/build-zip.ps1"],
+      "environment_signature": "Windows|Docker-29.6.1|php-7.4.33|node-v24.18.0|pwsh-7.6.3",
+      "notes": "The activation callback now accepts the legacy null value and normalizes it to bool internally. The rebuilt 11-entry ZIP is 35,343 bytes with SHA-256 8C391CB01E97EF21441B7FF0DC88D115AA044D23ED70D800B119A8285E76007B."
     }
   ]
 }

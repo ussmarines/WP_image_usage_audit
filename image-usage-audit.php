@@ -89,7 +89,9 @@ final class IUA_Plugin {
 	 *
 	 * @return void
 	 */
-	public static function activate( bool $network_wide = false ): void {
+	public static function activate( $network_wide = false ): void {
+		$network_wide = (bool) $network_wide;
+
 		if ( $network_wide && is_multisite() ) {
 			$iua_offset = 0;
 
