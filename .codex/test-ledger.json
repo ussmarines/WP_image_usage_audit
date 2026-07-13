@@ -510,6 +510,95 @@
       "configuration": ["Composer PHP platform 7.4.0", "phpstan.neon.dist"],
       "environment_signature": "Windows|Docker|composer-2-current|node-v24.18.0|git|rtk",
       "notes": "Composer metadata is strictly valid, the locked dependency graph has no security advisories, the ledger parses as JSON, and the patch has no whitespace errors."
+    },
+    {
+      "name": "2.2.6 targeted runtime and unit validation",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli sh -lc 'php -l image-usage-audit.php && php -l includes/class-iua-scanner.php && php -l uninstall.php && php -l tests/bootstrap.php && php -l tests/unit/PluginSecurityTest.php && php -l tests/unit/ScannerNormalizationTest.php'; rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli vendor/bin/phpunit --configuration=phpunit.xml.dist --testsuite=unit",
+      "tool_version": "PHP 7.4.33; PHPUnit 9.6.35",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "pass",
+      "duration_ms": 2400,
+      "coverage": ["AJAX request envelopes and status codes", "capabilities and action-specific nonces", "bounded IDs and bulk inputs", "owner-token scan lock", "network activation", "scanner batching", "URL/block/shortcode heuristics", "CDN validation", "CSV neutralization", "PHP syntax"],
+      "configuration": ["phpunit.xml.dist", "tests/bootstrap.php"],
+      "environment_signature": "Windows|Docker-29.6.1|php-7.4.33",
+      "notes": "39 tests and 131 assertions passed. The reusable pre-change suite had 20 tests and 35 assertions."
+    },
+    {
+      "name": "2.2.6 targeted coding standards and PHPStan",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli vendor/bin/phpcs --standard=phpcs.xml.dist; rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app php:7.4-cli vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G --no-progress",
+      "tool_version": "PHP 7.4.33; PHPCS 3.12.2; WPCS 3.1.0; PHPCompatibilityWP 2.1.8; PHPStan 2.2.5",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "pass",
+      "duration_ms": 31000,
+      "coverage": ["all runtime PHP", "WordPress Coding Standards", "PHP 7.4 compatibility", "PHPStan level 1 with WordPress stubs"],
+      "configuration": ["phpcs.xml.dist", "phpstan.neon.dist", "composer.lock"],
+      "environment_signature": "Windows|Docker-29.6.1|php-7.4.33"
+    },
+    {
+      "name": "2.2.6 workflow and configuration validation",
+      "command": "rtk npm run validate:config; rtk npm run actionlint; rtk node --check tests/integration/ajax-smoke.mjs; rtk git diff --check",
+      "tool_version": "Node.js v24.18.0; actionlint 1.7.7; git via rtk",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "pass",
+      "duration_ms": 12000,
+      "coverage": ["10 repository JSON files", "GitHub Actions workflow", "AJAX HTTP test syntax", "tracked patch whitespace"],
+      "configuration": ["scripts/validate-config.mjs", ".github/workflows/qa.yml", ".wp-env.json", ".wp-env.wp59.json", ".wp-env.multisite.json"],
+      "environment_signature": "Windows|node-v24.18.0|docker-29.6.1|actionlint-1.7.7|git|rtk"
+    },
+    {
+      "name": "2.2.6 deterministic POT regeneration",
+      "command": "rtk docker run --rm --volume \"$((Get-Location).Path):/app\" --workdir /app wordpress:cli-php7.4 wp i18n make-pot /app /app/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{\"POT-Creation-Date\":\"2026-07-13T12:43:54+00:00\",\"Report-Msgid-Bugs-To\":\"https://github.com/ussmarines/WP_image_usage_audit/issues\"}'",
+      "tool_version": "WP-CLI 2.7.1; Docker 29.6.1",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "pass",
+      "duration_ms": 4000,
+      "coverage": ["complete PHP and JavaScript translation catalog", "text domain", "2.2.6 metadata", "translator comments", "absolute-path exclusion", "reproducibility"],
+      "configuration": ["languages/image-usage-audit.pot", ".github/workflows/qa.yml"],
+      "environment_signature": "Windows|Docker-29.6.1|wordpress-cli-php7.4|wp-cli-2.7.1",
+      "notes": "Two consecutive generations produced SHA-256 F4AD191410BBEE15CD0F461E48410D1D662AFBD6A5490E1E198DF5F99E85DA8B."
+    },
+    {
+      "name": "2.2.6 local WordPress runtime availability",
+      "command": "rtk npm run env:start",
+      "tool_version": "@wordpress/env 11.10.0; Docker 29.6.1",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "blocked",
+      "duration_ms": 116000,
+      "coverage": ["WordPress 7.0.1 exact-ZIP install", "HTTP AJAX", "large-site fixtures", "Plugin Check", "uninstall"],
+      "configuration": [".wp-env.json", "package.json"],
+      "environment_signature": "Windows|Docker-29.6.1|node-v24.18.0|wp-env-11.10.0",
+      "notes": "The wp-env CLI image build could not resolve api.github.com while Composer downloaded PHPUnit. No retry was made; the pull-request CI jobs remain the authoritative runtime path."
+    },
+    {
+      "name": "2.2.6 final global local QA",
+      "command": "Aggregate release gate: PHP 7.4 PHPCS/PHPStan/PHPUnit/syntax; PHP 8.3 PHPStan/PHPUnit/syntax; Composer validate/audit; npm audit; npm run actionlint; npm run validate:config; npm run validate:metadata; Node syntax; XML parsing; deterministic POT comparison; npm run build:zip; worktree and ZIP secret scans; git diff --check",
+      "tool_version": "PHP 7.4.33 and 8.3.32; PHPCS 3.12.2; WPCS 3.1.0; PHPCompatibilityWP 2.1.8; PHPStan 2.2.5; PHPUnit 9.6.35; Composer 2; Node.js v24.18.0; npm 11.7.0; actionlint 1.7.7; PowerShell 7.6.3",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "pass",
+      "duration_ms": null,
+      "coverage": ["all first-party PHP syntax on PHP 7.4 and 8.3", "PHPCS/WPCS/PHPCompatibilityWP", "PHPStan 2", "39 PHPUnit tests and 131 assertions", "Composer metadata and advisories", "npm advisories", "GitHub Actions workflow", "JSON/YAML/XML and release metadata", "JavaScript syntax", "deterministic POT", "distribution ZIP", "common secret patterns", "tracked patch whitespace"],
+      "configuration": ["composer.json", "composer.lock", "phpcs.xml.dist", "phpstan.neon.dist", "phpunit.xml.dist", "package.json", "package-lock.json", ".github/workflows/qa.yml", ".wp-env.json", ".wp-env.wp59.json", ".wp-env.multisite.json", "scripts/build-zip.ps1", "scripts/validate-metadata.mjs"],
+      "environment_signature": "Windows|Docker-29.6.1|php-7.4.33|php-8.3.32|node-v24.18.0|pwsh-7.6.3|actionlint-1.7.7",
+      "notes": "The aggregate wall-clock duration was not retained by the command orchestrator. All listed checks passed. Local wp-env runtime remains separately recorded as blocked by Docker DNS; pull-request CI is the authoritative WordPress runtime validation."
+    },
+    {
+      "name": "2.2.6 final ZIP entry, metadata and secret inspection",
+      "command": "rtk proxy pwsh -NoProfile -Command '$zip=(Resolve-Path -LiteralPath \"dist/image-usage-audit.zip\").Path; Get-Item -LiteralPath $zip; Get-FileHash -Algorithm SHA256 -LiteralPath $zip; open the ZIP with System.IO.Compression.FileSystem; enumerate entries; assert version/author/URIs/GPL metadata; scan every entry for common secret patterns'",
+      "tool_version": "PowerShell 7.6.3; System.IO.Compression.FileSystem",
+      "date": "2026-07-13",
+      "commit_tested": "146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c+release-worktree",
+      "result": "pass",
+      "duration_ms": 700,
+      "coverage": ["dist/image-usage-audit.zip", "all 11 ZIP entries", "2.2.6 plugin metadata", "common secret patterns", "release checksum"],
+      "configuration": ["scripts/build-zip.ps1", ".distignore"],
+      "environment_signature": "Windows|pwsh-7.6.3",
+      "notes": "The ZIP is 35,335 bytes with SHA-256 FA826815E1A865E528F4DA9DFE3EB0FDED9326F3A3A42A9E3883165E16BB1DC9. The checksum file dist/image-usage-audit-2.2.6.zip.sha256 contains the matching value and is ignored by Git."
     }
   ]
 }

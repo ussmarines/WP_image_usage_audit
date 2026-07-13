@@ -4,7 +4,10 @@
   "plugins": [
     "."
   ],
+  "config": {
+    "WP_ALLOW_MULTISITE": true
+  },
   "testsEnvironment": false,
-  "port": 8888,
-  "testsPort": 8889
+  "port": 8893,
+  "testsPort": 8894
 }

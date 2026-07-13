@@ -89,7 +89,7 @@ try {
 		$reader = [System.IO.StreamReader]::new($mainEntry.Open())
 		try { $mainContent = $reader.ReadToEnd() } finally { $reader.Dispose() }
 
-		if ($mainContent -notmatch 'Version:\s+2\.2\.5' -or $mainContent -notmatch 'License:\s+GPL-2\.0-or-later') {
+		if ($mainContent -notmatch 'Version:\s+2\.2\.6' -or $mainContent -notmatch 'License:\s+GPL-2\.0-or-later') {
 			throw 'Plugin version or license metadata is inconsistent in the ZIP.'
 		}
 	} finally {

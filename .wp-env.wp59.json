@@ -1,10 +1,10 @@
 {
-  "core": "WordPress/WordPress#7.0.1",
+  "core": "WordPress/WordPress#5.9.13",
   "phpVersion": "7.4",
   "plugins": [
     "."
   ],
   "testsEnvironment": false,
-  "port": 8888,
-  "testsPort": 8889
+  "port": 8891,
+  "testsPort": 8892
 }
