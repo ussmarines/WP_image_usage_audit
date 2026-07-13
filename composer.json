@@ -3,6 +3,12 @@
   "description": "Development tooling for the Image Usage Audit WordPress plugin.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "ussmarines",
+      "homepage": "https://github.com/ussmarines"
+    }
+  ],
   "require": {},
   "require-dev": {
     "php-stubs/wordpress-stubs": "7.0.1",

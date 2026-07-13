@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-const version = '2.2.5';
+const version = '2.2.6';
 const main = fs.readFileSync('image-usage-audit.php', 'utf8');
 const readme = fs.readFileSync('readme.txt', 'utf8');
 const pot = fs.readFileSync('languages/image-usage-audit.pot', 'utf8');

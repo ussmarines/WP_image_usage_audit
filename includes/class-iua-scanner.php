@@ -7,7 +7,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Scanner for image usage in content, meta, options and common builders.
  */
 class IUA_Scanner {
-	private const OPTION_BATCH_SIZE = 500;
+	private const ATTACHMENT_BATCH_SIZE = 200;
+	private const OPTION_BATCH_SIZE     = 500;
+	private const POST_BATCH_SIZE       = 200;
+	private const TERM_BATCH_SIZE       = 200;
 
 	/**
 	 * Provenance indexed by attachment ID.
@@ -176,22 +179,36 @@ class IUA_Scanner {
 			)
 		);
 
-		$iua_attachment_ids = get_posts(
-			array(
-				'post_type'              => 'attachment',
-				'post_status'            => 'inherit',
-				'post_mime_type'         => $iua_image_mime_types,
-				'posts_per_page'         => -1,
-				'orderby'                => 'ID',
-				'order'                  => 'ASC',
-				'fields'                 => 'ids',
-				'no_found_rows'          => true,
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-			)
-		);
+		$iua_attachment_ids = array();
+		$iua_page           = 1;
 
-		return array_map( 'intval', $iua_attachment_ids );
+		do {
+			$iua_batch = get_posts(
+				array(
+					'post_type'              => 'attachment',
+					'post_status'            => 'inherit',
+					'post_mime_type'         => $iua_image_mime_types,
+					'posts_per_page'         => self::ATTACHMENT_BATCH_SIZE,
+					'paged'                  => $iua_page,
+					'orderby'                => 'ID',
+					'order'                  => 'ASC',
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+				)
+			);
+
+			if ( ! is_array( $iua_batch ) || empty( $iua_batch ) ) {
+				break;
+			}
+
+			$iua_attachment_ids = array_merge( $iua_attachment_ids, array_map( 'intval', $iua_batch ) );
+			$iua_batch_count    = count( $iua_batch );
+			++$iua_page;
+		} while ( self::ATTACHMENT_BATCH_SIZE === $iua_batch_count );
+
+		return array_values( array_unique( $iua_attachment_ids ) );
 	}
 
 	/**
@@ -239,34 +256,43 @@ class IUA_Scanner {
 	 * @return void
 	 */
 	private function scan_post_contents( array &$used_map, array $statuses, array $path_map ): void {
-		$iua_posts = $this->get_scannable_posts(
-			$statuses,
-			array(
-				'update_post_meta_cache' => false,
-			)
-		);
+		$iua_page = 1;
 
-		foreach ( $iua_posts as $iua_post ) {
-			$iua_post_id = (int) $iua_post->ID;
-			$iua_content = $this->normalize_text_rewrites( (string) $iua_post->post_content );
+		do {
+			$iua_posts = $this->get_scannable_posts(
+				$statuses,
+				array(
+					'update_post_meta_cache' => false,
+				),
+				$iua_page
+			);
 
-			if ( '' === $iua_content ) {
-				continue;
-			}
+			foreach ( $iua_posts as $iua_post ) {
+				$iua_post_id = (int) $iua_post->ID;
+				$iua_content = $this->normalize_text_rewrites( (string) $iua_post->post_content );
 
-			if ( preg_match_all( '/wp-image-(\d+)/', $iua_content, $iua_matches ) ) {
-				foreach ( $iua_matches[1] as $iua_match ) {
-					$iua_attachment_id = (int) $iua_match;
+				if ( '' === $iua_content ) {
+					continue;
+				}
 
-					if ( $iua_attachment_id > 0 ) {
-						$used_map[ $iua_attachment_id ] = true;
-						$this->add_provenance( $iua_attachment_id, 'post:' . $iua_post_id . ' content:wp-image' );
+				if ( preg_match_all( '/wp-image-(\d+)/', $iua_content, $iua_matches ) ) {
+					foreach ( $iua_matches[1] as $iua_match ) {
+						$iua_attachment_id = (int) $iua_match;
+
+						if ( $iua_attachment_id > 0 ) {
+							$used_map[ $iua_attachment_id ] = true;
+							$this->add_provenance( $iua_attachment_id, 'post:' . $iua_post_id . ' content:wp-image' );
+						}
 					}
 				}
+
+				$this->scan_text_for_attachment_ids( $iua_content, $used_map, 'post:' . $iua_post_id . ' content' );
+				$this->scan_text_for_uploads( $iua_content, $path_map, $used_map, 'post:' . $iua_post_id . ' content:url' );
 			}
 
-			$this->scan_text_for_uploads( $iua_content, $path_map, $used_map, 'post:' . $iua_post_id . ' content:url' );
-		}
+			$iua_batch_count = count( $iua_posts );
+			++$iua_page;
+		} while ( self::POST_BATCH_SIZE === $iua_batch_count );
 	}
 
 	/**
@@ -277,35 +303,43 @@ class IUA_Scanner {
 	 * @return void
 	 */
 	private function scan_meta_references( array &$used_map, array $statuses ): void {
-		$iua_post_ids = $this->get_scannable_posts(
-			$statuses,
-			array(
-				'fields'                 => 'ids',
-				'update_post_meta_cache' => true,
-			)
-		);
+		$iua_page = 1;
 
-		foreach ( $iua_post_ids as $iua_post_id ) {
-			$iua_post_id       = (int) $iua_post_id;
-			$iua_attachment_id = (int) get_post_thumbnail_id( $iua_post_id );
-
-			if ( $iua_attachment_id > 0 ) {
-				$used_map[ $iua_attachment_id ] = true;
-				$this->add_provenance( $iua_attachment_id, 'post:' . $iua_post_id . ' meta:_thumbnail_id' );
-			}
-
-			$iua_gallery_ids = array_filter(
-				array_map(
-					'intval',
-					explode( ',', (string) get_post_meta( $iua_post_id, '_product_image_gallery', true ) )
-				)
+		do {
+			$iua_post_ids = $this->get_scannable_posts(
+				$statuses,
+				array(
+					'fields'                 => 'ids',
+					'update_post_meta_cache' => true,
+				),
+				$iua_page
 			);
 
-			foreach ( $iua_gallery_ids as $iua_gallery_id ) {
-				$used_map[ $iua_gallery_id ] = true;
-				$this->add_provenance( $iua_gallery_id, 'post:' . $iua_post_id . ' meta:_product_image_gallery' );
+			foreach ( $iua_post_ids as $iua_post_id ) {
+				$iua_post_id       = (int) $iua_post_id;
+				$iua_attachment_id = (int) get_post_thumbnail_id( $iua_post_id );
+
+				if ( $iua_attachment_id > 0 ) {
+					$used_map[ $iua_attachment_id ] = true;
+					$this->add_provenance( $iua_attachment_id, 'post:' . $iua_post_id . ' meta:_thumbnail_id' );
+				}
+
+				$iua_gallery_ids = array_filter(
+					array_map(
+						'intval',
+						explode( ',', (string) get_post_meta( $iua_post_id, '_product_image_gallery', true ) )
+					)
+				);
+
+				foreach ( $iua_gallery_ids as $iua_gallery_id ) {
+					$used_map[ $iua_gallery_id ] = true;
+					$this->add_provenance( $iua_gallery_id, 'post:' . $iua_post_id . ' meta:_product_image_gallery' );
+				}
 			}
-		}
+
+			$iua_batch_count = count( $iua_post_ids );
+			++$iua_page;
+		} while ( self::POST_BATCH_SIZE === $iua_batch_count );
 	}
 
 	/**
@@ -335,26 +369,40 @@ class IUA_Scanner {
 			'_et_pb_shortcodes',
 		);
 
-		$iua_post_ids = $this->get_posts_with_meta_keys( $statuses, $iua_builder_keys );
+		$iua_page = 1;
 
-		foreach ( $iua_post_ids as $iua_post_id ) {
-			$iua_post_id = (int) $iua_post_id;
+		do {
+			$iua_post_ids = $this->get_scannable_posts(
+				$statuses,
+				array(
+					'fields'                 => 'ids',
+					'update_post_meta_cache' => true,
+				),
+				$iua_page
+			);
 
-			foreach ( $iua_builder_keys as $iua_meta_key ) {
-				$iua_values = get_post_meta( $iua_post_id, $iua_meta_key, false );
+			foreach ( $iua_post_ids as $iua_post_id ) {
+				$iua_post_id = (int) $iua_post_id;
 
-				if ( empty( $iua_values ) ) {
-					continue;
-				}
+				foreach ( $iua_builder_keys as $iua_meta_key ) {
+					$iua_values = get_post_meta( $iua_post_id, $iua_meta_key, false );
 
-				foreach ( $iua_values as $iua_value ) {
-					$iua_context = 'post:' . $iua_post_id . ' meta:' . $iua_meta_key;
+					if ( empty( $iua_values ) ) {
+						continue;
+					}
 
-					$this->scan_value_for_uploads( $iua_value, $path_map, $used_map, $iua_context );
-					$this->scan_builder_value_for_ids( $iua_value, $used_map, $iua_context );
+					foreach ( $iua_values as $iua_value ) {
+						$iua_context = 'post:' . $iua_post_id . ' meta:' . $iua_meta_key;
+
+						$this->scan_value_for_uploads( $iua_value, $path_map, $used_map, $iua_context );
+						$this->scan_builder_value_for_ids( $iua_value, $used_map, $iua_context );
+					}
 				}
 			}
-		}
+
+			$iua_batch_count = count( $iua_post_ids );
+			++$iua_page;
+		} while ( self::POST_BATCH_SIZE === $iua_batch_count );
 	}
 
 	/**
@@ -366,36 +414,44 @@ class IUA_Scanner {
 	 * @return void
 	 */
 	private function scan_any_meta_uploads( array &$used_map, array $statuses, array $path_map ): void {
-		$iua_post_ids = $this->get_scannable_posts(
-			$statuses,
-			array(
-				'fields'                 => 'ids',
-				'update_post_meta_cache' => true,
-			)
-		);
+		$iua_page = 1;
 
-		foreach ( $iua_post_ids as $iua_post_id ) {
-			$iua_all_meta = get_post_meta( (int) $iua_post_id );
+		do {
+			$iua_post_ids = $this->get_scannable_posts(
+				$statuses,
+				array(
+					'fields'                 => 'ids',
+					'update_post_meta_cache' => true,
+				),
+				$iua_page
+			);
 
-			if ( empty( $iua_all_meta ) || ! is_array( $iua_all_meta ) ) {
-				continue;
-			}
+			foreach ( $iua_post_ids as $iua_post_id ) {
+				$iua_all_meta = get_post_meta( (int) $iua_post_id );
 
-			foreach ( $iua_all_meta as $iua_meta_key => $iua_meta_values ) {
-				foreach ( (array) $iua_meta_values as $iua_meta_value ) {
-					if ( ! $this->value_might_reference_uploads( $iua_meta_value ) ) {
-						continue;
+				if ( empty( $iua_all_meta ) || ! is_array( $iua_all_meta ) ) {
+					continue;
+				}
+
+				foreach ( $iua_all_meta as $iua_meta_key => $iua_meta_values ) {
+					foreach ( (array) $iua_meta_values as $iua_meta_value ) {
+						if ( ! $this->value_might_reference_uploads( $iua_meta_value ) ) {
+							continue;
+						}
+
+						$this->scan_value_for_uploads(
+							$iua_meta_value,
+							$path_map,
+							$used_map,
+							'post:' . (int) $iua_post_id . ' meta:' . (string) $iua_meta_key
+						);
 					}
-
-					$this->scan_value_for_uploads(
-						$iua_meta_value,
-						$path_map,
-						$used_map,
-						'post:' . (int) $iua_post_id . ' meta:' . (string) $iua_meta_key
-					);
 				}
 			}
-		}
+
+			$iua_batch_count = count( $iua_post_ids );
+			++$iua_page;
+		} while ( self::POST_BATCH_SIZE === $iua_batch_count );
 	}
 
 	/**
@@ -454,24 +510,33 @@ class IUA_Scanner {
 	 * @return void
 	 */
 	private function scan_terms( array &$used_map, array $path_map ): void {
-		$iua_terms = get_terms(
-			array(
-				'taxonomy'   => get_taxonomies( array(), 'names' ),
-				'hide_empty' => false,
-			)
-		);
+		$iua_offset = 0;
 
-		if ( is_wp_error( $iua_terms ) || ! is_array( $iua_terms ) ) {
-			return;
-		}
+		do {
+			$iua_terms = get_terms(
+				array(
+					'taxonomy'   => get_taxonomies( array(), 'names' ),
+					'hide_empty' => false,
+					'number'     => self::TERM_BATCH_SIZE,
+					'offset'     => $iua_offset,
+				)
+			);
 
-		foreach ( $iua_terms as $iua_term ) {
-			if ( empty( $iua_term->description ) ) {
-				continue;
+			if ( is_wp_error( $iua_terms ) || ! is_array( $iua_terms ) || empty( $iua_terms ) ) {
+				break;
 			}
 
-			$this->scan_text_for_uploads( (string) $iua_term->description, $path_map, $used_map, 'term:' . (int) $iua_term->term_id . ' description' );
-		}
+			foreach ( $iua_terms as $iua_term ) {
+				if ( empty( $iua_term->description ) ) {
+					continue;
+				}
+
+				$this->scan_text_for_uploads( (string) $iua_term->description, $path_map, $used_map, 'term:' . (int) $iua_term->term_id . ' description' );
+			}
+
+			$iua_term_count = count( $iua_terms );
+			$iua_offset    += $iua_term_count;
+		} while ( self::TERM_BATCH_SIZE === $iua_term_count );
 	}
 
 	/**
@@ -521,9 +586,10 @@ class IUA_Scanner {
 	 *
 	 * @param array<int, string> $statuses Allowed statuses.
 	 * @param array<string, mixed> $args Additional query arguments.
+	 * @param int $page Page number.
 	 * @return array<int, mixed>
 	 */
-	private function get_scannable_posts( array $statuses, array $args = array() ): array {
+	private function get_scannable_posts( array $statuses, array $args = array(), int $page = 1 ): array {
 		$iua_post_types = $this->get_scannable_post_types();
 		$iua_statuses   = array_values( array_unique( array_map( 'sanitize_key', $statuses ) ) );
 
@@ -534,7 +600,8 @@ class IUA_Scanner {
 		$iua_defaults = array(
 			'post_type'              => $iua_post_types,
 			'post_status'            => $iua_statuses,
-			'posts_per_page'         => -1,
+			'posts_per_page'         => self::POST_BATCH_SIZE,
+			'paged'                  => max( 1, $page ),
 			'orderby'                => 'ID',
 			'order'                  => 'ASC',
 			'no_found_rows'          => true,
@@ -549,38 +616,43 @@ class IUA_Scanner {
 	}
 
 	/**
-	 * Return post IDs having at least one of the provided meta keys.
+	 * Scan block comments and shortcodes for explicit attachment IDs.
 	 *
-	 * @param array<int, string> $statuses Allowed statuses.
-	 * @param array<int, string> $meta_keys Meta keys.
-	 * @return array<int, int>
+	 * @param string           $text Text content.
+	 * @param array<int, bool> $used_map Usage map.
+	 * @param string           $context Provenance label prefix.
+	 * @return void
 	 */
-	private function get_posts_with_meta_keys( array $statuses, array $meta_keys ): array {
-		$iua_post_ids = $this->get_scannable_posts(
-			$statuses,
-			array(
-				'fields'                 => 'ids',
-				'update_post_meta_cache' => true,
-			)
+	private function scan_text_for_attachment_ids( string $text, array &$used_map, string $context ): void {
+		$iua_patterns = array(
+			'block:image' => '/<!--\s+wp:image\s+\{[^}]*"id"\s*:\s*(\d+)/i',
+			'shortcode'   => '/\[[^\]]+\b(?:ids?|image_id|attachment_id)\s*=\s*["\']?([0-9,\s]+)/i',
 		);
-		$iua_matches  = array();
 
-		foreach ( $iua_post_ids as $iua_post_id ) {
-			$iua_all_meta = get_post_meta( (int) $iua_post_id );
-
-			if ( empty( $iua_all_meta ) || ! is_array( $iua_all_meta ) ) {
+		foreach ( $iua_patterns as $iua_source => $iua_pattern ) {
+			if ( ! preg_match_all( $iua_pattern, $text, $iua_matches ) ) {
 				continue;
 			}
 
-			foreach ( $meta_keys as $iua_meta_key ) {
-				if ( array_key_exists( $iua_meta_key, $iua_all_meta ) ) {
-					$iua_matches[] = (int) $iua_post_id;
-					break;
+			foreach ( $iua_matches[1] as $iua_match ) {
+				$iua_raw_ids = preg_split( '/[\s,]+/', (string) $iua_match );
+
+				if ( ! is_array( $iua_raw_ids ) ) {
+					continue;
+				}
+
+				foreach ( $iua_raw_ids as $iua_raw_id ) {
+					$iua_attachment_id = (int) $iua_raw_id;
+
+					if ( $iua_attachment_id <= 0 ) {
+						continue;
+					}
+
+					$used_map[ $iua_attachment_id ] = true;
+					$this->add_provenance( $iua_attachment_id, $context . ':' . $iua_source );
 				}
 			}
 		}
-
-		return $iua_matches;
 	}
 
 	/**
@@ -599,9 +671,10 @@ class IUA_Scanner {
 			return;
 		}
 
-		if ( preg_match_all( '#/wp-content/uploads/([^\s"\')<>]+)#', $iua_text, $iua_matches ) ) {
+		if ( preg_match_all( '#(?:^|[^A-Za-z0-9_-])/?wp-content/uploads/([^\s"\')<>,]+)#i', $iua_text, $iua_matches ) ) {
 			foreach ( $iua_matches[1] as $iua_relative_file ) {
-				$iua_relative_file = ltrim( preg_replace( '#\?.*$#', '', (string) $iua_relative_file ), '/\\' );
+				$iua_relative_file = preg_replace( '/[?#].*$/', '', (string) $iua_relative_file );
+				$iua_relative_file = ltrim( rtrim( (string) $iua_relative_file, '\\]}' ), '/\\' );
 
 				if ( isset( $path_map[ $iua_relative_file ] ) ) {
 					$iua_attachment_id              = $path_map[ $iua_relative_file ];
@@ -757,6 +830,15 @@ class IUA_Scanner {
 	private function normalize_text_rewrites( string $text ): string {
 		if ( '' === $text ) {
 			return $text;
+		}
+
+		$text = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$text = str_ireplace( array( '\\/', '\\u002f' ), '/', $text );
+
+		$iua_decoded_text = rawurldecode( $text );
+
+		if ( '' !== $iua_decoded_text ) {
+			$text = $iua_decoded_text;
 		}
 
 		foreach ( $this->cdn_aliases as $iua_alias ) {
