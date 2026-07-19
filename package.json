@@ -19,6 +19,6 @@
     "actionlint": "docker run --rm --volume \"%cd%:/repo\" --workdir /repo rhysd/actionlint@sha256:1d74bfc9fd1963af8f89a7c22afaaafd42f49aad711a09951d02cb996398f61d"
   },
   "devDependencies": {
-    "@wordpress/env": "11.10.0"
+    "@wordpress/env": "11.11.0"
   }
 }
