@@ -71,13 +71,23 @@ Passed after remediation:
 - repository metadata, JSON/YAML configuration, and Dependabot YAML parsing;
 - `wp-env --version`: 11.12.0.
 
+Final validation with npm 11.16.0 identified one dependency install script that was not covered by
+an explicit project policy: `fs-ext-extra-prebuilt@2.2.7`, used transitively by WordPress Playground.
+Its lockfile URL and SHA-512 integrity are fixed, and manual review confirmed that the script loads a
+packaged platform binary or falls back to `node-gyp rebuild`; it does not download code. The exact
+version is now approved in `package.json`, while `.npmrc` enables `strict-allow-scripts=true` so a
+future unreviewed install script fails instead of merely warning. `npm ci` then completed with no
+pending script and `npm audit` continued to report zero vulnerabilities.
+
 The detailed commands, failed diagnostic attempts, environment signatures, and reruns are retained
 in `.codex/test-ledger.json`.
 
 ## Residual considerations
 
 - npm emits a deprecation warning for transitive `glob` 10.5.0. npm reports no advisory for the
-  resolved graph; replacing it requires an upstream or major dependency change and is deferred.
+  resolved graph, `npm outdated` reports no available direct update, and the path is
+  `@wordpress/env` → `rimraf` → `glob`. Replacing it requires an upstream or major transitive change
+  and is deferred.
 - `phpcompatibility/php-compatibility` 9.3.5 is the newest stable release visible to Composer. Its
   pre-release 10.x line was not adopted.
 - GitHub's existing Dependabot alerts will remain visible until the corrected lockfiles reach the

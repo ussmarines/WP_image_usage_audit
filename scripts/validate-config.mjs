@@ -41,6 +41,22 @@ for (const file of jsonFiles) {
 	JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
+const packageManifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const approvedInstallScripts = packageManifest.allowScripts || {};
+
+if (
+	Object.keys(approvedInstallScripts).length !== 1 ||
+	approvedInstallScripts['fs-ext-extra-prebuilt@2.2.7'] !== true
+) {
+	throw new Error('The reviewed npm install script must remain approved at its exact version.');
+}
+
+const npmConfig = fs.readFileSync('.npmrc', 'utf8');
+
+if (!/^strict-allow-scripts=true$/m.test(npmConfig)) {
+	throw new Error('npm must reject unreviewed dependency install scripts.');
+}
+
 for (const file of yamlFiles) {
 	const parsedYaml = parseYaml(fs.readFileSync(file, 'utf8'));
 
