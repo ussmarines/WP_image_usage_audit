@@ -56,4 +56,5 @@ invulnerable.
 - [CI and supply chain](05-ci-supply-chain.md)
 - [Remediation](06-remediation.md)
 - [Final validation](07-final-validation.md)
+- [Code scanning and Scorecard remediation](08-code-scanning-scorecard-remediation.md)
 - [Machine-readable findings](findings.json)
