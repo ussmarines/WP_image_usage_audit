@@ -147,6 +147,18 @@
       "attack_scenario": "A future dependency update could introduce another lifecycle script that executes during CI installation without a repository-reviewed approval.",
       "validation": "The current package is development-only, locked to an exact registry URL and SHA-512 integrity. Its reviewed script loads a packaged platform binary or invokes node-gyp locally and does not download code. No current malicious behavior was found.",
       "remediation": "Implemented: approve only fs-ext-extra-prebuilt@2.2.7, enforce strict-allow-scripts=true so unreviewed scripts fail installation, and validate both invariants in the repository configuration check."
+    },
+    {
+      "id": "IUA-SEC-013",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "security-policy",
+      "file": "SECURITY.md",
+      "function": "vulnerability reporting and coordinated disclosure",
+      "evidence": "The first post-merge OpenSSF Scorecard run gave Security-Policy 9/10 because the repository documented private reporting and coordination but did not state numeric response or disclosure timelines.",
+      "attack_scenario": "A reporter may not know when to expect acknowledgement, triage, remediation, or coordinated disclosure updates, increasing the risk of delayed or uncoordinated vulnerability handling.",
+      "validation": "Private vulnerability reporting was enabled and the policy already identified the supported version, private channel, requested evidence, and coordinated disclosure expectation. The missing measurable timelines were confirmed as a repository-process hardening gap, not a plugin vulnerability.",
+      "remediation": "Implemented: document practical 7-day acknowledgement, 14-day initial triage, and 90-day confirmed-vulnerability remediation or advisory targets, with accelerated handling for active exploitation or critical severity and private notice of revised timelines."
     }
   ]
 }

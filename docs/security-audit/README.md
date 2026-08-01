@@ -28,7 +28,7 @@ invulnerable.
 - [x] Phase 8 — Verify ZIP and release provenance
 - [x] Phase 9 — Run final local and GitHub validation
 - [-] Phase 10 — Optional targeted standard Codex Security scan; not required for validity
-- [~] Phase 11 — Open the pull request, monitor required checks, and merge only when green
+- [x] Phase 11 — Open the pull request, monitor required checks, and merge only when green
 
 ## Status notation
 
