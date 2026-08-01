@@ -1080,6 +1080,45 @@
       "configuration": ["GitHub repository settings", "ruleset 20181296"],
       "environment_signature": "GitHub|public-repository|gh-2.96.0|api-2022-11-28/2026-03-10",
       "notes": "Secret scanning and code scanning each had zero open alert. Four high Dependabot alerts remain against the old main lockfile. The ruleset has no bypass and now requires eight universal green PR contexts; CodeQL and Scorecard remain correctly conditional."
+    },
+    {
+      "name": "Phase 11 merge and post-merge validation",
+      "command": "gh pr view 16 --repo ussmarines/WP_image_usage_audit --json state,mergedAt,mergeCommit,statusCheckRollup; gh run view 30698479350,30698479354,30698479339 --repo ussmarines/WP_image_usage_audit --json conclusion,headSha,jobs,url; gh api <open Dependabot, secret-scanning and code-scanning alerts>",
+      "tool_version": "GitHub Actions runner 2.336.0; GitHub CLI 2.96.0; GitHub REST API 2022-11-28",
+      "date": "2026-08-01",
+      "commit_tested": "8437b5441800ac7415fdccd74df1bc739627cbb2",
+      "result": "pass",
+      "duration_ms": 215000,
+      "coverage": ["PR 16 final required checks and merge state", "post-merge QA and JavaScript CodeQL", "first OpenSSF Scorecard run", "open Dependabot, secret-scanning and code-scanning alerts"],
+      "configuration": ["GitHub pull request 16", ".github/workflows/qa.yml", ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml", "GitHub repository security alerts"],
+      "environment_signature": "GitHub|public-repository|main|runner-2.336.0|gh-2.96.0|api-2022-11-28",
+      "notes": "PR 16 merged as 8437b5441800ac7415fdccd74df1bc739627cbb2 after every required check passed. Post-merge QA 30698479350, CodeQL 30698479354 and Scorecard 30698479339 passed. Dependabot and secret scanning had zero open alert. CodeQL had zero finding; Scorecard created eight posture alerts for separate triage."
+    },
+    {
+      "name": "Post-merge Scorecard alert triage and security-policy resolution",
+      "command": "gh api repos/ussmarines/WP_image_usage_audit/code-scanning/alerts?state=open; resolve_security_md.py inventory/list/resolve <repository>; review SECURITY.md and Scorecard alert evidence",
+      "tool_version": "OpenSSF Scorecard 5.4.0; GitHub CLI 2.96.0; Codex Security define-security-policy 0.1.15; Python 3.13.14",
+      "date": "2026-08-01",
+      "commit_tested": "8437b5441800ac7415fdccd74df1bc739627cbb2+security-policy-followup-worktree",
+      "result": "pass",
+      "duration_ms": 3200,
+      "coverage": ["all eight open Scorecard SARIF alerts", "repository-wide SECURITY.md applicability", "vulnerability response and disclosure timelines", "support scope and disclosure channel preservation"],
+      "configuration": ["SECURITY.md", "docs/security-audit/07-final-validation.md", "docs/security-audit/findings.json"],
+      "environment_signature": "Windows|PowerShell|python-3.13.14|GitHub-public-repository|scorecard-5.4.0",
+      "notes": "The applicable root policy is SECURITY.md. Seven alerts were classified as structural, historical, time-bound, informational or proportionate residuals. Security-Policy 9/10 was actionable and is remediated with 7/14/90-day targets, accelerated critical handling and private timeline updates; no scope or exclusion changed."
+    },
+    {
+      "name": "Security-policy follow-up affected validation",
+      "command": "python <codex-security>/scripts/resolve_security_md.py --repo <repository> --list; python <same> --repo <repository> --scope SECURITY.md --out -; node -e <parse ledger/findings and require IUA-SEC-013>; npm run validate:config; git diff --check",
+      "tool_version": "Codex Security define-security-policy 0.1.15; Python 3.13.14; Node.js v24.18.0; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "8437b5441800ac7415fdccd74df1bc739627cbb2+security-policy-followup-worktree",
+      "result": "pass",
+      "duration_ms": 4200,
+      "coverage": ["repository security-policy inventory and SECURITY.md resolution", "all 11 repository JSON files and six YAML files", "IUA-SEC-013 presence", "complete follow-up patch whitespace"],
+      "configuration": ["SECURITY.md", "scripts/validate-config.mjs", "docs/security-audit/findings.json", ".codex/test-ledger.json"],
+      "environment_signature": "Windows|PowerShell|python-3.13.14|node-v24.18.0|git-2.55.0.windows.3",
+      "notes": "The root SECURITY.md is the only policy applicable to repository source; policies under vendor and node_modules apply only to dependencies. JSON/YAML validation and git diff checks passed. Unaffected PHP, WordPress, dependency and workflow test results were reused under the repository test protocol."
     }
   ]
 }

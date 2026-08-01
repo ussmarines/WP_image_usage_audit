@@ -10,4 +10,10 @@ Do not disclose an unpatched vulnerability in a public issue. Open the repositor
 
 Include a clear description, reproduction steps, the affected plugin version, WordPress and PHP versions, the required role or capability, and the estimated impact. Include a proposed fix or mitigation when available. Remove credentials, personal data, and production content from evidence.
 
-Reports are reviewed and disclosed in coordination with the reporter when practical. No fixed remediation deadline is promised before the issue is understood and validated.
+## Response and coordinated disclosure
+
+When practical, maintainers will acknowledge a vulnerability report within 7 calendar days and provide an initial validation or triage update within 14 calendar days.
+
+After a vulnerability is confirmed, maintainers aim to publish a fix, mitigation, or security advisory within 90 calendar days. Actively exploited or critical vulnerabilities are prioritized for an accelerated response. Complex issues may require a revised timeline, which will be communicated privately to the reporter.
+
+Reporters should avoid public disclosure until a fix or advisory is available, or until a mutually agreed disclosure date. Reports are reviewed and disclosed in coordination with the reporter when practical.
