@@ -123,6 +123,18 @@
       "attack_scenario": "A newly published malicious or severely broken package release could be proposed before ecosystem detection and removal.",
       "validation": "All three version updaters were in scope. GitHub cooldowns do not delay security updates, so a seven-day routine-update delay improves supply-chain review without slowing advisory fixes.",
       "remediation": "Implemented: all three update ecosystems use cooldown.default-days 7; final Zizmor reports no finding."
+    },
+    {
+      "id": "IUA-SEC-011",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "release-provenance",
+      "file": ".github/workflows/release.yml",
+      "function": "future GitHub release publication",
+      "evidence": "The v2.2.6 ZIP had a matching SHA-256 checksum and clean contents, but its tag was unsigned, the release was mutable, and GitHub reported no build attestation for the artifact.",
+      "attack_scenario": "A compromised release credential could replace a mutable asset or move its tag without consumers having a signed provenance statement that binds the downloaded bytes to the source commit and workflow.",
+      "validation": "No tampering was found in v2.2.6; its release asset digest matched the published checksum. The missing identity and immutability controls were therefore classified as prospective supply-chain hardening rather than evidence of a compromised release.",
+      "remediation": "Implemented for future releases: repository release immutability, exact tag/version and main-ancestry checks, deterministic allow-listed ZIP construction, SHA-256 generation, exact-ZIP runtime tests, GitHub build attestation, checksum/attestation verification, and draft-first publication."
     }
   ]
 }
