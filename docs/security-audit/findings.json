@@ -66,39 +66,39 @@
     },
     {
       "id": "IUA-SEC-006",
-      "status": "candidate",
+      "status": "hardening",
       "severity": "low",
       "category": "denial-of-service",
       "file": "includes/class-iua-scanner.php",
       "function": "IUA_Scanner::run",
       "evidence": "The administrator-triggered scan enumerates all attachments, posts, metadata, options, terms, and upload image paths. Database reads are batched, but filesystem entries and wall-clock duration are not capped; the owner lock expires after a fixed 900 seconds.",
       "attack_scenario": "On a very large or adversarially populated site, a manage_options user starts a scan that exceeds the lease, then starts another scan after expiry, causing overlapping CPU, database, and memory load.",
-      "validation": "pending",
-      "remediation": "Determine whether the administrative trust boundary makes this availability hardening only; if retained, consider a renewable owner lease or a bounded resumable scan design."
+      "validation": "Only the POST-only, exact-action, manage_options and nonce-protected scan route reaches the exhaustive scanner. Atomic locking and batching are present. An unusually long authorized scan can outlive the lease, but no lower-privileged trigger or privilege-boundary impact exists; classified as availability hardening.",
+      "remediation": "A renewable owner lease or bounded resumable scan would change the scan architecture and is deferred as a documented residual hardening item."
     },
     {
       "id": "IUA-SEC-007",
-      "status": "candidate",
+      "status": "hardening",
       "severity": "low",
       "category": "information-disclosure",
       "file": "includes/class-iua-scanner.php",
       "function": "IUA_Scanner::find_upload_images",
       "evidence": "Orphan discovery returns normalized absolute filesystem paths. The complete result is stored in iua_usage_results and returned by the nonce- and capability-protected scan response, while the current admin view does not render the orphan list.",
       "attack_scenario": "An actor able to obtain scan results learns the uploads base filesystem path. The identified route currently requires manage_options and a valid action-specific nonce.",
-      "validation": "pending",
-      "remediation": "Confirm reachability; if absolute paths are unnecessary, retain only upload-relative paths or omit unused orphan data."
+      "validation": "No public or lower-privileged path exposes the orphan result: it is stored non-autoloaded and returned only to a manage_options user with the action nonce. This is not a confirmed disclosure, but retaining absolute paths is unnecessary.",
+      "remediation": "Convert orphan results to uploads-relative paths and cover the data-minimization behavior with a unit test."
     },
     {
       "id": "IUA-SEC-008",
-      "status": "candidate",
+      "status": "rejected",
       "severity": "low",
       "category": "denial-of-service",
       "file": "includes/class-iua-scanner.php",
       "function": "IUA_Scanner::flatten_scan_strings",
       "evidence": "Nested arrays and objects from decoded metadata are traversed recursively without an explicit depth or node limit; builder values have a second recursive traversal.",
       "attack_scenario": "A lower-privileged content workflow or another plugin stores a deeply nested value in scanned post metadata; a later administrator scan exhausts stack or memory while traversing it.",
-      "validation": "pending",
-      "remediation": "Establish whether an in-scope lower-privileged input path can create such metadata; if reachable, replace recursion with a bounded iterative traversal."
+      "validation": "The plugin has no arbitrary metadata-write route, core request data cannot create cyclic PHP graphs, and reaching a hostile decoded structure requires another compromised component. A safe 512-level nested-array harness completed successfully. The in-scope controllable source-to-impact path is absent.",
+      "remediation": "None for this audit. Reconsider a bounded iterative traversal if the plugin later accepts arbitrary decoded nested input directly."
     }
   ]
 }
