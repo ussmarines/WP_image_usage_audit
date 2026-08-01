@@ -1,5 +1,5 @@
 === Image Usage Audit ===
-Contributors: elliot
+Contributors: ussmarines
 Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
