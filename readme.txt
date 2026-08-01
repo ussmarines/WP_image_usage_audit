@@ -4,7 +4,7 @@ Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,13 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 
 == Changelog ==
 
+= 2.2.7 =
+* Added deterministic property-based security tests for CDN validation and CSV formula neutralization on PHP 7.4 and PHP 8.3.
+* Improved scanner normalization and regression coverage for encoded, relative, and scheme-relative image references.
+* Hardened dependency, CodeQL, Scorecard, branch-protection, and release workflows with full-SHA action pins and required checks.
+* Added reproducible ZIP checksums and GitHub artifact attestations to the release pipeline.
+* Updated the confirmed WordPress.org contributor identity and refreshed development dependencies.
+
 = 2.2.6 =
 * Restricted every audit action to administrators with `manage_options` and gave each AJAX action its own nonce and stable validation responses.
 * Neutralized spreadsheet formulas in CSV exports and strictly bounded CDN aliases, rewrite rules, manual selections, and request values.
@@ -80,9 +87,9 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 
 == Upgrade Notice ==
 
-= 2.2.6 =
+= 2.2.7 =
 
-Security and robustness release with stricter administrator-only AJAX handling, bounded scanning, multisite lifecycle fixes, broader detection fixtures, and a reproducible validated package.
+Security, validation, and release-engineering update with broader regression coverage and an attested reproducible package.
 
 == Privacy ==
 
