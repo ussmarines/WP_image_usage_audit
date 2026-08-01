@@ -1,7 +1,7 @@
 name: Prepare release 2.2.7
 
 on:
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -13,19 +13,26 @@ permissions:
 
 jobs:
   prepare:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'release/v2.2.7'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: main
           persist-credentials: false
           fetch-depth: 0
-      - name: Apply release metadata and automation
+      - name: Create the prepared release branch
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_BRANCH: release/v2.2.7-final
         run: |
+          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null 2>&1; then
+            echo "Release branch $RELEASE_BRANCH already exists; nothing to recreate."
+            exit 0
+          fi
+
+          git switch --create "$RELEASE_BRANCH"
+
           python - <<'PY'
           import json
           from pathlib import Path
@@ -175,6 +182,9 @@ Security, validation, and release-engineering update with broader regression cov
 
           release = release.replace('          RELEASE_TAG: ${{ github.ref_name }}\n', '          RELEASE_TAG: ${{ needs.build-test-attest.outputs.release_tag }}\n', 1)
           release_path.write_text(release, encoding='utf-8', newline='\n')
+
+          request['prepared'] = True
+          request_path.write_text(json.dumps(request, indent=2) + '\n', encoding='utf-8', newline='\n')
           PY
 
           node scripts/validate-metadata.mjs
@@ -186,4 +196,4 @@ Security, validation, and release-engineering update with broader regression cov
           git add image-usage-audit.php readme.txt languages/image-usage-audit.pot scripts/validate-metadata.mjs .github/workflows/release.yml .github/release-request.json
           git commit -m 'chore(release): prepare 2.2.7'
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git push origin HEAD:release/v2.2.7
+          git push origin HEAD:"$RELEASE_BRANCH"
