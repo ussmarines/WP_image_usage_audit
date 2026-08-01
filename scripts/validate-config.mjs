@@ -45,6 +45,13 @@ const packageManifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 const approvedInstallScripts = packageManifest.allowScripts || {};
 
 if (
+	packageManifest.devDependencies?.['fast-check'] !== '4.9.0' ||
+	packageManifest.scripts?.['test:property'] !== 'node tests/property/security-inputs.property.js'
+) {
+	throw new Error('The property-based security test must use the reviewed fast-check version and harness.');
+}
+
+if (
 	Object.keys(approvedInstallScripts).length !== 1 ||
 	approvedInstallScripts['fs-ext-extra-prebuilt@2.2.7'] !== true
 ) {
@@ -91,6 +98,20 @@ for (const file of yamlFiles) {
 					throw new Error(`${file} job ${jobName} must disable checkout credential persistence.`);
 				}
 			}
+		}
+	}
+
+	if (file === path.join('.github', 'workflows', 'codeql.yml')) {
+		if (parsedYaml.on?.pull_request?.paths || parsedYaml.on?.push?.paths) {
+			throw new Error('CodeQL must run for every pull request and push to main.');
+		}
+	}
+
+	if (file === path.join('.github', 'workflows', 'qa.yml')) {
+		const qaCommands = (parsedYaml.jobs?.qa?.steps || []).map((step) => step.run).filter(Boolean);
+
+		if (!qaCommands.includes('npm ci') || !qaCommands.includes('npm run test:property')) {
+			throw new Error('Both PHP QA lanes must install and run the property-based security test.');
 		}
 	}
 
