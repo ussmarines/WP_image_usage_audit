@@ -60,12 +60,14 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
+      - run: npm ci
       - run: composer install --no-interaction --prefer-dist
       - run: composer validate --strict --no-interaction
       - if: matrix.php == '7.4'
         run: composer audit --locked --no-interaction
       - run: composer analyse
       - run: composer test
+      - run: npm run test:property
       - if: matrix.php == '7.4'
         run: composer lint
       - run: php -l image-usage-audit.php
