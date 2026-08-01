@@ -63,6 +63,42 @@
       "attack_scenario": "An unbounded crafted brace pattern could exhaust memory in the development tooling process; no plugin runtime code imports this package.",
       "validation": "Affected transitive version confirmed; production reachability rejected; remediated with brace-expansion 2.1.4 within the existing constraint.",
       "remediation": "Retain the corrected lockfile and continue automated dependency monitoring."
+    },
+    {
+      "id": "IUA-SEC-006",
+      "status": "candidate",
+      "severity": "low",
+      "category": "denial-of-service",
+      "file": "includes/class-iua-scanner.php",
+      "function": "IUA_Scanner::run",
+      "evidence": "The administrator-triggered scan enumerates all attachments, posts, metadata, options, terms, and upload image paths. Database reads are batched, but filesystem entries and wall-clock duration are not capped; the owner lock expires after a fixed 900 seconds.",
+      "attack_scenario": "On a very large or adversarially populated site, a manage_options user starts a scan that exceeds the lease, then starts another scan after expiry, causing overlapping CPU, database, and memory load.",
+      "validation": "pending",
+      "remediation": "Determine whether the administrative trust boundary makes this availability hardening only; if retained, consider a renewable owner lease or a bounded resumable scan design."
+    },
+    {
+      "id": "IUA-SEC-007",
+      "status": "candidate",
+      "severity": "low",
+      "category": "information-disclosure",
+      "file": "includes/class-iua-scanner.php",
+      "function": "IUA_Scanner::find_upload_images",
+      "evidence": "Orphan discovery returns normalized absolute filesystem paths. The complete result is stored in iua_usage_results and returned by the nonce- and capability-protected scan response, while the current admin view does not render the orphan list.",
+      "attack_scenario": "An actor able to obtain scan results learns the uploads base filesystem path. The identified route currently requires manage_options and a valid action-specific nonce.",
+      "validation": "pending",
+      "remediation": "Confirm reachability; if absolute paths are unnecessary, retain only upload-relative paths or omit unused orphan data."
+    },
+    {
+      "id": "IUA-SEC-008",
+      "status": "candidate",
+      "severity": "low",
+      "category": "denial-of-service",
+      "file": "includes/class-iua-scanner.php",
+      "function": "IUA_Scanner::flatten_scan_strings",
+      "evidence": "Nested arrays and objects from decoded metadata are traversed recursively without an explicit depth or node limit; builder values have a second recursive traversal.",
+      "attack_scenario": "A lower-privileged content workflow or another plugin stores a deeply nested value in scanned post metadata; a later administrator scan exhausts stack or memory while traversing it.",
+      "validation": "pending",
+      "remediation": "Establish whether an in-scope lower-privileged input path can create such metadata; if reachable, replace recursion with a bounded iterative traversal."
     }
   ]
 }
