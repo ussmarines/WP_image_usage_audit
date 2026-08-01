@@ -1,18 +1,21 @@
 # Phase 9 — Final validation
 
-Status: complete for the audited implementation on 2026-08-01. Pull request 16 was open and green
-when this report was written; the final merge outcome is reported in the task handoff after GitHub
-creates the merge commit.
+Status: complete for the audited implementation and its merge on 2026-08-01. Pull request 16 merged
+only after its required checks passed. Post-merge workflows on `main` also completed successfully.
 
 ## Validated source state
 
 - Baseline: `798bee520a69609cd98960aca483aa787273b093` on `main`.
-- Implementation SHA: `af6cb454d75b4393c7c8763ba2989412aab33526` on
+- Final pull-request SHA: `07d369984a4aa05cdfe74ccc037edafd807539dc` on
   `security/repository-hardening`.
+- Merge commit: `8437b5441800ac7415fdccd74df1bc739627cbb2` on `main`.
 - Pull request: <https://github.com/ussmarines/WP_image_usage_audit/pull/16>.
-- QA run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698198089>.
-- CodeQL run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698198080>.
-- Dependency Review run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698198094>.
+- Final pull-request QA run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698403309>.
+- Final pull-request CodeQL run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698403303>.
+- Final pull-request Dependency Review run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698403301>.
+- Post-merge QA run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698479350>.
+- Post-merge CodeQL run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698479354>.
+- Post-merge Scorecard run: <https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30698479339>.
 
 ## Test-reuse decision
 
@@ -58,7 +61,7 @@ unreviewed script now fails installation.
 
 ## Pull-request checks
 
-All checks for implementation SHA `af6cb45` completed successfully:
+All checks for final pull-request SHA `07d3699` completed successfully:
 
 | Check | Result | Coverage |
 | --- | --- | --- |
@@ -81,7 +84,9 @@ GitHub job passed. No scanner finding was suppressed to obtain the green result.
 
 - Dependabot security updates, secret scanning, push protection and private vulnerability reporting
   are enabled.
-- Secret scanning has zero open alert; Code scanning has zero open alert.
+- Dependabot and secret scanning have zero open alert after the merge.
+- CodeQL has zero open finding. The post-merge Scorecard SARIF upload created eight code-scanning
+  posture alerts; these are classified separately below and are not CodeQL vulnerability findings.
 - GitHub Actions uses selected sources, full-SHA enforcement, a read-only default token, and cannot
   approve pull requests.
 - Future GitHub releases are immutable.
@@ -92,9 +97,27 @@ GitHub job passed. No scanner finding was suppressed to obtain the green result.
 - CodeQL remains conditional on JavaScript or CodeQL-workflow changes, so its job is not a universal
   required check. Scorecard runs on `main`, schedule, manual dispatch and ruleset changes rather than
   on every pull request.
-- Four high Dependabot alerts remain on the pre-hardening default branch. They correspond to lockfile
-  versions already corrected on the pull request and are expected to close only after merge and
-  dependency-graph refresh; they were not prematurely dismissed.
+
+## Post-merge Scorecard triage
+
+The first Scorecard run on hardened `main` passed and produced eight repository-posture alerts. Each
+was reviewed rather than treated as a plugin vulnerability:
+
+| Check | Score | Disposition |
+| --- | ---: | --- |
+| Branch Protection | 4/10 | Residual: zero required approvals is intentional for the current single-maintainer repository; PRs, green checks, resolved conversations and strict updates remain mandatory. |
+| Security Policy | 9/10 | Remediated in the follow-up: `SECURITY.md` now documents acknowledgement, triage and coordinated-disclosure targets of 7, 14 and 90 calendar days. |
+| Fuzzing | 0/10 | Residual: no stable, meaningful fuzz harness exists for this small WordPress plugin; targeted unit and integration coverage remains the proportionate control. |
+| SAST | 8/10 | Historical metric: CodeQL was introduced during this audit and has not analyzed older commits; current eligible JavaScript changes are covered. |
+| Maintained | 0/10 | Time-bound metric: the repository was created less than 90 days ago. |
+| Code Review | 0/10 | Structural metric: a sole maintainer cannot provide independent approval; self-review is not represented as independent review. |
+| CII Best Practices | 0/10 | Informational: no OpenSSF Best Practices badge is claimed. |
+| CI Tests | 8/10 | Historical metric: 8 of 9 sampled merged changesets had tests; the active ruleset now requires the complete QA matrix prospectively. |
+
+The seven residual alerts are explicitly accepted as structural, historical, time-bound or
+proportionate limitations. The Security Policy content deficiency is the only directly actionable
+alert identified by this Scorecard run and is addressed without changing the repository's support
+scope or disclosure channel.
 
 ## Optional Codex Security scan
 
