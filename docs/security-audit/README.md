@@ -18,7 +18,7 @@ invulnerable.
 ## Persistent checklist
 
 - [x] Phase 0 — Record the initial local and GitHub state; create the working branch
-- [ ] Phase 1 — Audit and harden GitHub security settings and access
+- [x] Phase 1 — Audit and harden GitHub security settings and access
 - [ ] Phase 2 — Audit Dependabot and locked Composer/npm dependencies
 - [ ] Phase 3 — Complete the targeted manual WordPress code audit
 - [ ] Phase 4 — Validate or reject every candidate finding
