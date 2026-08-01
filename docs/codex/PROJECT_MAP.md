@@ -3,8 +3,8 @@
 ## Audit baseline
 
 - Audited source commit: `def18f0be8fe0b2ebe248dbc33e39d9f86847efa` (`main`, inspected locally and in the successful public GitHub Actions run `29207713713` on 2026-07-12).
-- Release preparation: `2.2.6` on `release/2.2.6`, based on audited `main` commit `146bccbab9c88dfac1d6f6800978b7d4fe9a9c7c`.
-- Plugin version: `2.2.6`.
+- Release preparation: `2.2.8` on `fix/plugin-check-readme-2.2.8`, based on `main` commit `f08293b30386aa7701de24304b0f8ddb45f46349`.
+- Plugin version: `2.2.8`.
 - Declared compatibility: WordPress 5.9+, PHP 7.4+, tested through WordPress 7.0.
 - Entry point: `image-usage-audit.php`.
 - Text domain: `image-usage-audit`; translations live under `languages/`.

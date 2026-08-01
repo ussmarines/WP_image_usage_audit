@@ -3,7 +3,7 @@
  * Plugin Name: Image Usage Audit
  * Plugin URI: https://github.com/ussmarines/WP_image_usage_audit
  * Description: Audit image usage in the Media Library with provenance, CSV export, manual false-negative handling, and CDN rewrite support.
- * Version: 2.2.7
+ * Version: 2.2.8
  * Author: ussmarines
  * Author URI: https://github.com/ussmarines
  * License: GPL-2.0-or-later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'IUA_VERSION' ) ) {
-	define( 'IUA_VERSION', '2.2.7' );
+	define( 'IUA_VERSION', '2.2.8' );
 }
 
 if ( ! defined( 'IUA_SLUG' ) ) {
@@ -739,11 +739,15 @@ final class IUA_Plugin {
 	private function get_posted_attachment_id(): int {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Every caller completes verify_ajax_request() before reading the validated action payload.
 		$iua_raw_id = isset( $_POST['id'] ) && is_scalar( $_POST['id'] )
-			? trim( wp_unslash( (string) $_POST['id'] ) )
+			? sanitize_text_field( wp_unslash( (string) $_POST['id'] ) )
+			: '';
+		$iua_key_id = isset( $_POST['id'] ) && is_scalar( $_POST['id'] )
+			? sanitize_key( wp_unslash( (string) $_POST['id'] ) )
 			: '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		if ( '' !== $iua_raw_id && strlen( $iua_raw_id ) <= 20 && ctype_digit( $iua_raw_id ) ) {
+		// Do not accept malformed text that either sanitizer would transform into digits.
+		if ( $iua_raw_id === $iua_key_id && '' !== $iua_raw_id && strlen( $iua_raw_id ) <= 20 && ctype_digit( $iua_raw_id ) ) {
 			return absint( $iua_raw_id );
 		}
 
@@ -757,10 +761,15 @@ final class IUA_Plugin {
 	 */
 	private function get_posted_attachment_ids(): array {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Every caller completes verify_ajax_request() before reading the validated action payload.
-		$iua_raw_ids = isset( $_POST['ids'] ) ? wp_unslash( $_POST['ids'] ) : null;
+		$iua_raw_ids = isset( $_POST['ids'] )
+			? map_deep( wp_unslash( $_POST['ids'] ), 'sanitize_text_field' )
+			: null;
+		$iua_key_ids = isset( $_POST['ids'] )
+			? map_deep( wp_unslash( $_POST['ids'] ), 'sanitize_key' )
+			: null;
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		if ( ! is_array( $iua_raw_ids ) || empty( $iua_raw_ids ) || count( $iua_raw_ids ) > self::MAX_BULK_IDS ) {
+		if ( ! is_array( $iua_raw_ids ) || ! is_array( $iua_key_ids ) || empty( $iua_raw_ids ) || count( $iua_raw_ids ) > self::MAX_BULK_IDS ) {
 			return array(
 				'valid' => false,
 				'ids'   => array(),
@@ -769,17 +778,16 @@ final class IUA_Plugin {
 
 		$iua_ids = array();
 
-		foreach ( $iua_raw_ids as $iua_raw_id ) {
-			if ( ! is_scalar( $iua_raw_id ) ) {
+		// Keep the whole selection invalid if sanitization would make any value numeric.
+		foreach ( $iua_raw_ids as $iua_index => $iua_raw_id ) {
+			if ( ! is_string( $iua_raw_id ) || ! isset( $iua_key_ids[ $iua_index ] ) || ! is_string( $iua_key_ids[ $iua_index ] ) ) {
 				return array(
 					'valid' => false,
 					'ids'   => array(),
 				);
 			}
 
-			$iua_raw_id = trim( (string) $iua_raw_id );
-
-			if ( '' === $iua_raw_id || strlen( $iua_raw_id ) > 20 || ! ctype_digit( $iua_raw_id ) ) {
+			if ( $iua_raw_id !== $iua_key_ids[ $iua_index ] || '' === $iua_raw_id || strlen( $iua_raw_id ) > 20 || ! ctype_digit( $iua_raw_id ) ) {
 				return array(
 					'valid' => false,
 					'ids'   => array(),

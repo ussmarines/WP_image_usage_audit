@@ -4,7 +4,7 @@ Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.7
+Stable tag: 2.2.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -44,6 +44,11 @@ No. Run a new scan to refresh the results.
 Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domains, or third-party integrations. Use the manual mark feature when needed.
 
 == Changelog ==
+
+= 2.2.8 =
+* Sanitized single and bulk attachment IDs before strict AJAX validation, resolving the related Plugin Check warnings.
+* Expanded tests for valid, malformed, oversized, duplicate, nested, and non-attachment ID inputs while preserving AJAX responses.
+* Reorganized and simplified the GitHub README for users, administrators, and contributors.
 
 = 2.2.7 =
 * Added deterministic property-based security tests for CDN validation and CSV formula neutralization on PHP 7.4 and PHP 8.3.
@@ -87,9 +92,9 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 
 == Upgrade Notice ==
 
-= 2.2.7 =
+= 2.2.8 =
 
-Security, validation, and release-engineering update with broader regression coverage and an attested reproducible package.
+Corrects attachment-ID sanitization warnings, strengthens AJAX input tests, and provides clearer GitHub documentation.
 
 == Privacy ==
 
