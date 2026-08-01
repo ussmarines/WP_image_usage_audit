@@ -885,6 +885,84 @@
       "configuration": ["docs/security-audit/findings.json", "docs/security-audit/06-remediation.md", ".codex/test-ledger.json"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass."
+    },
+    {
+      "name": "Phase 6 baseline CI and supply-chain inspection",
+      "command": "Get-Content .github/workflows/qa.yml, .github/dependabot.yml, scripts/build-zip.ps1, .distignore; rg -n <uses, permissions, events, expressions, downloads, Docker, timeouts, concurrency and attestations> .github scripts package.json; gh api <action release, tag commit and signature endpoints>; WordPress plugin information API for plugin-check",
+      "tool_version": "PowerShell 7.6.3; ripgrep 15.1.0; GitHub CLI 2.96.0; GitHub REST API 2022-11-28",
+      "date": "2026-08-01",
+      "commit_tested": "27fa77f+security-audit-phase-6-baseline",
+      "result": "warning",
+      "duration_ms": 8000,
+      "coverage": ["QA workflow triggers, permissions, checkouts, expressions and jobs", "Dependabot update policy", "ZIP build and exclusion inputs", "Action release commits and signature verification", "Plugin Check release selection"],
+      "configuration": [".github/workflows/qa.yml", ".github/dependabot.yml", "scripts/build-zip.ps1", "package.json"],
+      "environment_signature": "Windows|PowerShell|gh-2.96.0|api-2022-11-28|docker-not-on-path|python-3.13.14",
+      "notes": "Existing Actions were pinned and the workflow token was read-only, but checkout credentials persisted, actionlint lacked a timeout, workflow concurrency was absent, Plugin Check was unpinned, and no Dependency Review, JavaScript CodeQL or Scorecard workflow existed. Docker was not available on PATH in this runtime."
+    },
+    {
+      "name": "Phase 6 verified Zizmor baseline",
+      "command": "Invoke-RestMethod https://pypi.org/pypi/zizmor/1.27.0/json; Invoke-WebRequest <official Windows x64 wheel URL>; Get-FileHash -Algorithm SHA256; python -m venv <temporary-tool-directory>; <temporary-python> -m pip install --no-index --no-deps <verified-wheel>; zizmor .",
+      "tool_version": "Python 3.13.14; Zizmor 1.27.0",
+      "date": "2026-08-01",
+      "commit_tested": "27fa77f+security-audit-phase-6-baseline",
+      "result": "warning",
+      "duration_ms": 11800,
+      "coverage": ["all GitHub Actions workflows", ".github/dependabot.yml", "offline Zizmor audits"],
+      "configuration": ["official PyPI JSON metadata", "temporary isolated virtual environment"],
+      "environment_signature": "Windows|PowerShell|python-3.13.14|zizmor-1.27.0-offline",
+      "notes": "The Windows wheel SHA-256 matched debc723721172c170d5922171a40eaebf5787a02ff3e69d30597dafdb66a21ba. Zizmor reported five medium artipacked checkout warnings and three medium Dependabot cooldown warnings; five additional rules were suppressed/not applicable in offline mode. Exit status was nonzero because warnings were found."
+    },
+    {
+      "name": "Phase 6 workflow correction diagnostics",
+      "command": "npm run actionlint; node scripts/validate-config.mjs; PowerShell parser probe for scripts/run-actionlint.ps1",
+      "tool_version": "actionlint 1.7.12; Node.js v24.18.0; PowerShell 7.6.3",
+      "date": "2026-08-01",
+      "commit_tested": "27fa77f+security-audit-phase-6-worktree",
+      "result": "partial",
+      "duration_ms": 3000,
+      "coverage": ["four GitHub Actions workflows", "verified actionlint wrapper execution", "repository configuration validator"],
+      "configuration": [".github/workflows/*.yml", "scripts/run-actionlint.ps1", "scripts/validate-config.mjs"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|actionlint-1.7.12",
+      "notes": "The verified wrapper executed, and actionlint rejected the Scorecard event name branch_protection. The correct GitHub event is branch_protection_rule. The existing configuration validator passed but exposed that it counted only qa.yml. A separate ad hoc PowerShell parser expression emitted a reference-argument diagnostic and was not used as evidence. Both configuration defects were corrected."
+    },
+    {
+      "name": "Phase 6 final local workflow security validation",
+      "command": "npm run actionlint; node --check scripts/validate-config.mjs; npm run validate:config; <verified-zizmor-1.27.0> .",
+      "tool_version": "actionlint 1.7.12; Zizmor 1.27.0; Node.js v24.18.0; PowerShell 7.6.3",
+      "date": "2026-08-01",
+      "commit_tested": "27fa77f+security-audit-phase-6-worktree",
+      "result": "pass",
+      "duration_ms": 2600,
+      "coverage": ["all four workflows and Dependabot YAML", "all 11 repository JSON files", "Action SHA pins", "checkout credential persistence", "job timeouts", "workflow permissions and concurrency", "Zizmor offline audits"],
+      "configuration": [".github/workflows/qa.yml", ".github/workflows/dependency-review.yml", ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml", ".github/dependabot.yml", "scripts/validate-config.mjs", "scripts/run-actionlint.ps1"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|actionlint-1.7.12|zizmor-1.27.0-offline",
+      "notes": "Actionlint passed. The validator parsed 11 JSON and five YAML files and enforced full Action SHAs, timeouts, top-level permissions/concurrency, and non-persistent checkout credentials. Zizmor reported no finding; 11 audits were suppressed/not applicable in offline mode."
+    },
+    {
+      "name": "Phase 6 GitHub Actions policy verification",
+      "command": "gh api --method PUT repos/ussmarines/WP_image_usage_audit/actions/permissions/selected-actions <GitHub-owned, verified, setup-php and Scorecard policy>; gh api repos/ussmarines/WP_image_usage_audit/actions/permissions/selected-actions",
+      "tool_version": "GitHub CLI 2.96.0; GitHub REST API 2022-11-28",
+      "date": "2026-08-01",
+      "commit_tested": "27fa77f+repository-settings",
+      "result": "pass",
+      "duration_ms": 1100,
+      "coverage": ["repository selected-actions source policy"],
+      "configuration": ["GitHub Actions repository settings"],
+      "environment_signature": "GitHub|public-repository|gh-2.96.0|api-2022-11-28",
+      "notes": "GitHub-owned and verified actions remain allowed. Explicit patterns are shivammathur/setup-php@* and ossf/scorecard-action@*. Repository SHA pin enforcement remains enabled from Phase 1."
+    },
+    {
+      "name": "Phase 6 staged CI and supply-chain integrity",
+      "command": "npm run validate:config; node -e \"JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'));JSON.parse(require('fs').readFileSync('docs/security-audit/findings.json','utf8'))\"; git diff --cached --check",
+      "tool_version": "Node.js v24.18.0; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "27fa77f+security-audit-phase-6-index",
+      "result": "pass",
+      "duration_ms": 1500,
+      "coverage": ["all Phase 6 workflows, scripts, reports, findings and ledger", "complete staged Phase 6 patch"],
+      "configuration": ["scripts/validate-config.mjs", "docs/security-audit/05-ci-supply-chain.md", "docs/security-audit/findings.json", ".codex/test-ledger.json"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
+      "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass."
     }
   ]
 }
