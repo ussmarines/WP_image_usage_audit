@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-01T14:49:44+02:00",
+  "repository": "ussmarines/WP_image_usage_audit",
+  "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+  "state": "open",
+  "count": 7,
+  "alerts": [
+    {
+      "number": 1,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "BranchProtectionID",
+        "name": "Branch-Protection",
+        "severity": "high",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#branch-protection"
+      },
+      "message": "score is 4: branch protection is not maximal on development and all release branches: stale review dismissal is disabled; main does not require approvers; codeowner review is not required; last-push approval is disabled",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:47Z",
+      "last_detected_at": "2026-08-01T11:50:47Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/1"
+    },
+    {
+      "number": 3,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "FuzzingID",
+        "name": "Fuzzing",
+        "severity": "medium",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#fuzzing"
+      },
+      "message": "score is 0: project is not fuzzed: no fuzzer integrations found",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:48Z",
+      "last_detected_at": "2026-08-01T11:50:48Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/3"
+    },
+    {
+      "number": 4,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "SASTID",
+        "name": "SAST",
+        "severity": "medium",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#sast"
+      },
+      "message": "score is 8: SAST tool detected but not run on all commits: 13 commits out of 25 are checked with a SAST tool",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:48Z",
+      "last_detected_at": "2026-08-01T11:50:48Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/4"
+    },
+    {
+      "number": 5,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "MaintainedID",
+        "name": "Maintained",
+        "severity": "high",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#maintained"
+      },
+      "message": "score is 0: project was created within the last 90 days",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:49Z",
+      "last_detected_at": "2026-08-01T11:50:49Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/5"
+    },
+    {
+      "number": 6,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "CodeReviewID",
+        "name": "Code-Review",
+        "severity": "high",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#code-review"
+      },
+      "message": "score is 0: Found 0/12 approved changesets",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:49Z",
+      "last_detected_at": "2026-08-01T11:50:49Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/6"
+    },
+    {
+      "number": 7,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "CIIBestPracticesID",
+        "name": "CII-Best-Practices",
+        "severity": "low",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#cii-best-practices"
+      },
+      "message": "score is 0: no effort to earn an OpenSSF best practices badge detected",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:49Z",
+      "last_detected_at": "2026-08-01T11:50:49Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/7"
+    },
+    {
+      "number": 8,
+      "state": "open",
+      "tool": { "name": "Scorecard", "version": "v5.5.0" },
+      "rule": {
+        "id": "CITestsID",
+        "name": "CI-Tests",
+        "severity": "low",
+        "precision": null,
+        "help_uri": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#ci-tests"
+      },
+      "message": "score is 9: 10 out of 11 merged PRs checked by a CI test",
+      "ref": "refs/heads/main",
+      "commit": "41122772915682dc631aeff7c02001c014a13dbe",
+      "location": "no file associated with this alert:1",
+      "created_at": "2026-08-01T11:50:49Z",
+      "last_detected_at": "2026-08-01T11:50:49Z",
+      "url": "https://github.com/ussmarines/WP_image_usage_audit/security/code-scanning/8"
+    }
+  ]
+}
