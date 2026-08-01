@@ -13,6 +13,8 @@ updates:
       - php
     commit-message:
       prefix: "build(deps)"
+    cooldown:
+      default-days: 7
     groups:
       composer-minor-patch:
         patterns:
@@ -33,6 +35,8 @@ updates:
       - javascript
     commit-message:
       prefix: "build(deps)"
+    cooldown:
+      default-days: 7
     groups:
       npm-minor-patch:
         patterns:
@@ -53,6 +57,8 @@ updates:
       - github_actions
     commit-message:
       prefix: "build(deps)"
+    cooldown:
+      default-days: 7
     groups:
       github-actions-minor-patch:
         patterns:

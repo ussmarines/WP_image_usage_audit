@@ -16,7 +16,7 @@
     "validate:metadata": "node scripts/validate-metadata.mjs",
     "validate:config": "node scripts/validate-config.mjs",
     "build:zip": "pwsh -NoProfile -File scripts/build-zip.ps1",
-    "actionlint": "docker run --rm --volume \"%cd%:/repo\" --workdir /repo rhysd/actionlint@sha256:1d74bfc9fd1963af8f89a7c22afaaafd42f49aad711a09951d02cb996398f61d"
+    "actionlint": "pwsh -NoProfile -File scripts/run-actionlint.ps1"
   },
   "devDependencies": {
     "@wordpress/env": "11.12.0"

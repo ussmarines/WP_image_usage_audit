@@ -99,6 +99,30 @@
       "attack_scenario": "A lower-privileged content workflow or another plugin stores a deeply nested value in scanned post metadata; a later administrator scan exhausts stack or memory while traversing it.",
       "validation": "The plugin has no arbitrary metadata-write route, core request data cannot create cyclic PHP graphs, and reaching a hostile decoded structure requires another compromised component. A safe 512-level nested-array harness completed successfully. The in-scope controllable source-to-impact path is absent.",
       "remediation": "None for this audit. Reconsider a bounded iterative traversal if the plugin later accepts arbitrary decoded nested input directly."
+    },
+    {
+      "id": "IUA-SEC-009",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "ci-credential-persistence",
+      "file": ".github/workflows/qa.yml",
+      "function": "actions/checkout steps",
+      "evidence": "Zizmor 1.27.0 reported five medium artipacked warnings because each checkout used the default credential persistence behavior.",
+      "attack_scenario": "A later step processing untrusted pull-request content could read the persisted read-only workflow token from the checkout configuration. Fork permissions and absent secrets limited impact, but persistence was unnecessary.",
+      "validation": "All five checkout steps were reachable in QA jobs. The default token was read-only and could not approve pull requests, so this was classified as hardening rather than a confirmed privilege escalation.",
+      "remediation": "Implemented: every checkout now sets persist-credentials to false, the repository validator enforces it, and the final Zizmor run reports no finding."
+    },
+    {
+      "id": "IUA-SEC-010",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "dependency-supply-chain",
+      "file": ".github/dependabot.yml",
+      "function": "Composer, npm and GitHub Actions updaters",
+      "evidence": "Zizmor 1.27.0 reported three medium warnings because routine Dependabot version updates had no explicit seven-day cooldown.",
+      "attack_scenario": "A newly published malicious or severely broken package release could be proposed before ecosystem detection and removal.",
+      "validation": "All three version updaters were in scope. GitHub cooldowns do not delay security updates, so a seven-day routine-update delay improves supply-chain review without slowing advisory fixes.",
+      "remediation": "Implemented: all three update ecosystems use cooldown.default-days 7; final Zizmor reports no finding."
     }
   ]
 }
