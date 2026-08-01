@@ -3,6 +3,10 @@ name: QA
 permissions:
   contents: read
 
+concurrency:
+  group: qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
   push:
@@ -12,9 +16,31 @@ on:
 jobs:
   actionlint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - run: docker run --rm --volume "$GITHUB_WORKSPACE:/repo" --workdir /repo rhysd/actionlint@sha256:1d74bfc9fd1963af8f89a7c22afaaafd42f49aad711a09951d02cb996398f61d
+        with:
+          persist-credentials: false
+      - run: npm run actionlint
+
+  zizmor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Run zizmor 1.27.0
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/zizmor-1.27.0-py3-none-manylinux_2_28_x86_64.whl"
+          curl --fail --location --silent --show-error \
+            'https://files.pythonhosted.org/packages/21/64/4e21d26a2fc910594aaab19367ac25467a4da6438b7c381f67e90c38945e/zizmor-1.27.0-py3-none-manylinux_2_28_x86_64.whl' \
+            --output "$archive"
+          echo 'afb28123882d2b8248f1e480bf6cc6d1af102e0d3fbe22a40f7f795b1aa9d435  '"$archive" | sha256sum --check --strict
+          python3 -m venv "$RUNNER_TEMP/zizmor-venv"
+          "$RUNNER_TEMP/zizmor-venv/bin/python" -m pip install --no-index --no-deps "$archive"
+          "$RUNNER_TEMP/zizmor-venv/bin/zizmor" .
   qa:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
@@ -25,6 +51,8 @@ jobs:
         php: ['7.4', '8.3']
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ matrix.php }}
@@ -52,6 +80,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24
@@ -66,7 +96,7 @@ jobs:
       - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/ajax-setup.php
       - run: npm run test:ajax
       - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/smoke.php
-      - run: npx wp-env run cli wp plugin install plugin-check --activate
+      - run: npx wp-env run cli wp plugin install plugin-check --version=2.0.0 --activate
       - run: npx wp-env run cli wp plugin check image-usage-audit
       - run: npx wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/WP_image_usage_audit /var/www/html/wp-content/plugins/WP_image_usage_audit/languages/image-usage-audit.pot --domain=image-usage-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{"POT-Creation-Date":"2026-07-13T12:43:54+00:00","Report-Msgid-Bugs-To":"https://github.com/ussmarines/WP_image_usage_audit/issues"}'
       - run: git diff --exit-code -- languages/image-usage-audit.pot
@@ -78,6 +108,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24
@@ -96,6 +128,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24

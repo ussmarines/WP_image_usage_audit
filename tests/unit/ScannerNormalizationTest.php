@@ -136,6 +136,27 @@ final class ScannerNormalizationTest extends TestCase {
 		$this->assertSame( 2, $calls[1]['paged'] );
 	}
 
+	public function test_orphan_results_are_relative_to_uploads_directory(): void {
+		$iua_basedir = trailingslashit( sys_get_temp_dir() ) . 'iua-orphans-' . bin2hex( random_bytes( 8 ) );
+		$iua_subdir  = $iua_basedir . '/2026/08';
+		$iua_file    = $iua_subdir . '/orphan.jpg';
+
+		$this->assertTrue( mkdir( $iua_subdir, 0700, true ) );
+		$this->assertNotFalse( file_put_contents( $iua_file, 'fixture' ) );
+
+		try {
+			$iua_orphans = $this->call_private( new IUA_Scanner(), 'find_orphans', array( array(), $iua_basedir ) );
+
+			$this->assertSame( array( '2026/08/orphan.jpg' ), $iua_orphans );
+			$this->assertStringNotContainsString( wp_normalize_path( $iua_basedir ), $iua_orphans[0] );
+		} finally {
+			unlink( $iua_file );
+			rmdir( $iua_subdir );
+			rmdir( dirname( $iua_subdir ) );
+			rmdir( $iua_basedir );
+		}
+	}
+
 	public function test_builder_ids_are_detected_and_provenance_is_capped() : void {
 		$scanner = new IUA_Scanner();
 		$used    = array();

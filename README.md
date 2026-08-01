@@ -34,6 +34,12 @@ The orphan scan only covers `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, and `avi
 
 Developers may instead clone the canonical repository into `wp-content/plugins/image-usage-audit`. Build the same allow-listed installation archive locally with `npm run build:zip`.
 
+Future releases created by the hardened release workflow include `image-usage-audit.zip.sha256`, a
+GitHub build-provenance attestation, and GitHub release immutability. After downloading a release,
+verify the checksum and provenance with `sha256sum --check image-usage-audit.zip.sha256`,
+`gh attestation verify image-usage-audit.zip --repo ussmarines/WP_image_usage_audit`, and
+`gh release verify-asset TAG image-usage-audit.zip --repo ussmarines/WP_image_usage_audit`.
+
 The WordPress.org slug is not currently published. The canonical project page is this GitHub repository.
 
 ## Usage
@@ -98,7 +104,7 @@ npm run build:zip
 npm run env:stop
 ```
 
-`@wordpress/env` pins WordPress 7.0.1/PHP 7.4 in `.wp-env.json`; dedicated configurations also exercise WordPress 5.9.13 and multisite. The smoke jobs install the exact ZIP, exercise AJAX, large-site batching, multisite lifecycle and uninstall preservation, run Plugin Check, and reject a POT generated from a stale catalog. `npm run build:zip` creates `dist/image-usage-audit.zip`, verifies its single root folder and required metadata, and rejects development-only paths. Consult `.codex/test-ledger.json` before rerunning checks.
+`@wordpress/env` pins WordPress 7.0.1/PHP 7.4 in `.wp-env.json`; dedicated configurations also exercise WordPress 5.9.13 and multisite. The smoke jobs install the exact ZIP, exercise AJAX, large-site batching, multisite lifecycle and uninstall preservation, run Plugin Check, and reject a POT generated from a stale catalog. `npm run build:zip` creates `dist/image-usage-audit.zip` and its SHA-256 checksum, verifies the single root folder and synchronized metadata, and rejects development-only paths. Consult `.codex/test-ledger.json` before rerunning checks.
 
 ## Security and privacy
 

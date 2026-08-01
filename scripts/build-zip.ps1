@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $repoPrefix = [System.IO.Path]::TrimEndingDirectorySeparator($repoRoot) + [System.IO.Path]::DirectorySeparatorChar
 $outputFullPath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $OutputPath))
+$checksumFullPath = $outputFullPath + '.sha256'
 
 if (-not $outputFullPath.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
 	throw 'The ZIP output path must stay inside the repository.'
@@ -54,6 +55,9 @@ try {
 	if (Test-Path -LiteralPath $outputFullPath) {
 		Remove-Item -LiteralPath $outputFullPath -Force
 	}
+	if (Test-Path -LiteralPath $checksumFullPath) {
+		Remove-Item -LiteralPath $checksumFullPath -Force
+	}
 
 	Compress-Archive -LiteralPath $packageRoot -DestinationPath $outputFullPath -CompressionLevel Optimal
 
@@ -89,15 +93,38 @@ try {
 		$reader = [System.IO.StreamReader]::new($mainEntry.Open())
 		try { $mainContent = $reader.ReadToEnd() } finally { $reader.Dispose() }
 
-		if ($mainContent -notmatch 'Version:\s+2\.2\.6' -or $mainContent -notmatch 'License:\s+GPL-2\.0-or-later') {
-			throw 'Plugin version or license metadata is inconsistent in the ZIP.'
+		$versionMatch = [System.Text.RegularExpressions.Regex]::Match($mainContent, '(?m)^\s*\*\s*Version:\s*(\d+\.\d+\.\d+)\s*$')
+
+		if (-not $versionMatch.Success -or $mainContent -notmatch 'License:\s+GPL-2\.0-or-later') {
+			throw 'Plugin version or license metadata is missing from the ZIP.'
+		}
+
+		$pluginVersion = $versionMatch.Groups[1].Value
+		$escapedVersion = [System.Text.RegularExpressions.Regex]::Escape($pluginVersion)
+
+		if ($mainContent -notmatch "define\(\s*'IUA_VERSION'\s*,\s*'$escapedVersion'\s*\)" ) {
+			throw 'The plugin header and IUA_VERSION are inconsistent in the ZIP.'
+		}
+
+		$readmeEntry = $archive.GetEntry('image-usage-audit/readme.txt')
+		$reader = [System.IO.StreamReader]::new($readmeEntry.Open())
+		try { $readmeContent = $reader.ReadToEnd() } finally { $reader.Dispose() }
+
+		if ($readmeContent -notmatch "(?m)^Stable tag:\s*$escapedVersion\s*$") {
+			throw 'The plugin header and readme stable tag are inconsistent in the ZIP.'
 		}
 	} finally {
 		$archive.Dispose()
 	}
 
+	$sha256 = (Get-FileHash -LiteralPath $outputFullPath -Algorithm SHA256).Hash.ToLowerInvariant()
+	$checksumLine = "$sha256  $([System.IO.Path]::GetFileName($outputFullPath))`n"
+	[System.IO.File]::WriteAllText($checksumFullPath, $checksumLine, [System.Text.UTF8Encoding]::new($false))
+
 	[pscustomobject]@{
 		zip = $outputFullPath
+		checksum = $checksumFullPath
+		sha256 = $sha256
 		entries = $entries.Count
 		root = 'image-usage-audit/'
 		result = 'pass'

@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "repository": "ussmarines/WP_image_usage_audit",
+  "baseline_commit": "798bee520a69609cd98960aca483aa787273b093",
+  "generated_at": "2026-08-01",
+  "findings": [
+    {
+      "id": "IUA-SEC-001",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-rce",
+      "file": "composer.lock",
+      "function": "wp-coding-standards/wpcs",
+      "evidence": "The lock contained WPCS 3.1.0, affected by CVE-2026-45293; Composer audit identified 3.4.1 as the first fixed release.",
+      "attack_scenario": "A crafted PHP file analyzed by the vulnerable development sniff could execute code in the QA environment. WPCS is not loaded by the WordPress plugin in production.",
+      "validation": "Affected version and advisory confirmed; production reachability rejected because the package is require-dev only; remediated on the audit branch with WPCS 3.4.1.",
+      "remediation": "Update WPCS to 3.4.1 and its compatible PHPCS tooling, then rerun coding standards and dependency audits."
+    },
+    {
+      "id": "IUA-SEC-002",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-dos",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > adm-zip",
+      "evidence": "The lock contained adm-zip 0.5.18, affected below 0.6.0 by CVE-2026-39244.",
+      "attack_scenario": "A crafted archive handled by wp-env could exhaust memory in a developer or CI process. The package is absent from the distributed plugin.",
+      "validation": "Affected transitive version confirmed; no WordPress production path; remediated with an explicit 0.6.0 npm override because the current parent constraint remains on 0.5.x.",
+      "remediation": "Keep adm-zip at 0.6.0 and remove the override once @wordpress/env accepts the fixed line."
+    },
+    {
+      "id": "IUA-SEC-003",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-input-validation",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > @wp-playground/blueprints > ajv > fast-uri",
+      "evidence": "The lock contained fast-uri 3.1.3, affected by GHSA-v2hh-gcrm-f6hx.",
+      "attack_scenario": "A specially formed URI processed by development-only Playground tooling could be interpreted inconsistently. The code is not loaded by WordPress production requests.",
+      "validation": "Affected transitive version confirmed; production reachability rejected; remediated with fast-uri 3.1.5 inside the existing constraint.",
+      "remediation": "Retain the corrected lockfile and monitor the parent packages through Dependabot."
+    },
+    {
+      "id": "IUA-SEC-004",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-dos",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > @wp-playground/cli > fast-xml-parser",
+      "evidence": "The lock contained fast-xml-parser 5.10.0, affected below 5.10.1 by GHSA-8r6m-32jq-jx6q.",
+      "attack_scenario": "Repeated DOCTYPE declarations could exhaust resources when development-only Playground tooling parses crafted XML.",
+      "validation": "Affected transitive version confirmed; no distributed-plugin path; remediated with fast-xml-parser 5.10.1.",
+      "remediation": "Retain the corrected lockfile and monitor the parent packages through Dependabot."
+    },
+    {
+      "id": "IUA-SEC-005",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-dos",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > rimraf > glob > minimatch > brace-expansion",
+      "evidence": "npm audit identified brace-expansion 2.1.2 as affected by GHSA-mh99-v99m-4gvg.",
+      "attack_scenario": "An unbounded crafted brace pattern could exhaust memory in the development tooling process; no plugin runtime code imports this package.",
+      "validation": "Affected transitive version confirmed; production reachability rejected; remediated with brace-expansion 2.1.4 within the existing constraint.",
+      "remediation": "Retain the corrected lockfile and continue automated dependency monitoring."
+    },
+    {
+      "id": "IUA-SEC-006",
+      "status": "hardening",
+      "severity": "low",
+      "category": "denial-of-service",
+      "file": "includes/class-iua-scanner.php",
+      "function": "IUA_Scanner::run",
+      "evidence": "The administrator-triggered scan enumerates all attachments, posts, metadata, options, terms, and upload image paths. Database reads are batched, but filesystem entries and wall-clock duration are not capped; the owner lock expires after a fixed 900 seconds.",
+      "attack_scenario": "On a very large or adversarially populated site, a manage_options user starts a scan that exceeds the lease, then starts another scan after expiry, causing overlapping CPU, database, and memory load.",
+      "validation": "Only the POST-only, exact-action, manage_options and nonce-protected scan route reaches the exhaustive scanner. Atomic locking and batching are present. An unusually long authorized scan can outlive the lease, but no lower-privileged trigger or privilege-boundary impact exists; classified as availability hardening.",
+      "remediation": "A renewable owner lease or bounded resumable scan would change the scan architecture and is deferred as a documented residual hardening item."
+    },
+    {
+      "id": "IUA-SEC-007",
+      "status": "hardening",
+      "severity": "low",
+      "category": "information-disclosure",
+      "file": "includes/class-iua-scanner.php",
+      "function": "IUA_Scanner::find_upload_images",
+      "evidence": "Orphan discovery returns normalized absolute filesystem paths. The complete result is stored in iua_usage_results and returned by the nonce- and capability-protected scan response, while the current admin view does not render the orphan list.",
+      "attack_scenario": "An actor able to obtain scan results learns the uploads base filesystem path. The identified route currently requires manage_options and a valid action-specific nonce.",
+      "validation": "No public or lower-privileged path exposes the orphan result: it is stored non-autoloaded and returned only to a manage_options user with the action nonce. This is not a confirmed disclosure, but retaining absolute paths is unnecessary.",
+      "remediation": "Implemented on the audit branch: orphan results are constrained to the uploads prefix and stored as uploads-relative paths; a focused unit test verifies the relative result and absence of the absolute prefix."
+    },
+    {
+      "id": "IUA-SEC-008",
+      "status": "rejected",
+      "severity": "low",
+      "category": "denial-of-service",
+      "file": "includes/class-iua-scanner.php",
+      "function": "IUA_Scanner::flatten_scan_strings",
+      "evidence": "Nested arrays and objects from decoded metadata are traversed recursively without an explicit depth or node limit; builder values have a second recursive traversal.",
+      "attack_scenario": "A lower-privileged content workflow or another plugin stores a deeply nested value in scanned post metadata; a later administrator scan exhausts stack or memory while traversing it.",
+      "validation": "The plugin has no arbitrary metadata-write route, core request data cannot create cyclic PHP graphs, and reaching a hostile decoded structure requires another compromised component. A safe 512-level nested-array harness completed successfully. The in-scope controllable source-to-impact path is absent.",
+      "remediation": "None for this audit. Reconsider a bounded iterative traversal if the plugin later accepts arbitrary decoded nested input directly."
+    },
+    {
+      "id": "IUA-SEC-009",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "ci-credential-persistence",
+      "file": ".github/workflows/qa.yml",
+      "function": "actions/checkout steps",
+      "evidence": "Zizmor 1.27.0 reported five medium artipacked warnings because each checkout used the default credential persistence behavior.",
+      "attack_scenario": "A later step processing untrusted pull-request content could read the persisted read-only workflow token from the checkout configuration. Fork permissions and absent secrets limited impact, but persistence was unnecessary.",
+      "validation": "All five checkout steps were reachable in QA jobs. The default token was read-only and could not approve pull requests, so this was classified as hardening rather than a confirmed privilege escalation.",
+      "remediation": "Implemented: every checkout now sets persist-credentials to false, the repository validator enforces it, and the final Zizmor run reports no finding."
+    },
+    {
+      "id": "IUA-SEC-010",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "dependency-supply-chain",
+      "file": ".github/dependabot.yml",
+      "function": "Composer, npm and GitHub Actions updaters",
+      "evidence": "Zizmor 1.27.0 reported three medium warnings because routine Dependabot version updates had no explicit seven-day cooldown.",
+      "attack_scenario": "A newly published malicious or severely broken package release could be proposed before ecosystem detection and removal.",
+      "validation": "All three version updaters were in scope. GitHub cooldowns do not delay security updates, so a seven-day routine-update delay improves supply-chain review without slowing advisory fixes.",
+      "remediation": "Implemented: all three update ecosystems use cooldown.default-days 7; final Zizmor reports no finding."
+    },
+    {
+      "id": "IUA-SEC-011",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "release-provenance",
+      "file": ".github/workflows/release.yml",
+      "function": "future GitHub release publication",
+      "evidence": "The v2.2.6 ZIP had a matching SHA-256 checksum and clean contents, but its tag was unsigned, the release was mutable, and GitHub reported no build attestation for the artifact.",
+      "attack_scenario": "A compromised release credential could replace a mutable asset or move its tag without consumers having a signed provenance statement that binds the downloaded bytes to the source commit and workflow.",
+      "validation": "No tampering was found in v2.2.6; its release asset digest matched the published checksum. The missing identity and immutability controls were therefore classified as prospective supply-chain hardening rather than evidence of a compromised release.",
+      "remediation": "Implemented for future releases: repository release immutability, exact tag/version and main-ancestry checks, deterministic allow-listed ZIP construction, SHA-256 generation, exact-ZIP runtime tests, GitHub build attestation, checksum/attestation verification, and draft-first publication."
+    },
+    {
+      "id": "IUA-SEC-012",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "dependency-install-scripts",
+      "file": "package.json",
+      "function": "npm ci development dependency installation",
+      "evidence": "npm 11.16.0 reported that the install script for transitive fs-ext-extra-prebuilt@2.2.7 was not covered by an explicit allowScripts policy.",
+      "attack_scenario": "A future dependency update could introduce another lifecycle script that executes during CI installation without a repository-reviewed approval.",
+      "validation": "The current package is development-only, locked to an exact registry URL and SHA-512 integrity. Its reviewed script loads a packaged platform binary or invokes node-gyp locally and does not download code. No current malicious behavior was found.",
+      "remediation": "Implemented: approve only fs-ext-extra-prebuilt@2.2.7, enforce strict-allow-scripts=true so unreviewed scripts fail installation, and validate both invariants in the repository configuration check."
+    }
+  ]
+}
