@@ -135,6 +135,18 @@
       "attack_scenario": "A compromised release credential could replace a mutable asset or move its tag without consumers having a signed provenance statement that binds the downloaded bytes to the source commit and workflow.",
       "validation": "No tampering was found in v2.2.6; its release asset digest matched the published checksum. The missing identity and immutability controls were therefore classified as prospective supply-chain hardening rather than evidence of a compromised release.",
       "remediation": "Implemented for future releases: repository release immutability, exact tag/version and main-ancestry checks, deterministic allow-listed ZIP construction, SHA-256 generation, exact-ZIP runtime tests, GitHub build attestation, checksum/attestation verification, and draft-first publication."
+    },
+    {
+      "id": "IUA-SEC-012",
+      "status": "hardening",
+      "severity": "medium",
+      "category": "dependency-install-scripts",
+      "file": "package.json",
+      "function": "npm ci development dependency installation",
+      "evidence": "npm 11.16.0 reported that the install script for transitive fs-ext-extra-prebuilt@2.2.7 was not covered by an explicit allowScripts policy.",
+      "attack_scenario": "A future dependency update could introduce another lifecycle script that executes during CI installation without a repository-reviewed approval.",
+      "validation": "The current package is development-only, locked to an exact registry URL and SHA-512 integrity. Its reviewed script loads a packaged platform binary or invokes node-gyp locally and does not download code. No current malicious behavior was found.",
+      "remediation": "Implemented: approve only fs-ext-extra-prebuilt@2.2.7, enforce strict-allow-scripts=true so unreviewed scripts fail installation, and validate both invariants in the repository configuration check."
     }
   ]
 }

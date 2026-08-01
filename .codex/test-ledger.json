@@ -1028,6 +1028,19 @@
       "configuration": ["scripts/build-zip.ps1", "scripts/validate-release-tag.mjs", ".github/workflows/release.yml", "scripts/validate-config.mjs"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|actionlint-1.7.12|zizmor-1.27.0-offline",
       "notes": "Two builds were byte-identical at bd6fcb85a74f38eb5cfa33c0f8f99699657f7d98f641eaafb2b4e0e674f84f0d. The ZIP had 11 expected entries and zero targeted secret-pattern match. Actionlint and configuration validation passed; final Zizmor reported no finding with 15 offline-suppressed/not-applicable audits."
+    },
+    {
+      "name": "Phase 9 npm install-script policy and final dependency audit",
+      "command": "npm ci; npm audit --json; npm outdated --json; npm ls glob fs-ext-extra-prebuilt --all; inspect fs-ext-extra-prebuilt@2.2.7 package/install.js and lock integrity; npm approve-scripts --allow-scripts-pending --json; npm ci <after exact approval and strict policy>",
+      "tool_version": "Node.js v24.18.0; npm 11.16.0",
+      "date": "2026-08-01",
+      "commit_tested": "4640e31+security-audit-phase-9-worktree",
+      "result": "pass",
+      "duration_ms": 40500,
+      "coverage": ["complete locked npm development graph", "dependency advisories and direct updates", "all dependency lifecycle scripts", "reviewed fs-ext-extra-prebuilt install script", "transitive glob deprecation path"],
+      "configuration": ["package.json", "package-lock.json", ".npmrc", "scripts/validate-config.mjs"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|npm-11.16.0",
+      "notes": "npm ci completed under strict install-script enforcement, npm audit reported zero vulnerabilities across 391 packages, npm outdated returned no direct update, and no install script remained pending. Transitive glob 10.5.0 remains deprecated without an npm advisory or safe direct update and is documented as residual."
     }
   ]
 }
