@@ -664,6 +664,32 @@
       "configuration": ["docs/security-audit/README.md", "docs/security-audit/01-initial-state.md", "docs/security-audit/02-github-security.md", "docs/security-audit/03-dependencies.md", "docs/security-audit/04-wordpress-code-audit.md", "docs/security-audit/05-ci-supply-chain.md", "docs/security-audit/06-remediation.md", "docs/security-audit/07-final-validation.md", "docs/security-audit/findings.json"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "Entry prepared before the final Phase 0 index validation and must be corrected if that command does not pass."
+    },
+    {
+      "name": "Phase 1 GitHub security settings verification",
+      "command": "gh api repos/ussmarines/WP_image_usage_audit --jq '{security_and_analysis}'; gh api -i repos/ussmarines/WP_image_usage_audit/vulnerability-alerts; gh api repos/ussmarines/WP_image_usage_audit/automated-security-fixes; gh api 'repos/ussmarines/WP_image_usage_audit/dependabot/alerts?state=open&per_page=100'; gh api repos/ussmarines/WP_image_usage_audit/actions/permissions; gh api repos/ussmarines/WP_image_usage_audit/actions/permissions/selected-actions; gh api repos/ussmarines/WP_image_usage_audit/actions/permissions/workflow; gh api 'repos/ussmarines/WP_image_usage_audit/secret-scanning/alerts?state=open&per_page=100'; gh api repos/ussmarines/WP_image_usage_audit/private-vulnerability-reporting",
+      "tool_version": "GitHub CLI 2.96.0; GitHub REST API 2022-11-28",
+      "date": "2026-08-01",
+      "commit_tested": "1166cbc+repository-settings",
+      "result": "pass",
+      "duration_ms": 1200,
+      "coverage": ["dependency graph and alerts", "Dependabot security updates", "secret scanning and push protection", "Actions source and SHA policy", "default workflow token permissions", "private vulnerability reporting", "open Dependabot and secret alerts"],
+      "configuration": ["GitHub repository settings for ussmarines/WP_image_usage_audit"],
+      "environment_signature": "GitHub|public-repository|gh-2.96.0|api-2022-11-28",
+      "notes": "Vulnerability alerts and automated security fixes are enabled. Actions is limited to GitHub-owned and verified actions plus shivammathur/setup-php, with SHA pinning required. Four non-dismissed high Dependabot alerts surfaced. Non-provider secret patterns and validity checks remained disabled after the accepted PATCH and are documented as a manual plan/availability check."
+    },
+    {
+      "name": "Phase 1 staged documentation and ledger integrity",
+      "command": "node -e \"JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'));JSON.parse(require('fs').readFileSync('docs/security-audit/findings.json','utf8'));console.log('security audit JSON valid')\"; git diff --cached --check",
+      "tool_version": "Node.js v24.18.0; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "1166cbc+security-audit-phase-1-index",
+      "result": "pass",
+      "duration_ms": 500,
+      "coverage": [".codex/test-ledger.json", "docs/security-audit/findings.json", "complete staged Phase 1 patch"],
+      "configuration": ["docs/security-audit/README.md", "docs/security-audit/02-github-security.md"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
+      "notes": "Entry prepared before the final Phase 1 index validation and must be corrected if that command does not pass."
     }
   ]
 }
