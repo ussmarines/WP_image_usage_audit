@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "repository": "ussmarines/WP_image_usage_audit",
+  "baseline_commit": "798bee520a69609cd98960aca483aa787273b093",
+  "generated_at": "2026-08-01",
+  "findings": []
+}
