@@ -145,13 +145,15 @@ The ruleset:
 - requires the pull-request head to be current with `main`;
 - blocks branch deletion and non-fast-forward pushes;
 - permits the repository's three enabled merge methods;
-- requires only six stable QA contexts already observed passing together on `main`:
+- initially required only six stable QA contexts already observed passing together on `main`:
   `actionlint`, `PHP 7.4`, `PHP 8.3`, `wordpress-smoke`, `wordpress-59`, and
   `wordpress-multisite`.
 
 The new `zizmor`, Dependency Review, CodeQL and Scorecard jobs were deliberately not made mandatory
-before their first successful repository run. They remain active checks and can be promoted to
-required status after their names and behavior have been confirmed on the hardening pull request.
+before their first successful repository run. After `zizmor` and `dependency-review` passed on pull
+request 16, both stable, universal PR contexts were added to the required set. CodeQL remains
+path-conditional and Scorecard does not run on every pull request, so requiring either context would
+incorrectly block unrelated changes.
 
 GitHub's effective-rules endpoint for `main` returned the deletion, non-fast-forward, pull-request,
 and strict required-status-check rules immediately after creation. No legacy branch protection was
