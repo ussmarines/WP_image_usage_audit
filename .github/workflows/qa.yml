@@ -33,7 +33,7 @@ jobs:
       - name: Run zizmor 1.27.0
         shell: bash
         run: |
-          archive="$RUNNER_TEMP/zizmor-1.27.0.whl"
+          archive="$RUNNER_TEMP/zizmor-1.27.0-py3-none-manylinux_2_28_x86_64.whl"
           curl --fail --location --silent --show-error \
             'https://files.pythonhosted.org/packages/21/64/4e21d26a2fc910594aaab19367ac25467a4da6438b7c381f67e90c38945e/zizmor-1.27.0-py3-none-manylinux_2_28_x86_64.whl' \
             --output "$archive"
