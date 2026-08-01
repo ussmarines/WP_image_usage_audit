@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Image Usage Audit 2.2.8\n"
+"Project-Id-Version: Image Usage Audit 2.2.9\n"
 "Report-Msgid-Bugs-To: https://github.com/ussmarines/WP_image_usage_audit/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -381,4 +381,16 @@ msgstr ""
 
 #: views/admin-page.php:455
 msgid "No items."
+msgstr ""
+
+#: views/admin-page.php:491
+msgid "Support the project"
+msgstr ""
+
+#: views/admin-page.php:492
+msgid "If Image Usage Audit has been useful to you, you can support its continued development with an optional donation."
+msgstr ""
+
+#: views/admin-page.php:495
+msgid "Support via PayPal"
 msgstr ""

@@ -486,4 +486,15 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 			</div>
 		</div>
 	<?php endif; ?>
+
+	<div class="iua-card" style="margin-top: 20px;">
+		<h2><?php esc_html_e( 'Support the project', 'image-usage-audit' ); ?></h2>
+		<p><?php esc_html_e( 'If Image Usage Audit has been useful to you, you can support its continued development with an optional donation.', 'image-usage-audit' ); ?></p>
+		<p>
+			<a class="button button-secondary" href="<?php echo esc_url( 'https://paypal.me/ussmarinesdot' ); ?>" target="_blank" rel="noopener noreferrer">
+				<?php esc_html_e( 'Support via PayPal', 'image-usage-audit' ); ?>
+			</a>
+		</p>
+	</div>
+
 </div>

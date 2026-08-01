@@ -1,10 +1,11 @@
 === Image Usage Audit ===
 Contributors: ussmarines
+Donate link: https://paypal.me/ussmarinesdot
 Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.8
+Stable tag: 2.2.9
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,6 +24,10 @@ Features:
 * Stay non-destructive: the plugin does not delete attachments or modify Media Library behavior.
 
 Supported builders and editors include WordPress core, Elementor, Divi, Beaver Builder, Oxygen, Bricks, SiteOrigin, and WPBakery.
+
+= Support the project =
+
+If Image Usage Audit has been useful to you, you can support its continued development with an optional donation: https://paypal.me/ussmarinesdot
 
 Important:
 Images referenced only in custom CSS, raw HTML widgets, theme files, plugin files, or some external/CDN setups may still require manual review. Always make a full backup before deleting media.
@@ -44,6 +49,11 @@ No. Run a new scan to refresh the results.
 Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domains, or third-party integrations. Use the manual mark feature when needed.
 
 == Changelog ==
+
+= 2.2.9 =
+* Added optional PayPal support links to the GitHub repository, WordPress.org metadata, and the plugin administration page.
+* Added GitHub Sponsor button configuration through the repository funding file.
+* Refreshed translation and release metadata for the new support section.
 
 = 2.2.8 =
 * Sanitized single and bulk attachment IDs before strict AJAX validation, resolving the related Plugin Check warnings.
@@ -91,6 +101,10 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 * First public release based on the internal stable branch.
 
 == Upgrade Notice ==
+
+= 2.2.9 =
+
+Adds optional, non-intrusive donation links to support continued plugin development.
 
 = 2.2.8 =
 

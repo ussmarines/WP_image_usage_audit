@@ -113,6 +113,14 @@ gh release verify-asset TAG image-usage-audit.zip --repo ussmarines/WP_image_usa
 
 Replace `TAG` with the release tag you downloaded.
 
+## Support the project
+
+If Image Usage Audit has been useful to you, you can support its continued development with an optional donation:
+
+[Support the project via PayPal](https://paypal.me/ussmarinesdot)
+
+Thank you for helping maintain and improve the plugin.
+
 ## Contributing
 
 Open a topic branch and a focused pull request. Keep changes compatible with WordPress 5.9+ and PHP 7.4+, follow the WordPress Coding Standards, preserve the plugin’s non-destructive behavior, and add focused tests for changed behavior.
