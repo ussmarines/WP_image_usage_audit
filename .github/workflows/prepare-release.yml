@@ -1,22 +1,25 @@
 name: Prepare release 2.2.7
 
 on:
-  push:
+  pull_request:
     branches:
-      - 'release/v2.2.7'
+      - main
     paths:
       - '.github/release-request.json'
+      - '.github/workflows/prepare-release.yml'
 
 permissions:
   contents: write
 
 jobs:
   prepare:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'release/v2.2.7'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
           fetch-depth: 0
       - name: Apply release metadata and automation
