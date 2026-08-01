@@ -794,6 +794,32 @@
       "configuration": [".github/dependabot.yml", "composer.json", "composer.lock", "package.json", "package-lock.json", ".codex/test-ledger.json", "docs/security-audit/findings.json"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|npm-11.16.0|php-8.3.33-portable|composer-2.10.2|git-2.55.0.windows.3",
       "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass."
+    },
+    {
+      "name": "Phase 3 targeted manual WordPress security discovery",
+      "command": "rg -n <entry-point, request, database, filesystem, output, remote-request, deserialization, and dynamic-execution patterns> image-usage-audit.php includes views uninstall.php assets/admin.js; Get-Content with line numbers for image-usage-audit.php, includes/class-iua-scanner.php, includes/class-iua-cdn-settings.php, includes/class-iua-csv.php, views/admin-page.php, uninstall.php, and assets/admin.js; rg -n <cross-references> tests docs/codex",
+      "tool_version": "ripgrep 15.1.0; PowerShell 7.6.3",
+      "date": "2026-08-01",
+      "commit_tested": "c560a9a+manual-security-review",
+      "result": "pass",
+      "duration_ms": 5000,
+      "coverage": ["all production PHP", "admin JavaScript", "WordPress hooks and request envelopes", "capabilities and nonces", "SQL and option sinks", "filesystem and multisite behavior", "CSV and output escaping", "relevant regression-test cross-references"],
+      "configuration": ["docs/codex/PROJECT_MAP.md", "AGENTS.md security invariants"],
+      "environment_signature": "Windows|PowerShell-7.6.3|ripgrep-15.1.0",
+      "notes": "No Codex Security scan was used. An initial inventory command was rejected by PowerShell because of unescaped dollar-sign patterns and produced no audit evidence; the corrected single-quoted patterns were used for all conclusions. Three low-severity candidates were retained for separate validation; no vulnerability was marked confirmed."
+    },
+    {
+      "name": "Phase 3 staged audit report integrity",
+      "command": "node -e \"const f=JSON.parse(require('fs').readFileSync('docs/security-audit/findings.json','utf8'));if(f.findings.filter(x=>x.status==='candidate').length!==3)throw new Error('expected three candidates');JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'))\"; git diff --cached --check",
+      "tool_version": "Node.js v24.18.0; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "c560a9a+security-audit-phase-3-index",
+      "result": "pass",
+      "duration_ms": 600,
+      "coverage": ["docs/security-audit/04-wordpress-code-audit.md", "docs/security-audit/findings.json", "docs/security-audit/README.md", ".codex/test-ledger.json", "complete staged Phase 3 patch"],
+      "configuration": ["docs/security-audit findings schema and persistent checklist"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
+      "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass. Runtime and dependency tests were reused because Phase 3 changes documentation only."
     }
   ]
 }
