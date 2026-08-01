@@ -3,7 +3,7 @@
   "project": "ussmarines/WP_image_usage_audit",
   "policy": "See AGENTS.md test reuse protocol.",
   "baseline_commit": "41122772915682dc631aeff7c02001c014a13dbe",
-  "tested_state": "cd253ae plus the security/resolve-scorecard-alerts documentation worktree",
+  "tested_state": "04ee628 plus the security/resolve-scorecard-alerts CI-evidence documentation worktree",
   "tested_at": "2026-08-01T15:30:00+02:00",
   "environment": {
     "os": "Windows",
@@ -1210,6 +1210,19 @@
       "configuration": [".codex/test-ledger.json", "docs/security-audit/code-scanning-alerts-before.json", "docs/security-audit/scorecard-before.json"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "The inspected branch contains only the two reviewed Dependabot action updates, property-test and CodeQL improvements, validation enforcement, and the phase 12 evidence. Ignored dist, node_modules and vendor outputs are not staged."
+    },
+    {
+      "name": "Phase 12 first complete pull-request validation matrix",
+      "command": "gh run view 30701380357,30701380346,30701380371 --repo ussmarines/WP_image_usage_audit --json status,conclusion,headSha,jobs,url; gh pr view 21 --json mergeable,mergeStateStatus,headRefOid,statusCheckRollup",
+      "tool_version": "GitHub Actions runner 2.336.0; GitHub CLI 2.96.0",
+      "date": "2026-08-01",
+      "commit_tested": "04ee628a8256af2a841c54b1417386d0f74bce6b",
+      "result": "pass",
+      "duration_ms": 131000,
+      "coverage": ["actionlint and Zizmor", "PHP 7.4 and 8.3 QA including property tests", "40 unit tests and 135 assertions per PHP lane", "WordPress current exact-ZIP activation, AJAX, Plugin Check, POT and smoke", "WordPress 5.9 exact-ZIP compatibility", "multisite network activation and uninstall preservation", "Dependency Review", "unconditional JavaScript CodeQL security-extended"],
+      "configuration": ["pull request 21", ".github/workflows/qa.yml", ".github/workflows/dependency-review.yml", ".github/workflows/codeql.yml", "all source, tests, lockfiles and QA configuration at the pull-request SHA"],
+      "environment_signature": "GitHub-Actions|ubuntu-24.04|runner-2.336.0|php-7.4/8.3|WordPress-5.9.13/current/multisite",
+      "notes": "QA run 30701380357, Dependency Review run 30701380346 and CodeQL run 30701380371 completed successfully. Both PHP jobs installed the locked npm graph and passed the new property test. CodeQL reported no finding."
     }
   ]
 }

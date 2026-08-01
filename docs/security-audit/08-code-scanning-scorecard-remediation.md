@@ -1,7 +1,8 @@
 # Phase 12 — GitHub code-scanning and Scorecard remediation
 
-Status: implementation and local pre-merge validation complete on 2026-08-01; GitHub integration
-validation and final alert classification remain pending.
+Status: implementation, local validation, and the first complete pull-request integration run passed
+on 2026-08-01. Final documentation-head checks, merge, and main-branch alert classification remain
+pending.
 
 This report treats the seven alerts that were open on commit
 `41122772915682dc631aeff7c02001c014a13dbe`. All seven were produced by OpenSSF
@@ -224,5 +225,20 @@ after the final main-branch scans confirm the implementation.
 | Zizmor 1.27.0 | pass; no finding, 15 offline-suppressed/not-applicable audits |
 | Allow-listed release ZIP | pass; 11 runtime entries, no development files or targeted secret marker |
 
-Pull-request, post-merge, CodeQL, Dependency Review, Zizmor, ZIP, WordPress, final Scorecard, alert
-classification, and before/after comparison evidence will be appended after those checks execute.
+## Pull-request validation
+
+Pull request [#21](https://github.com/ussmarines/WP_image_usage_audit/pull/21) is ready for review. At
+implementation/documentation head `04ee628a8256af2a841c54b1417386d0f74bce6b`, all reported checks
+completed successfully:
+
+- [QA run 30701380357](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701380357):
+  actionlint, Zizmor, PHP 7.4, PHP 8.3, WordPress current, WordPress 5.9 and multisite passed. Both PHP
+  jobs ran the new property test; the exact ZIP passed activation, AJAX, Plugin Check, smoke,
+  translation-catalog and uninstall-preservation checks.
+- [Dependency Review run 30701380346](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701380346):
+  passed with the reviewed exact `fast-check` lock update.
+- [CodeQL run 30701380371](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701380371):
+  the unconditional JavaScript/TypeScript `security-extended` analysis passed with no finding.
+
+Post-merge QA, CodeQL, Scorecard, alert classification, and before/after comparison evidence remain
+to be appended after those checks execute.
