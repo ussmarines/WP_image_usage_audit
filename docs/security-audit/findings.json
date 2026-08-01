@@ -86,7 +86,7 @@
       "evidence": "Orphan discovery returns normalized absolute filesystem paths. The complete result is stored in iua_usage_results and returned by the nonce- and capability-protected scan response, while the current admin view does not render the orphan list.",
       "attack_scenario": "An actor able to obtain scan results learns the uploads base filesystem path. The identified route currently requires manage_options and a valid action-specific nonce.",
       "validation": "No public or lower-privileged path exposes the orphan result: it is stored non-autoloaded and returned only to a manage_options user with the action nonce. This is not a confirmed disclosure, but retaining absolute paths is unnecessary.",
-      "remediation": "Convert orphan results to uploads-relative paths and cover the data-minimization behavior with a unit test."
+      "remediation": "Implemented on the audit branch: orphan results are constrained to the uploads prefix and stored as uploads-relative paths; a focused unit test verifies the relative result and absence of the absolute prefix."
     },
     {
       "id": "IUA-SEC-008",

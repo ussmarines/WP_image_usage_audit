@@ -846,6 +846,45 @@
       "configuration": ["docs/security-audit/findings.json", "docs/security-audit/04-wordpress-code-audit.md", ".codex/test-ledger.json"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass. No runtime test was rerun because Phase 4 changes documentation only."
+    },
+    {
+      "name": "Phase 5 orphan-path targeted regression validation",
+      "command": "<portable-php> -l includes/class-iua-scanner.php; <portable-php> -l tests/bootstrap.php; <portable-php> -l tests/unit/ScannerNormalizationTest.php; <portable-php> vendor/bin/phpunit --configuration=phpunit.xml.dist --filter test_orphan_results_are_relative_to_uploads_directory",
+      "tool_version": "PHP 8.3.33; PHPUnit 9.6.35",
+      "date": "2026-08-01",
+      "commit_tested": "24cf2f7+orphan-path-hardening-worktree",
+      "result": "pass",
+      "duration_ms": 500,
+      "coverage": ["uploads-relative orphan result", "absolute-prefix exclusion", "temporary fixture cleanup", "syntax of every changed PHP file"],
+      "configuration": ["phpunit.xml.dist", "tests/bootstrap.php"],
+      "environment_signature": "Windows|PowerShell|php-8.3.33-portable",
+      "notes": "The focused test passed with 1 test and 4 assertions. The fixture used a unique directory beneath the system temporary directory and removed only its explicit file and empty directories."
+    },
+    {
+      "name": "Phase 5 orphan-path full affected QA",
+      "command": "<portable-php> <composer.phar> lint; <portable-php> <composer.phar> analyse; <portable-php> <composer.phar> test; git diff --check",
+      "tool_version": "PHP 8.3.33; Composer 2.10.2; PHPCS 3.13.5; WPCS 3.4.1; PHPCompatibilityWP 2.1.8; PHPStan 2.2.7; PHPUnit 9.6.35; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "24cf2f7+orphan-path-hardening-worktree",
+      "result": "pass",
+      "duration_ms": 6700,
+      "coverage": ["all runtime PHP coding standards and PHP 7.4 compatibility", "complete PHPStan project scope", "40 unit tests and 135 assertions", "tracked patch whitespace"],
+      "configuration": ["composer.lock", "phpcs.xml.dist", "phpstan.neon.dist", "phpunit.xml.dist"],
+      "environment_signature": "Windows|PowerShell|php-8.3.33-portable|composer-2.10.2|git-2.55.0.windows.3",
+      "notes": "All checks passed. Metadata, npm, dependency, workflow and WordPress runtime checks were not invalidated by this focused PHP and unit-test diff and were reused according to the test ledger protocol."
+    },
+    {
+      "name": "Phase 5 staged remediation integrity",
+      "command": "node -e \"JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'));const f=JSON.parse(require('fs').readFileSync('docs/security-audit/findings.json','utf8'));if(!f.findings.find(x=>x.id==='IUA-SEC-007').remediation.startsWith('Implemented'))throw new Error('remediation not recorded')\"; git diff --cached --check",
+      "tool_version": "Node.js v24.18.0; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "24cf2f7+security-audit-phase-5-index",
+      "result": "pass",
+      "duration_ms": 600,
+      "coverage": ["Phase 5 code, test, findings, remediation report, checklist and ledger", "complete staged Phase 5 patch"],
+      "configuration": ["docs/security-audit/findings.json", "docs/security-audit/06-remediation.md", ".codex/test-ledger.json"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
+      "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass."
     }
   ]
 }
