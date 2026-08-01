@@ -1,0 +1,59 @@
+name: Apply donation release changes
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-donation-release-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'release/v2.2.9-donation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Apply version, documentation, and admin changes
+        run: python3 scripts/apply-donation-release.py
+      - run: npm ci
+      - run: npx wp-env start
+      - run: npm run pot
+      - name: Stop WordPress
+        if: always()
+        run: npx wp-env stop
+      - run: npm run validate:metadata
+      - name: Commit prepared release changes
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- \
+            image-usage-audit.php \
+            README.md \
+            readme.txt \
+            views/admin-page.php \
+            languages/image-usage-audit.pot \
+            scripts/validate-metadata.mjs \
+            scripts/apply-donation-release.py \
+            .github/workflows/apply-donation-release.yml
+          git diff --cached --check
+          git commit -m "feat: add optional donation support and prepare 2.2.9"
+          git push origin "HEAD:${HEAD_BRANCH}"
