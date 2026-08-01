@@ -1,0 +1,60 @@
+name: Prepare release 2.2.7
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/release-request.json'
+      - '.github/workflows/prepare-release.yml'
+      - 'scripts/prepare-release-2.2.7.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Create prepared release branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_BRANCH: release/v2.2.7-final
+        run: |
+          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null 2>&1; then
+            echo "Release branch $RELEASE_BRANCH already exists; nothing to recreate."
+            exit 0
+          fi
+
+          git switch --create "$RELEASE_BRANCH"
+          python scripts/prepare-release-2.2.7.py
+          node scripts/validate-metadata.mjs
+          node scripts/validate-release-tag.mjs v2.2.7
+          git diff --check
+
+          git rm --force \
+            .github/workflows/prepare-release.yml \
+            scripts/prepare-release-2.2.7.py
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add \
+            .github/release-request.json \
+            .github/workflows/release.yml \
+            image-usage-audit.php \
+            languages/image-usage-audit.pot \
+            readme.txt \
+            scripts/validate-metadata.mjs
+          git commit -m 'chore(release): prepare 2.2.7'
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin HEAD:"$RELEASE_BRANCH"
