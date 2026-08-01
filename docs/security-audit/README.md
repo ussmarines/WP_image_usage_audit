@@ -24,7 +24,7 @@ invulnerable.
 - [x] Phase 4 — Validate or reject every candidate finding
 - [x] Phase 5 — Remediate confirmed findings and verify regressions
 - [x] Phase 6 — Audit and harden GitHub Actions and the software supply chain
-- [ ] Phase 7 — Protect `main` with a practical repository ruleset
+- [x] Phase 7 — Protect `main` with a practical repository ruleset
 - [ ] Phase 8 — Verify ZIP and release provenance
 - [ ] Phase 9 — Run final local and GitHub validation
 - [-] Phase 10 — Optional targeted standard Codex Security scan; not required for validity

@@ -130,5 +130,40 @@ does not apply cooldowns to security updates, so advisory remediation is not del
 - [x] Add Dependabot cooldowns and persistent workflow invariants
 - [x] Document why native secret scanning is used without a duplicate Gitleaks action
 
-Next phase: create a practical `main` ruleset after the new pull-request checks have produced stable
-check names.
+## Phase 7 — `main` ruleset
+
+Repository ruleset `Protect main` (ID `20181296`) is active and targets `~DEFAULT_BRANCH`, currently
+`main`. It has no bypass actor, and GitHub reports that the current administrator can never bypass
+it. The rules therefore apply consistently to maintainers and administrators.
+
+The ruleset:
+
+- requires every change to reach `main` through a pull request;
+- requires zero approvals, avoiding an impossible self-approval requirement for the repository's
+  single maintainer;
+- requires all review conversations to be resolved;
+- requires the pull-request head to be current with `main`;
+- blocks branch deletion and non-fast-forward pushes;
+- permits the repository's three enabled merge methods;
+- requires only six stable QA contexts already observed passing together on `main`:
+  `actionlint`, `PHP 7.4`, `PHP 8.3`, `wordpress-smoke`, `wordpress-59`, and
+  `wordpress-multisite`.
+
+The new `zizmor`, Dependency Review, CodeQL and Scorecard jobs were deliberately not made mandatory
+before their first successful repository run. They remain active checks and can be promoted to
+required status after their names and behavior have been confirmed on the hardening pull request.
+
+GitHub's effective-rules endpoint for `main` returned the deletion, non-fast-forward, pull-request,
+and strict required-status-check rules immediately after creation. No legacy branch protection was
+present, so there is no overlapping or contradictory protection configuration.
+
+## Phase 7 checklist
+
+- [x] Require a pull request without an impossible approval requirement
+- [x] Require resolved conversations and an up-to-date branch
+- [x] Require only previously green, stable QA contexts
+- [x] Block force pushes and deletion of `main`
+- [x] Apply rules to administrators with no bypass
+- [x] Verify the effective rules returned for `main`
+
+Next phase: harden artifact identity, checksums and release provenance.
