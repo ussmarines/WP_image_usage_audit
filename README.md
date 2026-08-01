@@ -1,125 +1,124 @@
 # Image Usage Audit
 
-Image Usage Audit is a read-only WordPress administration plugin for reviewing image usage before a human cleans up the Media Library. It classifies registered image attachments as used in published content, used only in drafts, or unused; records where matches were found; identifies image files in uploads that are not registered attachments; and exports the current result set as CSV.
+A non-destructive WordPress plugin for reviewing image usage before cleaning up the Media Library.
 
-The current plugin version is `2.2.6`. It is maintained by [ussmarines](https://github.com/ussmarines), supports WordPress 5.9 or later and PHP 7.4 or later, and is validated on WordPress 5.9.13 and 7.0.1 (the WordPress 7.0 release line).
+[![QA](https://github.com/ussmarines/WP_image_usage_audit/actions/workflows/qa.yml/badge.svg)](https://github.com/ussmarines/WP_image_usage_audit/actions/workflows/qa.yml)
+[![Latest release](https://img.shields.io/github/v/release/ussmarines/WP_image_usage_audit)](https://github.com/ussmarines/WP_image_usage_audit/releases/latest)
+[![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
+
+## Overview
+
+Image Usage Audit scans a WordPress site and groups registered image attachments as used, used only in draft content, or potentially unused. It also records where matches were found, reports image files that are not registered attachments, and exports the latest results as CSV.
+
+The plugin is a review tool, not an automatic cleanup tool. Its findings are heuristic and should always be checked before you make changes to the Media Library.
 
 ## Features
 
-- Scans published/private content and, optionally, draft, pending, and scheduled content.
-- Detects `wp-image-{id}` references, upload URLs, featured images, WooCommerce product galleries, the site icon, and the custom logo.
-- Scans post metadata, term descriptions, and WordPress options for upload paths.
-- Understands metadata used by Elementor, Divi, Beaver Builder, Oxygen, SiteOrigin, Bricks, and WPBakery.
-- Matches original attachment files and generated image sizes.
-- Supports comma-separated CDN host aliases and read-only `FROM => TO` rewrite rules.
-- Records up to 12 provenance labels per attachment.
-- Supports reversible manual “used” markings and bulk actions.
-- Exports used, draft-only, or unused results to CSV with spreadsheet-formula neutralization.
-- Reports orphan image files found under the WordPress uploads directory.
+- Scans published content and, optionally, draft, pending, and scheduled content.
+- Detects core image references, featured images, WooCommerce galleries, site icons, custom logos, upload URLs, and generated image sizes.
+- Searches post metadata, term descriptions, WordPress options, and common builder data.
+- Supports Elementor, Divi, Beaver Builder, Oxygen, Bricks, SiteOrigin, and WPBakery patterns.
+- Records provenance for each match and supports reversible manual “used” markings.
+- Supports CDN host aliases and read-only path rewrite rules.
+- Exports used, draft-only, and unused results to CSV.
+- Reports orphan image files under the WordPress uploads directory.
 
-The plugin does not delete, edit, move, or rewrite media files. Its only persistent writes are its own WordPress options; uninstalling the plugin removes those options, including scan results, settings, manual marks, and the temporary scan lock.
+## Non-destructive by design
 
-## Detection limits
+Image Usage Audit never deletes, moves, edits, or rewrites media, posts, metadata, terms, or upload files. It writes only its own WordPress options for settings, scan results, manual decisions, and a temporary scan lock. Uninstalling the plugin removes only those plugin-owned options.
 
-The scanner is heuristic, not proof that an image can safely be deleted. It can miss references in theme or plugin files, custom CSS, dynamically generated URLs, external services, unsupported builders, attachment IDs stored outside recognized builder structures, non-standard upload paths, or CDN transformations not covered by configured aliases or rewrites. It may report false positives when a builder's generic nested `id` happens to equal an image attachment ID.
+Always create and verify a full backup before deleting media manually.
 
-The orphan scan only covers `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, and `avif` files under the current uploads directory. Large sites may hit request time or memory limits because scans run as one authenticated AJAX request and enumerate posts, metadata, terms, attachments, and upload files. Option rows are read in bounded batches and concurrent scans are rejected, but the wider scan is not asynchronous or resumable. Always inspect provenance and make a verified backup before deleting media manually in WordPress.
+## Requirements
+
+- WordPress 5.9 or later
+- PHP 7.4 or later
+- An administrator account with the `manage_options` capability
 
 ## Installation
 
-1. Download `image-usage-audit.zip` from the matching GitHub Release.
-2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin** and select the ZIP.
-3. Activate **Image Usage Audit**, then open **Media → Image Usage Audit**.
-4. Save the scan settings, then select **Run scan**.
+1. Download `image-usage-audit.zip` from the [latest GitHub release](https://github.com/ussmarines/WP_image_usage_audit/releases/latest).
+2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
+3. Select the ZIP, install it, and activate **Image Usage Audit**.
+4. Open **Media → Image Usage Audit**.
 
-Developers may instead clone the canonical repository into `wp-content/plugins/image-usage-audit`. Build the same allow-listed installation archive locally with `npm run build:zip`.
+The plugin is not currently published in the WordPress.org Plugin Directory. GitHub Releases are the canonical download source.
 
-Future releases created by the hardened release workflow include `image-usage-audit.zip.sha256`, a
-GitHub build-provenance attestation, and GitHub release immutability. After downloading a release,
-verify the checksum and provenance with `sha256sum --check image-usage-audit.zip.sha256`,
-`gh attestation verify image-usage-audit.zip --repo ussmarines/WP_image_usage_audit`, and
-`gh release verify-asset TAG image-usage-audit.zip --repo ussmarines/WP_image_usage_audit`.
+## Quick start
 
-The WordPress.org slug is not currently published. The canonical project page is this GitHub repository.
+1. Review the scan settings and decide whether draft content should be included.
+2. Select **Run scan**.
+3. Review the **Unused**, **Draft-only**, and **Used (published)** tabs.
+4. Inspect each result’s provenance before taking action.
+5. Use manual markings for reviewed false negatives, or export a tab to CSV.
 
-## Usage
+Results are stored snapshots. Run another scan after content or settings change.
 
-The **Unused**, **Draft-only**, and **Used (published)** tabs show the latest stored scan. Results are not live; rerun the scan after content changes. Use manual markings only to record a reviewed false negative. CSV export reflects the selected tab and, on the used tab, the optional manual-only filter.
+## Important detection limits
 
-### CDN aliases and rewrites
+The scanner cannot prove that an image is safe to delete. It may miss references in theme or plugin files, custom CSS, dynamically generated URLs, external services, unsupported builders, unusual metadata, non-standard upload paths, or unconfigured CDN transformations. Generic builder IDs can also create false positives.
 
-Aliases are comma-separated host names without a path, for example:
+Orphan detection covers `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, and `avif` files in the current uploads directory. Scans run in one authenticated request, so very large sites may reach server time or memory limits. Provenance is limited to 12 labels per attachment.
+
+## CDN configuration
+
+Add comma-separated CDN host aliases when media URLs use alternate domains:
 
 ```text
 cdn.example.com, media.example.net
 ```
 
-Advanced rewrites contain one mapping per line:
+Advanced rewrites use one `FROM => TO` mapping per line:
 
 ```text
 https://cdn.example.com/assets => /wp-content/uploads
 /media => /wp-content/uploads
 ```
 
-Rules are applied to text in memory while scanning. They do not change posts, options, URLs, or files. Broad replacements can create false matches, so use the narrowest stable prefix.
+Rewrites are applied only to text in memory while scanning. Use the narrowest stable prefixes to reduce false matches.
 
-## Repository architecture
+## Privacy and security
 
-- `image-usage-audit.php`: plugin header, bootstrap, admin hooks, authenticated AJAX actions, settings, and CSV export.
-- `includes/class-iua-scanner.php`: attachment map, content/meta/option/term scans, CDN normalization, provenance, and orphan detection.
-- `includes/class-iua-cdn-settings.php` and `includes/class-iua-csv.php`: bounded CDN validation and CSV formula neutralization.
-- `views/admin-page.php`: escaped administration screen, filters, pagination, and settings forms.
-- `assets/admin.js` and `assets/admin.css`: admin interactions and presentation.
-- `languages/image-usage-audit.pot`: translation template metadata; regenerate the complete catalog before a release.
-- `uninstall.php`: removal of the plugin's five options on single-site and multisite installations.
-- `docs/codex/`: persistent project map and tooling decisions for future Codex sessions.
-- `.codex/test-ledger.json`: reusable, scope-aware validation history.
-- `.agents/skills/`: project-scoped WordPress skills from `WordPress/agent-skills`.
-- `scripts/build-zip.ps1`: allow-listed, inspected WordPress ZIP construction.
+Scanning happens locally inside WordPress. The plugin makes no remote requests, loads no remote executable code, and does not collect or transmit personal data.
 
-## Local development and checks
+All plugin screens and actions require `manage_options`. State-changing requests use server-verified nonces, request values are validated and sanitized, and output is escaped. CSV formula-leading values are neutralized.
 
-The repository keeps runtime dependencies at zero. QA dependencies are locked in `composer.lock` and `package-lock.json`; Docker provides PHP and WordPress without a global PHP or WP-CLI installation.
+Stored results and CSV exports can reveal filenames, paths, option names, and other site structure. Restrict access to trusted administrators and treat exported files as sensitive, untrusted input. Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
+
+## Local development
+
+Runtime code has no third-party dependencies. Development and QA tools are locked in `composer.lock` and `package-lock.json`.
 
 ```bash
-# Install locked development tools.
 npm ci
-npm run composer -- install
-
-# Run Composer scripts on a host with PHP 7.4+.
+composer install
 composer qa
-
-# Windows host without PHP: run the same QA sequence in Docker PHP 7.4.
-docker run --rm --volume "%cd%:/app" --workdir /app php:7.4-cli sh -lc \
-  'vendor/bin/phpcs --standard=phpcs.xml.dist && vendor/bin/phpstan analyse --configuration=phpstan.neon.dist --memory-limit=1G && vendor/bin/phpunit --configuration=phpunit.xml.dist --testsuite=unit'
-
-# Disposable WordPress, WP-CLI, Plugin Check and POT generation.
-npm run env:start
-npm run plugin-check
-npm run pot
+npm run test:property
 npm run validate:metadata
 npm run validate:config
-npm run actionlint
 npm run build:zip
-npm run env:stop
 ```
 
-`@wordpress/env` pins WordPress 7.0.1/PHP 7.4 in `.wp-env.json`; dedicated configurations also exercise WordPress 5.9.13 and multisite. The smoke jobs install the exact ZIP, exercise AJAX, large-site batching, multisite lifecycle and uninstall preservation, run Plugin Check, and reject a POT generated from a stale catalog. `npm run build:zip` creates `dist/image-usage-audit.zip` and its SHA-256 checksum, verifies the single root folder and synchronized metadata, and rejects development-only paths. Consult `.codex/test-ledger.json` before rerunning checks.
+The GitHub Actions matrix also tests WordPress 5.9, current WordPress, multisite, authenticated AJAX behavior, Plugin Check, translation catalog reproducibility, and the exact installation ZIP.
 
-## Security and privacy
+## Verify a release
 
-The admin page and all scan, settings, manual-mark, and export actions require `manage_options`. Settings, exports, and each AJAX action have server-verified nonces. Request values are allow-listed or sanitized, bulk IDs are bounded and validated, CDN hosts/rules are structurally checked, URLs and HTML are escaped at output, and the direct options query is read-only and batched. A short-lived atomic lock prevents concurrent scans.
+Each GitHub release includes the plugin ZIP, a SHA-256 checksum, and a GitHub artifact attestation. Download both files, then run:
 
-Scans run locally inside WordPress and do not transmit content or personal data. Scan results store attachment IDs, timestamps, orphan file paths, and short provenance labels in a non-autoloaded WordPress option. Because option names, paths, and exported filenames can reveal site structure, restrict administration and exported CSV files to trusted users. Formula-leading CSV values are prefixed defensively, but exported files should still be treated as untrusted input.
+```bash
+sha256sum --check image-usage-audit.zip.sha256
+gh attestation verify image-usage-audit.zip --repo ussmarines/WP_image_usage_audit
+gh release verify-asset TAG image-usage-audit.zip --repo ussmarines/WP_image_usage_audit
+```
 
-Security reports must not be filed publicly while unpatched. Use GitHub's private **Report a vulnerability** flow as described in [`SECURITY.md`](SECURITY.md).
+Replace `TAG` with the release tag you downloaded.
 
 ## Contributing
 
-Create a topic branch; never push changes directly to `main`. Preserve WordPress 5.9+ and PHP 7.4+ compatibility, follow the WordPress Coding Standards, keep the scanner non-destructive, and retain capability, nonce, validation, sanitization, and escaping controls. Add production dependencies only with a demonstrated need. Update tests and `.codex/test-ledger.json` for the affected surface.
+Open a topic branch and a focused pull request. Keep changes compatible with WordPress 5.9+ and PHP 7.4+, follow the WordPress Coding Standards, preserve the plugin’s non-destructive behavior, and add focused tests for changed behavior.
 
-Do not bump the plugin version for documentation or CI-only work. For a real release, synchronize the PHP header, `IUA_VERSION`, `readme.txt` stable tag and changelog, and the POT metadata/catalog.
+Security reports belong in GitHub’s private vulnerability reporting flow, not in public issues. See [SECURITY.md](SECURITY.md).
 
 ## License
 
-Image Usage Audit is distributed under [GPL-2.0-or-later](LICENSE).
+Image Usage Audit is licensed under [GPL-2.0-or-later](LICENSE).

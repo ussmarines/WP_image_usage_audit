@@ -86,26 +86,109 @@ final class PluginSecurityTest extends TestCase {
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 403 );
 	}
 
-	public function test_single_and_bulk_ajax_inputs_are_strictly_bounded(): void {
+	public function test_single_ajax_accepts_numeric_ids_and_preserves_action_responses(): void {
 		$GLOBALS['iua_test_post_types'][11] = 'attachment';
-		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
-		$_POST['id'] = '11';
-		$response = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), true, 200 );
-		$this->assertSame( 11, $response->data['id'] );
-		$this->assertSame( array( 11 ), get_option( 'iua_manual_used_ids' ) );
+		$GLOBALS['iua_test_post_types'][12] = 'attachment';
 
-		foreach ( array( '', '11oops', str_repeat( '9', 21 ), array( 11 ) ) as $invalid_id ) {
+		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
+		$_POST['id'] = 11;
+		$response     = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), true, 200 );
+		$this->assertSame( 11, $response->data['id'] );
+		$this->assertSame( array( 11 ), $response->data['manual'] );
+
+		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
+		$_POST['id'] = ' 12 ';
+		$response     = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), true, 200 );
+		$this->assertSame( 12, $response->data['id'] );
+		$this->assertSame( array( 11, 12 ), $response->data['manual'] );
+
+		$this->set_request( 'iua_unmark_manual_used', 'iua_unmark_manual_used-valid' );
+		$_POST['id'] = '11';
+		$response     = $this->capture_json( array( $this->plugin, 'ajax_unmark_manual_used' ), true, 200 );
+		$this->assertSame( 11, $response->data['id'] );
+		$this->assertSame( array( 12 ), $response->data['manual'] );
+	}
+
+	public function test_single_ajax_rejects_missing_malformed_and_non_attachment_ids(): void {
+		$GLOBALS['iua_test_post_types'][11] = 'attachment';
+
+		$invalid_ids = array(
+			null,
+			'',
+			'0',
+			'-11',
+			'11.5',
+			'11oops',
+			array( 11 ),
+			(object) array( 'id' => 11 ),
+			str_repeat( '9', 21 ),
+			'<strong>11</strong>',
+			'11%20',
+			'999',
+		);
+
+		foreach ( $invalid_ids as $invalid_id ) {
 			$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
-			$_POST['id'] = $invalid_id;
+
+			if ( null !== $invalid_id ) {
+				$_POST['id'] = $invalid_id;
+			}
+
 			$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 400 );
 		}
 
-		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
-		$_POST['ids'] = array_fill( 0, 501, '11' );
-		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), false, 400 );
+		$this->assertFalse( get_option( 'iua_manual_used_ids' ) );
+	}
+
+	public function test_bulk_ajax_accepts_valid_ids_deduplicates_and_filters_non_attachments(): void {
+		$GLOBALS['iua_test_post_types'][11] = 'attachment';
+		$GLOBALS['iua_test_post_types'][12] = 'attachment';
 
 		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
-		$_POST['ids'] = array( '11', 'bad' );
+		$_POST['ids'] = array( '11', ' 12 ', '11', '999' );
+		$response      = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), true, 200 );
+		$this->assertSame( array( 11, 12 ), $response->data['ids'] );
+		$this->assertSame( array( 11, 12 ), $response->data['manual'] );
+
+		$this->set_request( 'iua_unmark_manual_used_bulk', 'iua_unmark_manual_used_bulk-valid' );
+		$_POST['ids'] = array( '11', '12' );
+		$response      = $this->capture_json( array( $this->plugin, 'ajax_unmark_manual_used_bulk' ), true, 200 );
+		$this->assertSame( array( 11, 12 ), $response->data['ids'] );
+		$this->assertSame( array(), $response->data['manual'] );
+
+		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
+		$_POST['ids'] = array( '999' );
+		$response      = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), true, 200 );
+		$this->assertSame( array(), $response->data['ids'] );
+		$this->assertSame( array(), $response->data['manual'] );
+	}
+
+	public function test_bulk_ajax_rejects_empty_oversized_malformed_and_unexpected_inputs(): void {
+		$GLOBALS['iua_test_post_types'][11] = 'attachment';
+
+		$invalid_selections = array(
+			array(),
+			array_fill( 0, 501, '11' ),
+			array( '11', 'bad' ),
+			array( '11', '-12' ),
+			array( '11', '12.5' ),
+			array( '11', array( '12' ) ),
+			array( '11', (object) array( 'id' => '12' ) ),
+			array( '11', '<strong>12</strong>' ),
+			'11,12',
+		);
+
+		foreach ( $invalid_selections as $invalid_selection ) {
+			$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
+			$_POST['ids'] = $invalid_selection;
+			$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), false, 400 );
+		}
+
+		$this->assertFalse( get_option( 'iua_manual_used_ids' ) );
+	}
+
+	public function test_bulk_ajax_rejects_missing_ids(): void {
+		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), false, 400 );
 	}
 
