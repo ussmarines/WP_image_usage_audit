@@ -3,5 +3,66 @@
   "repository": "ussmarines/WP_image_usage_audit",
   "baseline_commit": "798bee520a69609cd98960aca483aa787273b093",
   "generated_at": "2026-08-01",
-  "findings": []
+  "findings": [
+    {
+      "id": "IUA-SEC-001",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-rce",
+      "file": "composer.lock",
+      "function": "wp-coding-standards/wpcs",
+      "evidence": "The lock contained WPCS 3.1.0, affected by CVE-2026-45293; Composer audit identified 3.4.1 as the first fixed release.",
+      "attack_scenario": "A crafted PHP file analyzed by the vulnerable development sniff could execute code in the QA environment. WPCS is not loaded by the WordPress plugin in production.",
+      "validation": "Affected version and advisory confirmed; production reachability rejected because the package is require-dev only; remediated on the audit branch with WPCS 3.4.1.",
+      "remediation": "Update WPCS to 3.4.1 and its compatible PHPCS tooling, then rerun coding standards and dependency audits."
+    },
+    {
+      "id": "IUA-SEC-002",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-dos",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > adm-zip",
+      "evidence": "The lock contained adm-zip 0.5.18, affected below 0.6.0 by CVE-2026-39244.",
+      "attack_scenario": "A crafted archive handled by wp-env could exhaust memory in a developer or CI process. The package is absent from the distributed plugin.",
+      "validation": "Affected transitive version confirmed; no WordPress production path; remediated with an explicit 0.6.0 npm override because the current parent constraint remains on 0.5.x.",
+      "remediation": "Keep adm-zip at 0.6.0 and remove the override once @wordpress/env accepts the fixed line."
+    },
+    {
+      "id": "IUA-SEC-003",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-input-validation",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > @wp-playground/blueprints > ajv > fast-uri",
+      "evidence": "The lock contained fast-uri 3.1.3, affected by GHSA-v2hh-gcrm-f6hx.",
+      "attack_scenario": "A specially formed URI processed by development-only Playground tooling could be interpreted inconsistently. The code is not loaded by WordPress production requests.",
+      "validation": "Affected transitive version confirmed; production reachability rejected; remediated with fast-uri 3.1.5 inside the existing constraint.",
+      "remediation": "Retain the corrected lockfile and monitor the parent packages through Dependabot."
+    },
+    {
+      "id": "IUA-SEC-004",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-dos",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > @wp-playground/cli > fast-xml-parser",
+      "evidence": "The lock contained fast-xml-parser 5.10.0, affected below 5.10.1 by GHSA-8r6m-32jq-jx6q.",
+      "attack_scenario": "Repeated DOCTYPE declarations could exhaust resources when development-only Playground tooling parses crafted XML.",
+      "validation": "Affected transitive version confirmed; no distributed-plugin path; remediated with fast-xml-parser 5.10.1.",
+      "remediation": "Retain the corrected lockfile and monitor the parent packages through Dependabot."
+    },
+    {
+      "id": "IUA-SEC-005",
+      "status": "hardening",
+      "severity": "high",
+      "category": "dependency-dos",
+      "file": "package-lock.json",
+      "function": "@wordpress/env > rimraf > glob > minimatch > brace-expansion",
+      "evidence": "npm audit identified brace-expansion 2.1.2 as affected by GHSA-mh99-v99m-4gvg.",
+      "attack_scenario": "An unbounded crafted brace pattern could exhaust memory in the development tooling process; no plugin runtime code imports this package.",
+      "validation": "Affected transitive version confirmed; production reachability rejected; remediated with brace-expansion 2.1.4 within the existing constraint.",
+      "remediation": "Retain the corrected lockfile and continue automated dependency monitoring."
+    }
+  ]
 }
