@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-01T13:25:05Z",
+  "repository": "ussmarines/WP_image_usage_audit",
+  "scan_commit": "b6cd6f99a411e7313da28e681914ab9b12e7c7a8",
+  "scorecard_run": "https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701586170",
+  "initial_count": 7,
+  "open_count": 0,
+  "alerts": [
+    {
+      "number": 1,
+      "rule_id": "BranchProtectionID",
+      "tool": "Scorecard v5.5.0",
+      "state": "dismissed",
+      "disposition": "accepted-structural-risk",
+      "final_score": 4,
+      "dismissed_reason": "won't fix",
+      "dismissed_at": "2026-08-01T13:24:56Z",
+      "dismissed_comment": "Single-maintainer structural limit: main requires PRs, strict updates, resolved threads, 9 green contexts, and blocks deletion/force-push with no bypass. Independent approval cannot be configured without locking out the sole maintainer. Evidence: audit report phase 12."
+    },
+    {
+      "number": 3,
+      "rule_id": "FuzzingID",
+      "tool": "Scorecard v5.5.0",
+      "state": "fixed",
+      "disposition": "fixed",
+      "final_score": 10,
+      "fixed_at": "2026-08-01T13:22:50Z",
+      "evidence": "JavaScriptPropertyBasedTesting integration found at tests/property/security-inputs.property.js"
+    },
+    {
+      "number": 4,
+      "rule_id": "SASTID",
+      "tool": "Scorecard v5.5.0",
+      "state": "dismissed",
+      "disposition": "accepted-historical-risk",
+      "final_score": 8,
+      "final_probe": "20 commits out of 30 are checked with a SAST tool",
+      "dismissed_reason": "won't fix",
+      "dismissed_at": "2026-08-01T13:24:58Z",
+      "dismissed_comment": "Historical Scorecard metric: CodeQL now runs on every PR and main push and its analyze job is required. Older commits predate CodeQL and will age out of the sample; history was not rewritten. Evidence: audit report phase 12."
+    },
+    {
+      "number": 5,
+      "rule_id": "MaintainedID",
+      "tool": "Scorecard v5.5.0",
+      "state": "dismissed",
+      "disposition": "accepted-temporal-risk",
+      "final_score": 0,
+      "dismissed_reason": "won't fix",
+      "dismissed_at": "2026-08-01T13:25:00Z",
+      "revalidate_after": "2026-10-11T16:12:14Z",
+      "dismissed_comment": "Temporal Scorecard limit: GitHub reports creation at 2026-07-12T16:12:14Z. The repository is active and protected but cannot satisfy the 90-day probe before 2026-10-11. Revalidate then. Evidence: audit report phase 12."
+    },
+    {
+      "number": 6,
+      "rule_id": "CodeReviewID",
+      "tool": "Scorecard v5.5.0",
+      "state": "dismissed",
+      "disposition": "accepted-structural-risk",
+      "final_score": 0,
+      "final_probe": "0 of 7 sampled changesets had independent approval",
+      "dismissed_reason": "won't fix",
+      "dismissed_at": "2026-08-01T13:25:02Z",
+      "dismissed_comment": "Single-maintainer structural limit: automated checks are required, but no independent human reviewer exists. No bot, self-approval, fake account, or unauthorized collaborator was used. Evidence: audit report phase 12."
+    },
+    {
+      "number": 7,
+      "rule_id": "CIIBestPracticesID",
+      "tool": "Scorecard v5.5.0",
+      "state": "dismissed",
+      "disposition": "manual-action-required",
+      "final_score": 0,
+      "dismissed_reason": "won't fix",
+      "dismissed_at": "2026-08-01T13:25:04Z",
+      "dismissed_comment": "Manual action required: the official BadgeApp API returns no project. All 67 passing criteria are prefilled in the audit report, but 5 require maintainer attestation. No badge is claimed until OpenSSF awards it."
+    },
+    {
+      "number": 8,
+      "rule_id": "CITestsID",
+      "tool": "Scorecard v5.5.0",
+      "state": "fixed",
+      "disposition": "fixed",
+      "final_score": 10,
+      "fixed_at": "2026-08-01T13:22:50Z",
+      "evidence": "11 out of 11 merged pull requests were checked by a CI test"
+    }
+  ]
+}

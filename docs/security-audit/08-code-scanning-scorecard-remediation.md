@@ -1,17 +1,19 @@
 # Phase 12 — GitHub code-scanning and Scorecard remediation
 
-Status: implementation, local validation, and the first complete pull-request integration run passed
-on 2026-08-01. Final documentation-head checks, merge, and main-branch alert classification remain
-pending.
+Status: complete for the code-bearing merge `b6cd6f99a411e7313da28e681914ab9b12e7c7a8` on
+2026-08-01. All pull-request and post-merge checks passed, the final Scorecard result was published,
+and all seven alerts have a documented GitHub disposition.
 
 This report treats the seven alerts that were open on commit
 `41122772915682dc631aeff7c02001c014a13dbe`. All seven were produced by OpenSSF
 Scorecard 5.5.0. No CodeQL alert was open, and no Codex Security scan, deep scan,
 multi-agent scan, or multi-pass scan was used.
 
-Sanitized source evidence is stored in
-[`code-scanning-alerts-before.json`](code-scanning-alerts-before.json) and
-[`scorecard-before.json`](scorecard-before.json). Authentication tokens and request headers are not
+Sanitized before/after evidence is stored in
+[`code-scanning-alerts-before.json`](code-scanning-alerts-before.json),
+[`code-scanning-alerts-after.json`](code-scanning-alerts-after.json),
+[`scorecard-before.json`](scorecard-before.json), and
+[`scorecard-after.json`](scorecard-after.json). Authentication tokens and request headers are not
 stored.
 
 ## Initial inventory
@@ -94,15 +96,16 @@ CodeQL already used `javascript-typescript`, `security-extended`, minimum permis
 manual triggers, and full-SHA action pins. Path filters caused documentation, PHP, configuration, and
 other non-JavaScript PRs to lack a CodeQL run. Those filters are removed: CodeQL now runs on every pull
 request and every push to `main`, as well as weekly and on manual dispatch. After merge, the stable
-`analyze` job is to be added to the `Protect main` required contexts.
+`analyze` job was added to the `Protect main` required contexts.
 
 CodeQL does not analyze PHP. PHP remains covered by PHPStan, PHPCS, WordPress Coding Standards,
 PHPCompatibilityWP, PHPUnit, Plugin Check, exact-ZIP WordPress 5.9/current/multisite tests, and the new
 property-based production harness. Adding an unrelated PHP scanner solely to change Scorecard would
 not be evidence of improved security.
 
-The current 13/25 metric is historical and cannot be repaired without rewriting history or creating
-artificial commits. Prospective coverage is corrected; the residual is `accepted-historical-risk`.
+The metric improved from 13/25 to 20/30 detected commits but remains historical and cannot be repaired
+without rewriting history or creating artificial commits. Prospective coverage is corrected; the
+residual is `accepted-historical-risk`.
 
 ### Alert 5 — Maintained
 
@@ -176,37 +179,36 @@ Disposition until that human self-certification exists: `manual-action-required`
 
 ### Alert 8 — CI Tests
 
-The sampled result is 10 of 11 merged PRs. Current QA runs for every PR and requires actionlint,
-Zizmor, PHP 7.4, PHP 8.3, WordPress current, WordPress 5.9 and multisite. Dependency Review also runs
-on every PR. CodeQL becomes unconditional in this change and is to become required after merge.
+The initial sampled result was 10 of 11 merged PRs. Current QA runs for every PR and requires
+actionlint, Zizmor, PHP 7.4, PHP 8.3, WordPress current, WordPress 5.9 and multisite. Dependency Review
+also runs on every PR, and CodeQL is unconditional and required.
 
-The one missing historical result predates the completed controls. History will not be rewritten and
-no empty commits will be created. Disposition: `accepted-historical-risk`; revalidate after enough
-tested PRs move the older changeset outside Scorecard's sample window.
+The final Scorecard scan measured 11 of 11 merged PRs with CI, scored the check 10/10, and
+automatically fixed alert 8 at `2026-08-01T13:22:50Z`. No history was rewritten and no artificial
+commit was created. Disposition: `fixed`.
 
 ## Disposition matrix
 
 | Alert | Tool | Category | Initial state | Analysis | Action | Validation | Disposition |
 | ---: | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Scorecard | structural | open | reviewer probes require a second human | preserve functional single-maintainer ruleset | effective ruleset/API evidence | `accepted-structural-risk` |
-| 3 | Scorecard | correctable | open | real property coverage was feasible | fast-check generator, PHP production harness, CI execution | 500 cases on PHP 7.4/8.3; Scorecard Fuzzing 10 | `fixed` after main SARIF |
-| 4 | Scorecard | historical plus prospective | open | path filters omitted many commits | CodeQL on every PR/push; require `analyze` after merge | PR and post-merge CodeQL | `accepted-historical-risk` until window ages out |
-| 5 | Scorecard | temporal | open | repository created 2026-07-12 | no artificial history | GitHub creation timestamp | `accepted-temporal-risk` |
-| 6 | Scorecard | structural | open | independent review impossible for sole owner | preserve automated protections | ruleset and collaborator evidence | `accepted-structural-risk` |
-| 7 | Scorecard | manual | open | no BadgeApp project exists | complete 67-criterion prefill | official BadgeApp API returned `[]` | `manual-action-required` |
-| 8 | Scorecard | historical | open | one sampled PR predates CI | enforce complete future matrix | required contexts and workflow triggers | `accepted-historical-risk` |
+| 1 | Scorecard | structural | open | reviewer probes require a second human | preserve functional single-maintainer ruleset | nine required checks; dismissed with evidence | `accepted-structural-risk` |
+| 3 | Scorecard | correctable | open | real property coverage was feasible | fast-check generator, PHP production harness, CI execution | Scorecard 10; GitHub state `fixed` | `fixed` |
+| 4 | Scorecard | historical plus prospective | open | path filters omitted many commits | CodeQL on every PR/push; require `analyze` | 20/30 detected; dismissed with evidence | `accepted-historical-risk` |
+| 5 | Scorecard | temporal | open | repository created 2026-07-12 | no artificial history | timestamp; dismissed, revalidate 2026-10-11 | `accepted-temporal-risk` |
+| 6 | Scorecard | structural | open | independent review impossible for sole owner | preserve automated protections | 0/7 independent reviews; dismissed with evidence | `accepted-structural-risk` |
+| 7 | Scorecard | manual | open | no BadgeApp project exists | complete 67-criterion prefill | official API `[]`; dismissed pending human action | `manual-action-required` |
+| 8 | Scorecard | historical, then correctable by normal history | open | one sampled PR initially predated CI | enforce complete future matrix | Scorecard 11/11 and GitHub state `fixed` | `fixed` |
 
-## Planned GitHub classification comments
+## Applied GitHub classification comments
 
-Comments are intentionally factual and below GitHub's 280-character limit. They are applied only
-after the final main-branch scans confirm the implementation.
+The following factual comments, all below GitHub's 280-character limit, were applied after the final
+main-branch scans. Alerts 3 and 8 were not dismissed; the new SARIF fixed them automatically.
 
 - Alert 1: `Single-maintainer structural limit: main requires PRs, strict updates, resolved threads, 9 green contexts, and blocks deletion/force-push with no bypass. Independent approval cannot be configured without locking out the sole maintainer. Evidence: audit report phase 12.`
 - Alert 4: `Historical Scorecard metric: CodeQL now runs on every PR and main push and its analyze job is required. Older commits predate CodeQL and will age out of the sample; history was not rewritten. Evidence: audit report phase 12.`
 - Alert 5: `Temporal Scorecard limit: GitHub reports creation at 2026-07-12T16:12:14Z. The repository is active and protected but cannot satisfy the 90-day probe before 2026-10-11. Revalidate then. Evidence: audit report phase 12.`
 - Alert 6: `Single-maintainer structural limit: automated checks are required, but no independent human reviewer exists. No bot, self-approval, fake account, or unauthorized collaborator was used. Evidence: audit report phase 12.`
 - Alert 7: `Manual action required: the official BadgeApp API returns no project. All 67 passing criteria are prefilled in the audit report, but 5 require maintainer attestation. No badge is claimed until OpenSSF awards it.`
-- Alert 8: `Historical Scorecard metric: current PRs require the full QA matrix and Dependency Review; CodeQL is now unconditional and required. One sampled older PR predates these controls and history was not rewritten. Evidence: audit report phase 12.`
 
 ## Validation record
 
@@ -227,9 +229,9 @@ after the final main-branch scans confirm the implementation.
 
 ## Pull-request validation
 
-Pull request [#21](https://github.com/ussmarines/WP_image_usage_audit/pull/21) is ready for review. At
-implementation/documentation head `04ee628a8256af2a841c54b1417386d0f74bce6b`, all reported checks
-completed successfully:
+Pull request [#21](https://github.com/ussmarines/WP_image_usage_audit/pull/21) was merged only after
+every reported check completed successfully. At implementation/documentation head
+`04ee628a8256af2a841c54b1417386d0f74bce6b`:
 
 - [QA run 30701380357](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701380357):
   actionlint, Zizmor, PHP 7.4, PHP 8.3, WordPress current, WordPress 5.9 and multisite passed. Both PHP
@@ -240,5 +242,68 @@ completed successfully:
 - [CodeQL run 30701380371](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701380371):
   the unconditional JavaScript/TypeScript `security-extended` analysis passed with no finding.
 
-Post-merge QA, CodeQL, Scorecard, alert classification, and before/after comparison evidence remain
-to be appended after those checks execute.
+The documentation-only final PR head `0e82da7749d15312171b14e683dcf4a3ece6338a` then passed
+[QA 30701496067](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701496067),
+[Dependency Review 30701496070](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701496070),
+and [CodeQL 30701496080](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701496080).
+GitHub reported the PR clean and mergeable before it merged as
+`b6cd6f99a411e7313da28e681914ab9b12e7c7a8`.
+
+## Post-merge validation and before/after comparison
+
+All three workflows triggered by the code-bearing merge passed:
+
+- [QA 30701586247](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701586247):
+  every PHP, WordPress, workflow and ZIP job passed, including Plugin Check and the new property test;
+- [CodeQL 30701586167](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701586167):
+  `security-extended` passed with zero CodeQL finding;
+- [OpenSSF Scorecard 30701586170](https://github.com/ussmarines/WP_image_usage_audit/actions/runs/30701586170):
+  official Scorecard 5.5.0 completed, published results and uploaded SARIF successfully.
+
+The published global score increased from 6.1 to 6.6. The complete sanitized results are in the two
+Scorecard JSON snapshots.
+
+| Check | Before | After | Result |
+| --- | ---: | ---: | --- |
+| Binary-Artifacts | 10 | 10 | unchanged |
+| Branch-Protection | 4 | 4 | functional controls preserved; reviewer probes remain structural |
+| CII-Best-Practices | 0 | 0 | human self-certification remains |
+| CI-Tests | 9 | 10 | fixed; 11/11 merged PRs detected with CI |
+| Code-Review | 0 | 0 | structural single-maintainer limit; sample changed from 0/12 to 0/7 |
+| Contributors | 0 | 0 | unchanged single-person project |
+| Dangerous-Workflow | 10 | 10 | unchanged |
+| Dependency-Update-Tool | 10 | 10 | unchanged |
+| Fuzzing | 0 | 10 | fixed; real property integration detected |
+| License | 9 | 9 | unchanged Scorecard recognition limitation |
+| Maintained | 0 | 0 | repository remains under 90 days |
+| Packaging | -1 | -1 | custom release ZIP workflow not recognized |
+| Pinned-Dependencies | 10 | 10 | 22/22 GitHub, 2/2 third-party Actions and 5/5 npm commands pinned |
+| SAST | 8 | 8 | detected coverage improved from 13/25 to 20/30 commits |
+| Security-Policy | 9 | 9 | published result unchanged; official CLI independently scores 10 |
+| Signed-Releases | 0 | 0 | historical v2.2.6 predates the attested release workflow |
+| Token-Permissions | 10 | 10 | unchanged least privilege |
+| Vulnerabilities | 10 | 10 | zero known unfixed vulnerability |
+
+The active `Protect main` ruleset (`20181296`) now requires nine stable contexts: the original eight
+plus CodeQL job `analyze`. It remains strict, blocks deletion and non-fast-forward updates, requires a
+pull request and resolved conversations, has no bypass actor, and reports
+`current_user_can_bypass: never`.
+
+The final Code scanning query returned zero open alert. Alerts 3 and 8 were automatically `fixed` at
+`2026-08-01T13:22:50Z`; alerts 1, 4, 5, 6 and 7 were dismissed as `won't fix` only after the evidence
+above was published, using the exact comments recorded in this report. No CodeQL finding or plugin
+vulnerability was dismissed.
+
+## Git delivery
+
+- branch: `security/resolve-scorecard-alerts`;
+- reviewed dependency commits: `e597905` and `1c8cfb4`;
+- implementation commits: `cb3cddc` and `cd253ae`;
+- evidence commits before merge: `04ee628` and `0e82da7`;
+- pull request: [#21](https://github.com/ussmarines/WP_image_usage_audit/pull/21);
+- code-bearing merge and audited main SHA: `b6cd6f99a411e7313da28e681914ab9b12e7c7a8`.
+
+The two `after` snapshots necessarily originate from the post-merge run and are committed through a
+follow-up documentation-only pull request. That evidence-only change does not alter plugin code,
+dependencies, workflows, or repository settings; its own required checks must still pass before
+merge.
