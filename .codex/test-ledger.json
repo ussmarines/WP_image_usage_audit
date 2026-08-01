@@ -820,6 +820,32 @@
       "configuration": ["docs/security-audit findings schema and persistent checklist"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass. Runtime and dependency tests were reused because Phase 3 changes documentation only."
+    },
+    {
+      "name": "Phase 4 candidate reachability and nested-data validation",
+      "command": "rg -n <scan route, capability, nonce, lock, orphan consumer, and metadata writer patterns> image-usage-audit.php includes views assets tests; <portable-php> <inline harness invoking IUA_Scanner::flatten_scan_strings on a 512-level nested array>",
+      "tool_version": "ripgrep 15.1.0; PHP 8.3.33",
+      "date": "2026-08-01",
+      "commit_tested": "a677d3a+security-audit-phase-4-validation",
+      "result": "pass",
+      "duration_ms": 1300,
+      "coverage": ["IUA-SEC-006 scan route and lock prerequisites", "IUA-SEC-007 orphan result producers and consumers", "IUA-SEC-008 nested metadata source and recursive traversal"],
+      "configuration": ["current production source", "existing PluginSecurityTest access and lock results reused from Phase 2"],
+      "environment_signature": "Windows|PowerShell|ripgrep-15.1.0|php-8.3.33-portable",
+      "notes": "The safe recursion harness returned the expected leaf at depth 512 with no additional allocated memory page. Existing 39-test Phase 2 results were reused because runtime code and test configuration were unchanged. Decisions: IUA-SEC-006 hardening, IUA-SEC-007 hardening, IUA-SEC-008 rejected; no confirmed code vulnerability."
+    },
+    {
+      "name": "Phase 4 staged validation report integrity",
+      "command": "node -e \"const f=JSON.parse(require('fs').readFileSync('docs/security-audit/findings.json','utf8'));if(f.findings.some(x=>x.status==='candidate'||x.validation==='pending'))throw new Error('pending finding');JSON.parse(require('fs').readFileSync('.codex/test-ledger.json','utf8'))\"; git diff --cached --check",
+      "tool_version": "Node.js v24.18.0; git 2.55.0.windows.3",
+      "date": "2026-08-01",
+      "commit_tested": "a677d3a+security-audit-phase-4-index",
+      "result": "pass",
+      "duration_ms": 600,
+      "coverage": ["all finding decisions", "Phase 4 narrative", "persistent checklist", "complete staged Phase 4 patch"],
+      "configuration": ["docs/security-audit/findings.json", "docs/security-audit/04-wordpress-code-audit.md", ".codex/test-ledger.json"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
+      "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass. No runtime test was rerun because Phase 4 changes documentation only."
     }
   ]
 }

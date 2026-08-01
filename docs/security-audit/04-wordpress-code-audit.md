@@ -124,3 +124,63 @@ No candidate is described as confirmed at this stage.
 - [x] Record only evidence-backed candidates for separate validation
 
 Next phase: validate or reject `IUA-SEC-006` through `IUA-SEC-008` individually.
+
+## Phase 4 validation decisions
+
+Validation completed on 2026-08-01. Each candidate received a final decision; none remains pending.
+
+### IUA-SEC-006 — scan duration and lock lease
+
+Decision: `hardening`, not a confirmed vulnerability.
+
+- Source control: only `ajax_run_scan()` reaches `IUA_Scanner::run()`.
+- Reachability: the common envelope requires POST, the exact action, `manage_options`, and a valid
+  action-specific nonce.
+- Existing mitigations: fixed-size database batches, an atomic owner-token lock, rejection of a
+  concurrent request, raised administrative memory limit, and previous-result preservation.
+- Impact: a scan over an unusually large uploads tree can outlive the 900-second lease and permit a
+  second authorized administrator scan. No unauthenticated or lower-privileged trigger was found.
+
+The work needed for a renewable lease or resumable time-budgeted scanner is architectural and can
+change the exhaustive-scan contract. It is deferred as an explicitly documented availability
+hardening item rather than represented as a fixed vulnerability.
+
+### IUA-SEC-007 — absolute orphan paths
+
+Decision: `hardening`, not a confirmed information disclosure.
+
+- The paths are created beneath the current site's WordPress uploads directory.
+- The complete result is returned only after the same `manage_options` and nonce checks and is stored
+  in a non-autoloaded plugin option.
+- No public, author, subscriber, REST, frontend, log, or HTML rendering path for `orphans` exists.
+- Administrators can already obtain environment paths through normal site diagnostics, so no new
+  privilege boundary is crossed.
+
+Nevertheless, the current view does not consume absolute orphan paths and relative paths are enough
+to identify files within uploads. Phase 5 will minimize retained data by converting orphan results
+to uploads-relative paths and will add a regression test.
+
+### IUA-SEC-008 — nested metadata recursion
+
+Decision: `rejected`.
+
+- This plugin exposes no route that writes arbitrary post metadata.
+- Core form/REST JSON input cannot create cyclic PHP object graphs; builder JSON remains a string for
+  the ID scanner, and an exploit would require another component to place an already-decoded hostile
+  graph in post meta.
+- That prerequisite would be an out-of-scope arbitrary metadata/object-injection capability.
+- A safe local harness invoked `flatten_scan_strings()` on a 512-level nested array and returned the
+  expected leaf without an error or measurable additional allocated memory page.
+
+The helper remains a potential robustness consideration for data supplied by another compromised
+component, but the complete source-to-impact path required by this audit is absent.
+
+### Phase 4 summary
+
+- Confirmed code vulnerabilities: 0
+- Rejected candidates: 1
+- Retained hardening items: 2
+- Pending candidates: 0
+
+Next phase: implement and test the uploads-relative orphan-path minimization, then record remediation
+and the deferred scan-lease hardening item.
