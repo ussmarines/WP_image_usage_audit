@@ -4,6 +4,7 @@ import { parse as parseYaml } from 'yaml';
 
 const ignoredDirectories = new Set(['.git', 'dist', 'node_modules', 'vendor']);
 const jsonFiles = [];
+const yamlFiles = [];
 
 function collectJson(directory) {
 	for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -21,17 +22,81 @@ function collectJson(directory) {
 	}
 }
 
+function collectYaml(directory) {
+	for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+		const entryPath = path.join(directory, entry.name);
+
+		if (entry.isDirectory()) {
+			collectYaml(entryPath);
+		} else if (entry.isFile() && /\.ya?ml$/i.test(entry.name)) {
+			yamlFiles.push(entryPath);
+		}
+	}
+}
+
 collectJson('.');
+collectYaml('.github');
 
 for (const file of jsonFiles) {
 	JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-const workflow = fs.readFileSync('.github/workflows/qa.yml', 'utf8');
-const parsedWorkflow = parseYaml(workflow);
+const packageManifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const approvedInstallScripts = packageManifest.allowScripts || {};
 
-if (!parsedWorkflow || typeof parsedWorkflow !== 'object' || !parsedWorkflow.jobs) {
-	throw new Error('GitHub Actions workflow is not a valid job mapping.');
+if (
+	Object.keys(approvedInstallScripts).length !== 1 ||
+	approvedInstallScripts['fs-ext-extra-prebuilt@2.2.7'] !== true
+) {
+	throw new Error('The reviewed npm install script must remain approved at its exact version.');
 }
 
-console.log(JSON.stringify({ result: 'pass', jsonFiles: jsonFiles.length, yamlFiles: 1 }));
+const npmConfig = fs.readFileSync('.npmrc', 'utf8');
+
+if (!/^strict-allow-scripts=true$/m.test(npmConfig)) {
+	throw new Error('npm must reject unreviewed dependency install scripts.');
+}
+
+for (const file of yamlFiles) {
+	const parsedYaml = parseYaml(fs.readFileSync(file, 'utf8'));
+
+	if (!parsedYaml || typeof parsedYaml !== 'object') {
+		throw new Error(`${file} is not a YAML mapping.`);
+	}
+
+	if (file.startsWith(path.join('.github', 'workflows')) && (!parsedYaml.on || !parsedYaml.jobs)) {
+		throw new Error(`${file} is not a valid GitHub Actions workflow mapping.`);
+	}
+
+	if (file.startsWith(path.join('.github', 'workflows'))) {
+		if (!parsedYaml.permissions || !parsedYaml.concurrency) {
+			throw new Error(`${file} must declare top-level permissions and concurrency.`);
+		}
+
+		for (const [jobName, job] of Object.entries(parsedYaml.jobs)) {
+			if (!job || typeof job !== 'object' || !Number.isInteger(job['timeout-minutes'])) {
+				throw new Error(`${file} job ${jobName} must declare an integer timeout-minutes.`);
+			}
+
+			for (const step of job.steps || []) {
+				if (!step.uses || typeof step.uses !== 'string') {
+					continue;
+				}
+
+				if (!step.uses.startsWith('./') && !/@[0-9a-f]{40}$/.test(step.uses)) {
+					throw new Error(`${file} job ${jobName} contains an action that is not pinned to a full commit SHA: ${step.uses}`);
+				}
+
+				if (step.uses.startsWith('actions/checkout@') && step.with?.['persist-credentials'] !== false) {
+					throw new Error(`${file} job ${jobName} must disable checkout credential persistence.`);
+				}
+			}
+		}
+	}
+
+	if (file === path.join('.github', 'dependabot.yml') && (parsedYaml.version !== 2 || !Array.isArray(parsedYaml.updates))) {
+		throw new Error('Dependabot configuration must use version 2 with an updates array.');
+	}
+}
+
+console.log(JSON.stringify({ result: 'pass', jsonFiles: jsonFiles.length, yamlFiles: yamlFiles.length }));

@@ -913,10 +913,24 @@ class IUA_Scanner {
 	 * @return array<int, string>
 	 */
 	private function find_orphans( array $attachment_ids, string $basedir ): array {
-		$iua_all_files = $this->find_upload_images( $basedir );
-		$iua_attached  = $this->collect_all_attachment_files( $attachment_ids, $basedir );
+		$iua_all_files   = $this->find_upload_images( $basedir );
+		$iua_attached    = $this->collect_all_attachment_files( $attachment_ids, $basedir );
+		$iua_base_prefix = trailingslashit( wp_normalize_path( $basedir ) );
+		$iua_orphans     = array();
 
-		return array_values( array_diff( $iua_all_files, $iua_attached ) );
+		foreach ( array_diff( $iua_all_files, $iua_attached ) as $iua_orphan_file ) {
+			if ( 0 !== strpos( $iua_orphan_file, $iua_base_prefix ) ) {
+				continue;
+			}
+
+			$iua_relative_file = ltrim( substr( $iua_orphan_file, strlen( $iua_base_prefix ) ), '/\\' );
+
+			if ( '' !== $iua_relative_file ) {
+				$iua_orphans[] = $iua_relative_file;
+			}
+		}
+
+		return array_values( array_unique( $iua_orphans ) );
 	}
 
 	/**

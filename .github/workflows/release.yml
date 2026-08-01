@@ -1,0 +1,109 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-test-attest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Verify release identity
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node scripts/validate-release-tag.mjs "$RELEASE_TAG"
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - run: npm run validate:metadata
+      - run: npm run validate:config
+      - run: npm run build:zip
+      - run: npx wp-env start
+      - run: npx wp-env run cli wp plugin deactivate WP_image_usage_audit
+      - run: npx wp-env run cli wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/image-usage-audit.zip --activate
+      - run: npx wp-env run cli wp plugin is-active image-usage-audit
+      - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/ajax-setup.php
+      - run: npm run test:ajax
+      - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/smoke.php
+      - run: npx wp-env run cli wp plugin install plugin-check --version=2.0.0 --activate
+      - run: npx wp-env run cli wp plugin check image-usage-audit
+      - name: Stop WordPress
+        if: always()
+        run: npx wp-env stop
+      - name: Attest tested ZIP
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: dist/image-usage-audit.zip
+      - name: Upload tested release files
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-files
+          path: |
+            dist/image-usage-audit.zip
+            dist/image-usage-audit.zip.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+
+  publish:
+    needs: build-test-attest
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      attestations: read
+      contents: write
+    steps:
+      - name: Download tested release files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-files
+          path: release
+      - name: Verify checksum and provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd release
+          sha256sum --check --strict image-usage-audit.zip.sha256
+          gh attestation verify image-usage-audit.zip --repo "$GITHUB_REPOSITORY"
+      - name: Publish immutable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft \
+            --verify-tag \
+            --generate-notes \
+            --title "Image Usage Audit ${RELEASE_TAG#v}"
+          gh release upload "$RELEASE_TAG" \
+            release/image-usage-audit.zip \
+            release/image-usage-audit.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft=false
