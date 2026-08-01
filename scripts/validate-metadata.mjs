@@ -8,12 +8,15 @@ const funding = fs.readFileSync('.github/FUNDING.yml', 'utf8');
 const pot = fs.readFileSync('languages/image-usage-audit.pot', 'utf8');
 const license = fs.readFileSync('LICENSE', 'utf8');
 
+const donateLinkMatch = readme.match(/^Donate link:\s*(\S+)\s*$/m);
+const expectedFunding = `custom:\n  - "${donationUrl}"`;
+
 const checks = [
 	[main.includes(`Version: ${version}`), 'plugin header version'],
 	[main.includes(`define( 'IUA_VERSION', '${version}' )`), 'IUA_VERSION'],
 	[readme.includes(`Stable tag: ${version}`), 'readme stable tag'],
-	[readme.includes(`Donate link: ${donationUrl}`), 'WordPress.org donate link'],
-	[funding.includes(donationUrl), 'GitHub funding link'],
+	[donateLinkMatch !== null && donateLinkMatch[1] === donationUrl, 'WordPress.org donate link'],
+	[funding.trim() === expectedFunding, 'GitHub funding link'],
 	[pot.includes(`Project-Id-Version: Image Usage Audit ${version}`), 'POT project version'],
 	[main.includes('Text Domain: image-usage-audit'), 'plugin text domain'],
 	[pot.includes('Language-Team:'), 'POT metadata'],
