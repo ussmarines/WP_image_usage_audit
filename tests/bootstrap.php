@@ -88,6 +88,10 @@ function trailingslashit( $value ) {
 	return rtrim( $value, '/\\' ) . '/';
 }
 
+function wp_normalize_path( $path ) {
+	return str_replace( '\\', '/', (string) $path );
+}
+
 function wp_parse_url( $url ) {
 	return parse_url( $url );
 }
