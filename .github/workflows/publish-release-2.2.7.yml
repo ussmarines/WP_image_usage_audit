@@ -78,10 +78,13 @@ jobs:
           RELEASE_TAG: v2.2.7
           TARGET_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          existing_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null || true)"
-          if [[ -n "$existing_sha" && "$existing_sha" != "$TARGET_SHA" ]]; then
-            echo "Tag $RELEASE_TAG already points to $existing_sha, expected $TARGET_SHA." >&2
-            exit 1
+          if existing_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$RELEASE_TAG" --jq '.object.sha' 2>/dev/null)"; then
+            if [[ "$existing_sha" != "$TARGET_SHA" ]]; then
+              echo "Tag $RELEASE_TAG already points to $existing_sha, expected $TARGET_SHA." >&2
+              exit 1
+            fi
+          else
+            existing_sha=""
           fi
 
           if [[ -z "$existing_sha" ]]; then
