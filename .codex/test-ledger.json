@@ -963,6 +963,19 @@
       "configuration": ["scripts/validate-config.mjs", "docs/security-audit/05-ci-supply-chain.md", "docs/security-audit/findings.json", ".codex/test-ledger.json"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "Entry prepared before the final staged validation and must be corrected if that command does not pass."
+    },
+    {
+      "name": "Phase 7 main ruleset creation and effective-rule verification",
+      "command": "gh run view 29252973299 --repo ussmarines/WP_image_usage_audit --json jobs,conclusion,headSha,url; gh api --method POST repos/ussmarines/WP_image_usage_audit/rulesets <reviewed ruleset payload>; gh api repos/ussmarines/WP_image_usage_audit/rulesets/20181296; gh api repos/ussmarines/WP_image_usage_audit/rules/branches/main",
+      "tool_version": "GitHub CLI 2.96.0; GitHub REST API 2022-11-28",
+      "date": "2026-08-01",
+      "commit_tested": "4e66ba1+repository-ruleset",
+      "result": "pass",
+      "duration_ms": 4700,
+      "coverage": ["historically green stable QA context names", "active main ruleset payload", "effective rules for main", "administrator bypass behavior"],
+      "configuration": ["GitHub repository ruleset 20181296", ".github/workflows/qa.yml"],
+      "environment_signature": "GitHub|public-repository|single-maintainer|gh-2.96.0|api-2022-11-28",
+      "notes": "Protect main is active with no bypass actors. It requires a PR with zero approvals, resolved conversations, an up-to-date branch and six previously green stable QA contexts; deletion and force pushes are blocked. New checks were not required before their first repository run."
     }
   ]
 }
