@@ -1054,6 +1054,32 @@
       "configuration": [".github/workflows/qa.yml", "Zizmor 1.27.0 manylinux wheel"],
       "environment_signature": "GitHub-Actions|ubuntu-24.04|runner-2.336.0|pip",
       "notes": "The official wheel downloaded and its SHA-256 passed, but the workflow renamed it to zizmor-1.27.0.whl; pip correctly rejected that non-canonical wheel filename before installation. The archive path now preserves the complete official wheel filename."
+    },
+    {
+      "name": "Phase 9 successful pull-request validation matrix",
+      "command": "gh run view 30698198089,30698198080,30698198094 --repo ussmarines/WP_image_usage_audit --json conclusion,headSha,jobs,url; gh pr view 16 --json <merge and check rollup fields>",
+      "tool_version": "GitHub Actions runner 2.336.0; GitHub CLI 2.96.0",
+      "date": "2026-08-01",
+      "commit_tested": "af6cb454d75b4393c7c8763ba2989412aab33526",
+      "result": "pass",
+      "duration_ms": 167000,
+      "coverage": ["PHP 7.4 and 8.3 QA", "40 unit tests and 135 assertions", "WordPress current exact-ZIP activation, AJAX, Plugin Check and uninstall", "WordPress 5.9 exact-ZIP compatibility", "multisite network activation and uninstall preservation", "Actionlint and Zizmor", "Dependency Review", "JavaScript CodeQL security-extended"],
+      "configuration": [".github/workflows/qa.yml", ".github/workflows/dependency-review.yml", ".github/workflows/codeql.yml", "all source, tests, lockfiles and QA configuration at the pull-request SHA"],
+      "environment_signature": "GitHub-Actions|ubuntu-24.04|runner-2.336.0|php-7.4/8.3|WordPress-5.9.13/current/multisite",
+      "notes": "QA run 30698198089, CodeQL run 30698198080 and Dependency Review run 30698198094 all completed successfully. PR 16 was mergeable and clean with every reported check green."
+    },
+    {
+      "name": "Phase 9 final repository security-state verification",
+      "command": "gh api <repository security_and_analysis, private vulnerability reporting, Actions permissions and workflow policy, immutable releases, ruleset 20181296, effective main rules, open Dependabot/secret/code-scanning alerts>",
+      "tool_version": "GitHub CLI 2.96.0; GitHub REST API 2022-11-28/2026-03-10",
+      "date": "2026-08-01",
+      "commit_tested": "af6cb454d75b4393c7c8763ba2989412aab33526+repository-settings",
+      "result": "pass",
+      "duration_ms": 3300,
+      "coverage": ["GitHub security features", "Actions source and token policy", "future release immutability", "active main rules", "open security alert counts"],
+      "configuration": ["GitHub repository settings", "ruleset 20181296"],
+      "environment_signature": "GitHub|public-repository|gh-2.96.0|api-2022-11-28/2026-03-10",
+      "notes": "Secret scanning and code scanning each had zero open alert. Four high Dependabot alerts remain against the old main lockfile. The ruleset has no bypass and now requires eight universal green PR contexts; CodeQL and Scorecard remain correctly conditional."
     }
   ]
 }
