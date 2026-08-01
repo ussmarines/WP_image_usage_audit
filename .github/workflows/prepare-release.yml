@@ -1,60 +1,65 @@
 name: Prepare release 2.2.7
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
     paths:
       - '.github/release-request.json'
-      - '.github/workflows/prepare-release.yml'
-      - 'scripts/prepare-release-2.2.7.py'
 
 permissions:
   contents: write
 
 concurrency:
-  group: prepare-release-${{ github.ref }}
+  group: prepare-release-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   prepare:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'release/v2.2.7-final'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
           fetch-depth: 0
-      - name: Create prepared release branch
+      - name: Prepare release metadata on the trusted release branch
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_BRANCH: release/v2.2.7-final
         run: |
-          if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH" >/dev/null 2>&1; then
-            echo "Release branch $RELEASE_BRANCH already exists; nothing to recreate."
+          if node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('.github/release-request.json','utf8'));process.exit(r.prepared===true?0:1)"; then
+            echo 'Release metadata is already prepared.'
             exit 0
           fi
 
-          git switch --create "$RELEASE_BRANCH"
-          python scripts/prepare-release-2.2.7.py
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          git show origin/main:scripts/prepare-release-2.2.7.py > /tmp/prepare-release-2.2.7.py
+          python /tmp/prepare-release-2.2.7.py
           node scripts/validate-metadata.mjs
           node scripts/validate-release-tag.mjs v2.2.7
           git diff --check
-
-          git rm --force \
-            .github/workflows/prepare-release.yml \
-            scripts/prepare-release-2.2.7.py
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add \
             .github/release-request.json \
-            .github/workflows/release.yml \
             image-usage-audit.php \
             languages/image-usage-audit.pot \
             readme.txt \
             scripts/validate-metadata.mjs
+
+          if git diff --cached --quiet; then
+            echo 'No release metadata changes were produced.'
+            exit 0
+          fi
+
           git commit -m 'chore(release): prepare 2.2.7'
           git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push origin HEAD:"$RELEASE_BRANCH"
