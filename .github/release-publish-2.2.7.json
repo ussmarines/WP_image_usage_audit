@@ -1,0 +1,5 @@
+{
+  "version": "2.2.7",
+  "target": "main",
+  "purpose": "trigger trusted release publisher"
+}
