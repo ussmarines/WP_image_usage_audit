@@ -1,6 +1,6 @@
 # Phases 6–8 — CI, supply chain, rulesets, and releases
 
-Phase 6 status: complete on 2026-08-01. Rulesets and release provenance continue in Phases 7–8.
+Phases 6–8 status: complete on 2026-08-01.
 
 ## Phase 6 initial workflow state
 
@@ -167,3 +167,84 @@ present, so there is no overlapping or contradictory protection configuration.
 - [x] Verify the effective rules returned for `main`
 
 Next phase: harden artifact identity, checksums and release provenance.
+
+## Phase 8 — ZIP and release provenance
+
+### Existing release baseline
+
+The published `v2.2.6` release points to commit `798bee520a69609cd98960aca483aa787273b093`.
+Its ZIP has SHA-256 `7294c7ddc55e53fdfd682831571f26dacf39b335d6603c77adcf8d93dab2659c`,
+which matches both the GitHub asset digest and the attached checksum file. Direct archive inspection
+found 11 entries under `image-usage-audit/`, no development-only path, and no targeted secret marker.
+
+That historical release predates this hardening: its annotated tag is unsigned, GitHub reports no
+artifact attestation for the ZIP, and the release is not immutable. Release immutability only applies
+prospectively, so these properties cannot be retrofitted without replacing an already published
+artifact. The checksum remains valid evidence of integrity, not identity or provenance.
+
+### Deterministic package and checksum
+
+`scripts/build-zip.ps1` continues to construct the package from a strict runtime allowlist rather
+than trusting `.distignore`. It rejects an unexpected root, development-only paths, missing runtime
+files, incompatible license metadata, or disagreement among the PHP header, `IUA_VERSION`, and the
+readme stable tag. The version check is now derived from the packaged metadata instead of embedding
+the current version in the build script.
+
+Every successful build now writes `dist/image-usage-audit.zip.sha256` without a byte-order mark and
+includes the ZIP digest in its machine-readable result. A stale checksum is removed before a rebuild.
+Two independent builds from the same worktree produced the identical SHA-256
+`bd6fcb85a74f38eb5cfa33c0f8f99699657f7d98f641eaafb2b4e0e674f84f0d`. The changed digest relative
+to `v2.2.6` is expected because the hardening branch contains a production-code correction.
+
+### Future immutable release workflow
+
+Repository release immutability is enabled for all future releases. GitHub will therefore lock each
+published release's tag and assets and generate a release attestation. The new `Release` workflow
+runs only for a `v*` tag and additionally:
+
+- checks that the tag exactly matches the packaged semantic version;
+- refuses a tag whose commit is not reachable from `main`;
+- installs dependencies from the lockfile without a shared package-manager cache;
+- builds one ZIP, installs that exact ZIP in WordPress, runs the AJAX and runtime smoke tests, and
+  runs Plugin Check 2.0.0 against it;
+- generates a GitHub build-provenance attestation for that tested ZIP with job-scoped
+  `attestations: write` and `id-token: write` permissions;
+- transfers the ZIP and checksum as one short-lived workflow artifact;
+- verifies both the checksum and attestation after download;
+- creates a draft release, uploads those unchanged files, and only then publishes it, at which point
+  GitHub makes it immutable.
+
+The publishing job alone receives `contents: write`; it has no OIDC or attestation write permission.
+Every Action is pinned to a verified 40-character commit. Zizmor initially rejected automatic npm
+caching as a high-confidence release cache-poisoning risk; `package-manager-cache: false` now forces
+the release build to obtain a clean dependency set through `npm ci`, and the final Zizmor run reports
+no finding.
+
+No SBOM is emitted. The distributed ZIP contains first-party PHP, JavaScript, CSS and translation
+files but no Composer or npm runtime dependency; those dependency graphs describe development and
+test tooling excluded from the package. Publishing them as the plugin's runtime SBOM would be
+misleading. No WordPress.org publication step was added because the plugin is not published there.
+
+### Phase 8 validation
+
+- `npm run build:zip`: pass; 11 entries, strict root and metadata validation, SHA-256 generated.
+- Repeated build digest comparison: pass; byte-identical ZIPs.
+- Targeted secret-pattern inspection of every ZIP entry: zero match.
+- `npm run actionlint`: pass for all five workflows then present, including `Release`.
+- `npm run validate:config`: pass, 11 JSON and six YAML files.
+- Zizmor 1.27.0 after remediation: no finding; 15 offline-suppressed/not-applicable audits.
+- The GitHub commit API reported valid signatures for `actions/attest` 4.2.1,
+  `actions/upload-artifact` 7.0.1, and `actions/download-artifact` 8.0.1 pins.
+
+## Phase 8 checklist
+
+- [x] Inspect the currently published ZIP and its checksum
+- [x] Generate and validate a SHA-256 checksum with every local build
+- [x] Confirm deterministic output from the same source state
+- [x] Enable immutable releases for future publications
+- [x] Ensure only a tested ZIP can reach the release job
+- [x] Generate and verify build provenance with least-privilege permissions
+- [x] Publish through a draft before immutability locks the assets
+- [x] Record why a runtime SBOM and WordPress.org publication are not applicable
+
+Next phase: run the final local validation matrix, open the pull request, and validate GitHub checks.

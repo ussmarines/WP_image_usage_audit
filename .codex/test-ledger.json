@@ -976,6 +976,58 @@
       "configuration": ["GitHub repository ruleset 20181296", ".github/workflows/qa.yml"],
       "environment_signature": "GitHub|public-repository|single-maintainer|gh-2.96.0|api-2022-11-28",
       "notes": "Protect main is active with no bypass actors. It requires a PR with zero approvals, resolved conversations, an up-to-date branch and six previously green stable QA contexts; deletion and force pushes are blocked. New checks were not required before their first repository run."
+    },
+    {
+      "name": "Phase 8 existing release and release-action provenance baseline",
+      "command": "gh release view/download v2.2.6; gh api <release tag and action release/commit endpoints>; Get-FileHash; System.IO.Compression ZIP inspection; gh attestation verify <v2.2.6 ZIP>; gh release verify v2.2.6",
+      "tool_version": "GitHub CLI 2.96.0; PowerShell 7.6.3; GitHub REST API 2022-11-28/2026-03-10",
+      "date": "2026-08-01",
+      "commit_tested": "79aa6c5+release-baseline",
+      "result": "warning",
+      "duration_ms": 14500,
+      "coverage": ["v2.2.6 release identity, tag, assets and checksum", "every published ZIP entry", "artifact and immutable-release attestations", "release workflow Action pins"],
+      "configuration": ["GitHub release v2.2.6", "scripts/build-zip.ps1", ".distignore"],
+      "environment_signature": "Windows|PowerShell|gh-2.96.0|public-repository|api-2022-11-28/2026-03-10",
+      "notes": "The published ZIP checksum matched its asset and contained 11 expected entries with no development path. The annotated tag is unsigned, the historical release is mutable, and GitHub returned no artifact or immutable-release attestation. These are provenance gaps, not evidence that v2.2.6 was modified. New Action release commits were signature-verified."
+    },
+    {
+      "name": "Phase 8 immutable releases setting",
+      "command": "gh api -H X-GitHub-Api-Version:2026-03-10 repos/ussmarines/WP_image_usage_audit/immutable-releases; gh api --method PUT <same endpoint>; gh api <same endpoint>",
+      "tool_version": "GitHub CLI 2.96.0; GitHub REST API 2026-03-10",
+      "date": "2026-08-01",
+      "commit_tested": "79aa6c5+repository-release-setting",
+      "result": "pass",
+      "duration_ms": 1400,
+      "coverage": ["future GitHub release immutability"],
+      "configuration": ["GitHub repository immutable releases setting"],
+      "environment_signature": "GitHub|public-repository|gh-2.96.0|api-2026-03-10",
+      "notes": "The setting changed from enabled false to enabled true. GitHub documents that this applies prospectively and automatically locks tags/assets and generates a release attestation when a new release is published."
+    },
+    {
+      "name": "Phase 8 release workflow cache-poisoning diagnostic",
+      "command": "<verified-zizmor-1.27.0> .",
+      "tool_version": "Zizmor 1.27.0",
+      "date": "2026-08-01",
+      "commit_tested": "79aa6c5+release-workflow-draft",
+      "result": "failed",
+      "duration_ms": 900,
+      "coverage": ["draft release workflow", "artifact-publishing cache boundary"],
+      "configuration": [".github/workflows/release.yml", "actions/setup-node 6.4.0"],
+      "environment_signature": "Windows|zizmor-1.27.0-offline",
+      "notes": "Zizmor reported one high cache-poisoning finding because setup-node 6 enables automatic npm caching when package metadata selects npm. The release workflow now explicitly sets package-manager-cache false."
+    },
+    {
+      "name": "Phase 8 final local artifact and workflow validation",
+      "command": "npm run build:zip; pwsh scripts/build-zip.ps1 -OutputPath <second ZIP>; compare SHA-256; inspect all ZIP entry contents for targeted secret patterns; npm run actionlint; npm run validate:config; node scripts/validate-release-tag.mjs v2.2.6; <verified-zizmor-1.27.0> .",
+      "tool_version": "PowerShell 7.6.3; Node.js v24.18.0; actionlint 1.7.12; Zizmor 1.27.0",
+      "date": "2026-08-01",
+      "commit_tested": "79aa6c5+security-audit-phase-8-worktree",
+      "result": "pass",
+      "duration_ms": 10200,
+      "coverage": ["allow-listed ZIP contents and metadata", "checksum creation", "same-state reproducibility", "release tag validation", "all six GitHub YAML files", "workflow security", "targeted ZIP secret patterns"],
+      "configuration": ["scripts/build-zip.ps1", "scripts/validate-release-tag.mjs", ".github/workflows/release.yml", "scripts/validate-config.mjs"],
+      "environment_signature": "Windows|PowerShell|node-v24.18.0|actionlint-1.7.12|zizmor-1.27.0-offline",
+      "notes": "Two builds were byte-identical at bd6fcb85a74f38eb5cfa33c0f8f99699657f7d98f641eaafb2b4e0e674f84f0d. The ZIP had 11 expected entries and zero targeted secret-pattern match. Actionlint and configuration validation passed; final Zizmor reported no finding with 15 offline-suppressed/not-applicable audits."
     }
   ]
 }
