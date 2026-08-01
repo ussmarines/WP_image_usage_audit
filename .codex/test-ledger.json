@@ -1041,6 +1041,19 @@
       "configuration": ["package.json", "package-lock.json", ".npmrc", "scripts/validate-config.mjs"],
       "environment_signature": "Windows|PowerShell|node-v24.18.0|npm-11.16.0",
       "notes": "npm ci completed under strict install-script enforcement, npm audit reported zero vulnerabilities across 391 packages, npm outdated returned no direct update, and no install script remained pending. Transitive glob 10.5.0 remains deprecated without an npm advisory or safe direct update and is documented as residual."
+    },
+    {
+      "name": "Phase 9 pull-request Zizmor packaging diagnostic",
+      "command": "gh pr checks 16 --repo ussmarines/WP_image_usage_audit; gh api repos/ussmarines/WP_image_usage_audit/actions/jobs/91364395875/logs",
+      "tool_version": "GitHub Actions ubuntu-24.04; Python pip; GitHub CLI 2.96.0",
+      "date": "2026-08-01",
+      "commit_tested": "3734558eaaf1e66724dfeb0c37004b0fb06c050c",
+      "result": "failed",
+      "duration_ms": 8000,
+      "coverage": ["PR 16 Zizmor job", "verified wheel download, checksum and pip installation"],
+      "configuration": [".github/workflows/qa.yml", "Zizmor 1.27.0 manylinux wheel"],
+      "environment_signature": "GitHub-Actions|ubuntu-24.04|runner-2.336.0|pip",
+      "notes": "The official wheel downloaded and its SHA-256 passed, but the workflow renamed it to zizmor-1.27.0.whl; pip correctly rejected that non-canonical wheel filename before installation. The archive path now preserves the complete official wheel filename."
     }
   ]
 }
