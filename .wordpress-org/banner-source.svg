@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1544 500" role="img" aria-labelledby="title desc">
+  <title id="title">Image Usage Audit banner</title>
+  <desc id="desc">Image Usage Audit branding with image review cards and a magnifying glass.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1830"/>
+      <stop offset="1" stop-color="#123b58"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="80%" cy="40%" r="55%">
+      <stop offset="0" stop-color="#19becf" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#19becf" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1544" height="500" fill="url(#bg)"/>
+  <rect width="1544" height="500" fill="url(#glow)"/>
+  <g fill="#f4f9ff" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700">
+    <text x="90" y="160" font-size="74">IMAGE USAGE</text>
+    <text x="90" y="245" font-size="74" fill="#45dbe0">AUDIT</text>
+  </g>
+  <text x="90" y="340" fill="#cde1ec" font-family="DejaVu Sans, Arial, sans-serif" font-size="29">Review media usage before cleanup</text>
+  <g transform="translate(930 70)">
+    <g fill="#f8fcff" stroke="#7dc3d8" stroke-width="2">
+      <rect width="235" height="138" rx="18"/><rect x="270" width="235" height="138" rx="18"/>
+      <rect y="173" width="235" height="138" rx="18"/><rect x="270" y="173" width="235" height="138" rx="18"/>
+    </g>
+    <g fill="#254f69">
+      <rect x="15" y="15" width="205" height="85" rx="10"/><rect x="285" y="15" width="205" height="85" rx="10"/>
+      <rect x="15" y="188" width="205" height="85" rx="10"/><rect x="285" y="188" width="205" height="85" rx="10"/>
+    </g>
+    <g font-family="DejaVu Sans, Arial, sans-serif" font-size="22" font-weight="700" fill="#1e3646">
+      <circle cx="24" cy="118" r="7" fill="#24b07a"/><text x="39" y="125">USED</text>
+      <circle cx="294" cy="118" r="7" fill="#e1a434"/><text x="309" y="125">DRAFT</text>
+      <circle cx="24" cy="291" r="7" fill="#df5b5b"/><text x="39" y="298">REVIEW</text>
+      <circle cx="294" cy="291" r="7" fill="#df5b5b"/><text x="309" y="298">REVIEW</text>
+    </g>
+    <circle cx="170" cy="90" r="69" fill="none" stroke="#54e6e8" stroke-width="12"/>
+    <path d="m217 137 58 58" fill="none" stroke="#54e6e8" stroke-width="16" stroke-linecap="round"/>
+  </g>
+</svg>
