@@ -7,7 +7,7 @@ Preferred slug
 image-usage-audit
 
 Version
-2.2.9
+3.0.0
 
 WordPress.org contributor
 ussmarines
@@ -20,16 +20,16 @@ It classifies images as used, draft-only, or potentially unused, records provena
 
 The plugin never deletes, moves, edits, or rewrites media or site content. It makes no remote requests, loads no remote executable code, and collects no telemetry or personal data. Administrative actions require manage_options, state-changing requests use action-specific nonces, request values are validated and sanitized, output is escaped, and CSV formula-leading values are neutralized.
 
-The submitted package is version 2.2.9, compatible with WordPress 5.9 or later and PHP 7.4 or later, and tested through WordPress 7.0. The complete human-readable source, tests, and reproducible build instructions are publicly available in the GitHub repository.
+The submitted package is version 3.0.0, compatible with WordPress 5.9 or later and PHP 7.4 or later, and tested through WordPress 7.0. The complete human-readable source, tests, and reproducible build instructions are publicly available in the GitHub repository.
 
 Repository
 https://github.com/ussmarines/WP_image_usage_audit
 
 Public release
-https://github.com/ussmarines/WP_image_usage_audit/releases/tag/v2.2.9
+https://github.com/ussmarines/WP_image_usage_audit/releases/tag/v3.0.0
 
 Expected SHA-256
-69988a5d02090f74cc9ad09e1990bfb649a0d4cb1df0266e4476cfda53330866
+Read the checksum from the v3.0.0 release asset image-usage-audit.zip.sha256
 
 Optional note for reviewers
 ---------------------------
