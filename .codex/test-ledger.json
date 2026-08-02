@@ -1379,6 +1379,19 @@
       "configuration": ["phpunit.xml.dist", "phpcs.xml.dist", "scripts/validate-metadata.mjs", "scripts/validate-config.mjs", ".codex/test-ledger.json"],
       "environment_signature": "Windows|PowerShell-7.6.4|php-7.4.33-verified|node-v24.18.0|git-2.55.0.windows.3",
       "notes": "The complete branch diff contains only the requested sanitization, focused tests, README and release metadata changes, the stale 2.2.7 publisher cleanup, project-map and test-ledger updates. No temporary artifact or secret is tracked."
+    },
+    {
+      "name": "3.0.0 admin width regression targeted validation",
+      "command": "npm ci; npm run validate:config; npm run build:zip; rg -n '#iua-admin\\s*\\{[^}]*max-width|#iua-admin\\s*\\{[^}]*width' assets/admin.css; git diff --check; inspect complete origin/main diff",
+      "tool_version": "Node.js v24.18.0; npm 11.16.0; PowerShell 7.6.4; git 2.55.0.windows.3; ripgrep 15.1.0",
+      "date": "2026-08-02",
+      "commit_tested": "3752394b8742c721d027951f76a23e227ae99ef0+admin-width-worktree",
+      "result": "pass",
+      "duration_ms": 14117,
+      "coverage": ["locked npm dependency graph", "repository JSON and YAML configuration", "allow-listed release ZIP", "assets/admin.css principal-container width constraint", "branch patch whitespace and scope"],
+      "configuration": ["package.json", "package-lock.json", "scripts/validate-config.mjs", "scripts/build-zip.ps1", "assets/admin.css"],
+      "environment_signature": "Windows|PowerShell-7.6.4|node-v24.18.0|npm-11.16.0|git-2.55.0.windows.3|ripgrep-15.1.0",
+      "notes": "npm ci audited 393 packages with zero vulnerabilities. The ZIP build passed with 12 entries and SHA-256 88f06f237f8bf6956d83e5833dbe67135d52df3f87845025a32d737124166aa4. The targeted CSS guard found no fixed or maximum width applied to #iua-admin. No PHP file changed, so PHP syntax and static-analysis checks were not required."
     }
   ]
 }

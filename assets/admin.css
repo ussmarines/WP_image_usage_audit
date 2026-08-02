@@ -8,8 +8,6 @@
 	--iua-muted: #52606d;
 }
 
-#iua-admin { max-width: 1440px; }
-
 #iua-admin .iua-hero {
 	position: relative;
 	display: grid;
