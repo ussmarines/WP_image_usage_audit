@@ -110,7 +110,7 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 	<?php endif; ?>
 
 	<div class="iua-hero">
-		<img class="iua-brand-mark" src="<?php echo esc_url( IUA_URL . 'assets/image-usage-audit-mark.svg' ); ?>" alt="" aria-hidden="true" />
+		<img class="iua-brand-mark" src="<?php echo esc_url( plugins_url( 'assets/image-usage-audit-mark.svg', dirname( __DIR__ ) . '/image-usage-audit.php' ) ); ?>" alt="" aria-hidden="true" />
 		<div class="iua-hero-copy"><h1><?php esc_html_e( 'Image Usage Audit', 'image-usage-audit' ); ?></h1><div class="iua-sub"><?php esc_html_e( 'Audit image usage with provenance and safe review tools.', 'image-usage-audit' ); ?></div></div>
 		<span class="iua-version"><?php echo esc_html( 'v' . IUA_VERSION ); ?></span>
 	</div>
