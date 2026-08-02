@@ -1,0 +1,62 @@
+name: Prepare Image Usage Audit 3.0.0 final
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '.github/workflows/prepare-3.0.0-final.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-image-usage-audit-3.0.0-final
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'chore/wordpress-org-submission-assets'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: chore/wordpress-org-submission-assets
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Apply the 3.0.0 branding and metadata update
+        env:
+          PATCH_SCRIPT_GZIP_BASE64: >-
+            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
+        run: |
+          python3 - <<'PY'
+          import base64
+          import gzip
+          import os
+          script = gzip.decompress(base64.b64decode(os.environ['PATCH_SCRIPT_GZIP_BASE64'])).decode()
+          exec(compile(script, '<prepare-3.0.0>', 'exec'))
+          PY
+
+      - name: Validate generated metadata and package
+        run: |
+          npm ci
+          npm run validate:metadata
+          npm run validate:config
+          php -l image-usage-audit.php
+          php -l views/admin-page.php
+          npm run build:zip
+
+      - name: Commit the prepared release branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git add -- README.md readme.txt image-usage-audit.php languages/image-usage-audit.pot assets/admin.css assets/image-usage-audit-mark.svg views/admin-page.php scripts/validate-metadata.mjs scripts/verify-wordpress-org-submission.ps1 scripts/prepare-wordpress-org-svn.ps1 docs/wordpress-org .wordpress-org
+          git commit -m 'feat: apply 3.0.0 visual identity and release metadata'
+          git push origin HEAD:chore/wordpress-org-submission-assets
