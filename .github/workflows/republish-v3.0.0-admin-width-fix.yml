@@ -1,4 +1,4 @@
-name: Republish Image Usage Audit 3.0.0 admin width fix
+name: Publish Image Usage Audit 3.0.0 corrected package
 
 on:
   pull_request:
@@ -14,16 +14,17 @@ permissions:
   attestations: read
 
 concurrency:
-  group: republish-image-usage-audit-3.0.0-admin-width-fix
+  group: publish-image-usage-audit-3.0.0-corrected-package
   cancel-in-progress: false
 
 jobs:
-  republish:
+  publish-corrected-package:
     if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'release/v3.0.0-admin-width-fix'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      RELEASE_TAG: v3.0.0
+      ORIGINAL_TAG: v3.0.0
+      CORRECTED_TAG: v3.0.0-fixed
       RELEASE_SHA: ${{ github.event.pull_request.base.sha }}
       EXPECTED_ZIP_SHA256: 6807d10a7d8f555f43e3d5257370d1d6a2c1af03d1da8a6ae931da2d100ee4db
     steps:
@@ -42,7 +43,7 @@ jobs:
         run: |
           test "$RELEASE_SHA" = "$(git rev-parse HEAD)"
           test "$RELEASE_SHA" = "389a61e06a83b3a4d18406545d5b298219e70a5b"
-          node scripts/validate-release-tag.mjs "$RELEASE_TAG"
+          test "$(node -e "const fs=require('fs'); const m=fs.readFileSync('image-usage-audit.php','utf8').match(/Version:\s*(\d+\.\d+\.\d+)/); process.stdout.write(m[1]);")" = "3.0.0"
           if grep -Eq '#iua-admin[[:space:]]*\{[^}]*\b(max-width|width)[[:space:]]*:' assets/admin.css; then
             echo 'The fixed admin container still has a width cap.' >&2
             exit 1
@@ -56,58 +57,95 @@ jobs:
           sha256sum --check --strict image-usage-audit.zip.sha256
           test "$(sha256sum image-usage-audit.zip | cut -d' ' -f1)" = "$EXPECTED_ZIP_SHA256"
 
-      - name: Verify the existing fixed-package provenance attestation
+      - name: Verify the fixed-package provenance attestation
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh attestation verify dist/image-usage-audit.zip --repo "$GITHUB_REPOSITORY"
 
-      - name: Replace the 3.0.0 release assets and notes
+      - name: Create the corrected tag and release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null
+          if gh release view "$CORRECTED_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Corrected release $CORRECTED_TAG already exists." >&2
+            exit 1
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$CORRECTED_TAG" >/dev/null 2>&1; then
+            echo "Corrected tag $CORRECTED_TAG already exists without a release." >&2
+            exit 1
+          fi
 
-          cat > release-notes.md <<'EOF'
-          ## Image Usage Audit 3.0.0
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+            --method POST \
+            -f ref="refs/tags/$CORRECTED_TAG" \
+            -f sha="$RELEASE_SHA"
 
-          Version 3.0.0 applies the complete Image Usage Audit visual identity while preserving the plugin's non-destructive audit behavior.
+          cat > corrected-release-notes.md <<'EOF'
+          ## Image Usage Audit 3.0.0 — corrected package
 
-          ### Highlights
+          This is the corrected official package for Image Usage Audit 3.0.0.
 
-          - Added a responsive navy and teal branded administration header.
-          - Bundled the Image Usage Audit mark locally with no remote resources or tracking.
-          - Added the project banner to the GitHub README.
-          - Added WordPress.org banner and icon resources, submission documentation, and SVN publication helpers.
-          - Preserved WordPress 5.9+, PHP 7.4+, multisite support, existing security controls, provenance reporting, CSV export, manual review tools, and CDN rewrite support.
-
-          ### Included layout correction
+          ### Layout correction
 
           - Removed the accidental 1440px maximum width from the main administration container.
-          - The hero, settings cards, controls, tabs, and results table now use the full WordPress content width while retaining the native administration margins and responsive layout.
-          - Corrected package commit: `389a61e06a83b3a4d18406545d5b298219e70a5b`.
+          - The hero, settings cards, controls, tabs, and results table now use the full WordPress content width.
+          - Native WordPress administration margins and the responsive grid are preserved.
 
-          The downloadable ZIP was rebuilt from the corrected `main` commit, installed and activated in WordPress, checked with Plugin Check, tested through the authenticated AJAX and smoke-test flows, checksummed, and supplied with GitHub provenance attestation `38412666`.
+          ### Package identity
 
-          The protected `v3.0.0` Git ref remains immutable; the release ZIP and checksum below are the corrected official 3.0.0 package.
+          - Plugin version: `3.0.0`
+          - Corrected source commit: `389a61e06a83b3a4d18406545d5b298219e70a5b`
+          - ZIP SHA-256: `6807d10a7d8f555f43e3d5257370d1d6a2c1af03d1da8a6ae931da2d100ee4db`
+          - Provenance attestation: `38412666`
+
+          The exact ZIP was installed and activated in WordPress, tested through authenticated AJAX and smoke-test flows, and passed Plugin Check with no errors. The original `v3.0.0` release is immutable, so GitHub does not permit replacing its archived assets; this corrected release supersedes its downloadable ZIP.
           EOF
 
-          gh release edit "$RELEASE_TAG" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "Image Usage Audit 3.0.0" \
-            --notes-file release-notes.md
-
-          gh release upload "$RELEASE_TAG" \
+          gh release create "$CORRECTED_TAG" \
             dist/image-usage-audit.zip \
             dist/image-usage-audit.zip.sha256 \
-            --clobber \
-            --repo "$GITHUB_REPOSITORY"
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$RELEASE_SHA" \
+            --verify-tag \
+            --title "Image Usage Audit 3.0.0 — corrected layout" \
+            --notes-file corrected-release-notes.md \
+            --latest
 
-      - name: Verify the public corrected package
+      - name: Update the original immutable release notice
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          cat > original-release-notes.md <<'EOF'
+          ## Image Usage Audit 3.0.0
+
+          Version 3.0.0 introduced the complete Image Usage Audit visual identity across the plugin administration screen, GitHub documentation, and WordPress.org directory assets.
+
+          ### Important correction
+
+          GitHub has made this original release and its assets immutable. Its downloadable ZIP cannot be replaced.
+
+          Use the corrected official 3.0.0 package here:
+
+          https://github.com/ussmarines/WP_image_usage_audit/releases/tag/v3.0.0-fixed
+
+          The corrected package removes the accidental 1440px administration-width cap and has SHA-256:
+
+          `6807d10a7d8f555f43e3d5257370d1d6a2c1af03d1da8a6ae931da2d100ee4db`
+          EOF
+
+          gh release edit "$ORIGINAL_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --notes-file original-release-notes.md
+
+      - name: Verify the public corrected release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$CORRECTED_TAG" --jq '.object.sha')"
+          test "$tag_sha" = "$RELEASE_SHA"
+
           mkdir public-release
-          gh release download "$RELEASE_TAG" \
+          gh release download "$CORRECTED_TAG" \
             --repo "$GITHUB_REPOSITORY" \
             --pattern 'image-usage-audit.zip' \
             --pattern 'image-usage-audit.zip.sha256' \
