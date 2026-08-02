@@ -54,7 +54,8 @@ jobs:
           npm run validate:metadata
           npm run validate:config
           npm run build:zip
-          sha256sum --check --strict dist/image-usage-audit.zip.sha256
+          cd dist
+          sha256sum --check --strict image-usage-audit.zip.sha256
 
       - name: Test the exact production ZIP in WordPress
         run: |
@@ -70,7 +71,7 @@ jobs:
 
       - name: Stop WordPress
         if: always()
-        run: npx wp-env stop
+        run: npx wp-env stop || true
 
       - name: Attest the tested production ZIP
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
