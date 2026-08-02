@@ -1,22 +1,70 @@
 :root {
-	--iua-border: #dcdfe5;
-	--iua-soft: #f6f7f7;
-	--iua-accent: #2271b1;
-	--iua-muted: #646970;
+	--iua-border: #d4e1e9;
+	--iua-soft: #f3f8fb;
+	--iua-accent: #147c96;
+	--iua-accent-strong: #0d536d;
+	--iua-teal: #45dbe0;
+	--iua-navy: #0a1830;
+	--iua-muted: #52606d;
 }
+
+#iua-admin { max-width: 1440px; }
 
 #iua-admin .iua-hero {
-	background: linear-gradient(180deg, #f6f7f7, #fff);
-	border: 1px solid var(--iua-border);
-	border-radius: 10px;
-	padding: 12px 16px;
-	margin-bottom: 12px;
+	position: relative;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	gap: 18px;
+	align-items: center;
+	overflow: hidden;
+	background: radial-gradient(circle at 82% 35%, rgba(69, 219, 224, 0.24), transparent 34%), linear-gradient(135deg, var(--iua-navy), #123b58 64%, #125a73);
+	border: 1px solid #1d6079;
+	border-radius: 16px;
+	box-shadow: 0 12px 30px rgba(10, 24, 48, 0.16);
+	padding: 22px 24px;
+	margin-bottom: 18px;
 }
 
-#iua-admin .iua-sub,
-#iua-admin .description {
-	color: var(--iua-muted);
+#iua-admin .iua-hero::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background-image: linear-gradient(rgba(125, 195, 216, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 195, 216, 0.06) 1px, transparent 1px);
+	background-size: 34px 34px;
+	mask-image: linear-gradient(90deg, transparent 28%, #000);
 }
+
+#iua-admin .iua-brand-mark {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 76px;
+	height: 76px;
+	filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.22));
+}
+
+#iua-admin .iua-hero-copy,
+#iua-admin .iua-version { position: relative; z-index: 1; }
+
+#iua-admin .iua-hero h1 { color: #fff; font-size: 30px; line-height: 1.15; margin: 0 0 5px; }
+#iua-admin .iua-hero .iua-sub { color: #cde1ec; font-size: 14px; }
+
+#iua-admin .iua-version {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 64px;
+	padding: 7px 11px;
+	border: 1px solid rgba(84, 230, 232, 0.48);
+	border-radius: 999px;
+	background: rgba(7, 28, 48, 0.52);
+	color: #e8fcff;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+}
+
+#iua-admin .description { color: var(--iua-muted); }
 
 #iua-admin .iua-grid {
 	display: grid;
@@ -28,7 +76,8 @@
 #iua-admin .iua-card {
 	background: #fff;
 	border: 1px solid var(--iua-border);
-	border-radius: 10px;
+	border-radius: 12px;
+	box-shadow: 0 4px 14px rgba(10, 24, 48, 0.05);
 	padding: 16px;
 }
 
@@ -163,7 +212,22 @@
 }
 
 @media (max-width: 960px) {
-	#iua-admin .iua-grid {
-		grid-template-columns: 1fr;
-	}
+	#iua-admin .iua-grid { grid-template-columns: 1fr; }
+	#iua-admin .iua-hero { grid-template-columns: auto minmax(0, 1fr); }
+	#iua-admin .iua-version { grid-column: 2; justify-self: start; }
 }
+
+@media (max-width: 600px) {
+	#iua-admin .iua-hero { grid-template-columns: 1fr; padding: 20px; }
+	#iua-admin .iua-brand-mark { width: 64px; height: 64px; }
+	#iua-admin .iua-version { grid-column: 1; }
+}
+
+#iua-admin .button-primary { background: var(--iua-accent-strong); border-color: var(--iua-accent-strong); }
+#iua-admin .button-primary:hover,
+#iua-admin .button-primary:focus { background: var(--iua-accent); border-color: var(--iua-accent); }
+#iua-admin a:focus,
+#iua-admin button:focus,
+#iua-admin input:focus,
+#iua-admin textarea:focus,
+#iua-admin select:focus { box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--iua-teal); }

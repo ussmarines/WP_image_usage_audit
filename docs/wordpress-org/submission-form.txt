@@ -1,0 +1,36 @@
+WORDPRESS.ORG PLUGIN SUBMISSION
+
+Plugin name
+Image Usage Audit
+
+Preferred slug
+image-usage-audit
+
+Version
+3.0.0
+
+WordPress.org contributor
+ussmarines
+
+Brief overview
+--------------
+Image Usage Audit is a non-destructive administration plugin that scans registered image attachments and reports where they are referenced across published content, optional draft content, metadata, options, term descriptions, and common page-builder data.
+
+It classifies images as used, draft-only, or potentially unused, records provenance for detected references, supports reversible manual review decisions, exports results as CSV, reports orphan image files in the uploads directory, and supports optional CDN aliases and read-only path rewrite rules during scans.
+
+The plugin never deletes, moves, edits, or rewrites media or site content. It makes no remote requests, loads no remote executable code, and collects no telemetry or personal data. Administrative actions require manage_options, state-changing requests use action-specific nonces, request values are validated and sanitized, output is escaped, and CSV formula-leading values are neutralized.
+
+The submitted package is version 3.0.0, compatible with WordPress 5.9 or later and PHP 7.4 or later, and tested through WordPress 7.0. The complete human-readable source, tests, and reproducible build instructions are publicly available in the GitHub repository.
+
+Repository
+https://github.com/ussmarines/WP_image_usage_audit
+
+Public release
+https://github.com/ussmarines/WP_image_usage_audit/releases/tag/v3.0.0
+
+Expected SHA-256
+Read the checksum from the v3.0.0 release asset image-usage-audit.zip.sha256
+
+Optional note for reviewers
+---------------------------
+The plugin deliberately does not offer media deletion. Its classifications are heuristic review aids, and the interface repeatedly asks administrators to verify provenance and maintain backups before manually deleting any media.

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Image Usage Audit icon</title>
+  <desc id="desc">An image card inspected by a magnifying glass.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1d36"/>
+      <stop offset="1" stop-color="#114e66"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="40" fill="url(#bg)"/>
+  <rect x="37" y="49" width="150" height="132" rx="20" fill="#f6fafd" stroke="#7ecddc" stroke-width="3"/>
+  <rect x="51" y="64" width="122" height="79" rx="10" fill="#27536d"/>
+  <circle cx="76" cy="87" r="11" fill="#5de1e2"/>
+  <path d="M56 138 101 92l31 46z" fill="#5097a9"/>
+  <path d="m104 138 41-53 24 53z" fill="#37778f"/>
+  <circle cx="73" cy="169" r="18" fill="#22b57c"/>
+  <path d="m64 169 8 8 12-17" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="160" cy="133" r="57" fill="none" stroke="#56e8ea" stroke-width="13"/>
+  <path d="m199 174 27 46" fill="none" stroke="#56e8ea" stroke-width="18" stroke-linecap="round"/>
+</svg>

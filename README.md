@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".wordpress-org/banner-source.svg" alt="Image Usage Audit — Review media usage before cleanup" width="772">
+</p>
+
 # Image Usage Audit
 
 A non-destructive WordPress plugin for reviewing image usage before cleaning up the Media Library.
@@ -7,6 +11,8 @@ A non-destructive WordPress plugin for reviewing image usage before cleaning up 
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
 
 ## Overview
+
+Version 3.0.0 introduces the complete Image Usage Audit visual identity across the project documentation, WordPress.org assets, and the plugin administration screen while preserving the same non-destructive audit behavior.
 
 Image Usage Audit scans a WordPress site and groups registered image attachments as used, used only in draft content, or potentially unused. It also records where matches were found, reports image files that are not registered attachments, and exports the latest results as CSV.
 

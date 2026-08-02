@@ -5,7 +5,7 @@ Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.9
+Stable tag: 3.0.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,12 @@ No. Run a new scan to refresh the results.
 Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domains, or third-party integrations. Use the manual mark feature when needed.
 
 == Changelog ==
+
+= 3.0.0 =
+* Applied a complete Image Usage Audit visual identity to the administration screen and project documentation.
+* Added a bundled, self-contained brand mark with no remote resources or tracking.
+* Added WordPress.org banner and icon sources, submission guidance, and safer release-preparation helpers.
+* Preserved the non-destructive scanner, existing security controls, and WordPress 5.9 / PHP 7.4 compatibility.
 
 = 2.2.9 =
 * Added optional PayPal support links to the GitHub repository, WordPress.org metadata, and the plugin administration page.
@@ -101,6 +107,10 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 * First public release based on the internal stable branch.
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+
+Introduces the complete visual identity and WordPress.org publication resources without changing the plugin's non-destructive audit behavior.
 
 = 2.2.9 =
 

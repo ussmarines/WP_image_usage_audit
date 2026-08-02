@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-const version = '2.2.9';
+const version = '3.0.0';
 const donationUrl = 'https://paypal.me/ussmarinesdot';
 const main = fs.readFileSync('image-usage-audit.php', 'utf8');
 const readme = fs.readFileSync('readme.txt', 'utf8');

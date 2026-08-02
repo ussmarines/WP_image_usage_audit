@@ -3,7 +3,7 @@
  * Plugin Name: Image Usage Audit
  * Plugin URI: https://github.com/ussmarines/WP_image_usage_audit
  * Description: Audit image usage in the Media Library with provenance, CSV export, manual false-negative handling, and CDN rewrite support.
- * Version: 2.2.9
+ * Version: 3.0.0
  * Author: ussmarines
  * Author URI: https://github.com/ussmarines
  * License: GPL-2.0-or-later
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'IUA_VERSION' ) ) {
-	define( 'IUA_VERSION', '2.2.9' );
+	define( 'IUA_VERSION', '3.0.0' );
 }
 
 if ( ! defined( 'IUA_SLUG' ) ) {
