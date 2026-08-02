@@ -26,7 +26,7 @@ jobs:
     env:
       RELEASE_TAG: v3.0.0
       RELEASE_SHA: ${{ github.event.pull_request.base.sha }}
-      EXPECTED_ZIP_SHA256: 88f06f237f8bf6956d83e5833dbe67135d52df3f87845025a32d737124166aa4
+      EXPECTED_ZIP_SHA256: 6807d10a7d8f555f43e3d5257370d1d6a2c1af03d1da8a6ae931da2d100ee4db
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
