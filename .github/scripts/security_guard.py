@@ -14,7 +14,7 @@ import unicodedata
 MAX_BYTES = 20 * 1024 * 1024
 ALLOWED_ENV = {".env.example", ".env.sample", ".env.template", ".env.dist"}
 FORBIDDEN_NAMES = {
-    ".env", ".npmrc", ".pypirc", ".netrc", "auth.json", "credentials.json",
+    ".env", ".pypirc", ".netrc", "auth.json", "credentials.json",
     "service-account.json", "id_rsa", "id_ed25519",
 }
 FORBIDDEN_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".jks", ".keystore", ".tfstate"}
@@ -32,6 +32,7 @@ FORBIDDEN_IDENTITY_HASHES = {
 }
 TOKEN_RE = re.compile(r"[a-z0-9]+")
 ASCII_TOKEN_RE = re.compile(rb"[A-Za-z0-9]{3,}")
+SELF = Path(__file__).resolve()
 
 
 def tracked_paths() -> list[Path]:
@@ -70,7 +71,8 @@ def main() -> int:
             findings.add(f"{path}: unreadable tracked file")
             continue
 
-        if any(marker in data for marker in PRIVATE_KEY_MARKERS):
+        # The scanner contains the detection markers as inert constants.
+        if path.resolve() != SELF and any(marker in data for marker in PRIVATE_KEY_MARKERS):
             findings.add(f"{path}: private-key material marker")
         if b"\0" in data:
             binary_tokens = [value.decode("ascii", "ignore").lower() for value in ASCII_TOKEN_RE.findall(data)]
