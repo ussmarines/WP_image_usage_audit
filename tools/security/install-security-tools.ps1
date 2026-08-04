@@ -1,11 +1,12 @@
-[CmdletBinding()] param([switch]$Force)
-$ErrorActionPreference='Stop';Set-StrictMode -Version Latest
-$root=Join-Path $env:LOCALAPPDATA 'ussmarines-security-tools';$downloads=Join-Path $root 'downloads';New-Item -ItemType Directory -Force -Path $root,$downloads|Out-Null
-function Assert-Hash($p,$e){if((Get-FileHash -Algorithm SHA256 $p).Hash.ToLowerInvariant()-ne $e.ToLowerInvariant()){throw "SHA-256 invalide: $p"}}
-function Get-Verified($u,$p,$h){if($Force-or-not(Test-Path $p)){Invoke-WebRequest -UseBasicParsing $u -OutFile $p};Assert-Hash $p $h}
-function Expand-Clean($a,$d){Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $d;New-Item -ItemType Directory -Force $d|Out-Null;Expand-Archive $a $d -Force}
-$oa=Join-Path $downloads 'opengrep-core_windows_x86.zip';Get-Verified 'https://github.com/opengrep/opengrep/releases/download/v1.22.0/opengrep-core_windows_x86.zip' $oa '53d87310653faf591d410389e04335ca3a2558fe72c3f5a949cd9a71628329e7';$or=Join-Path $root 'opengrep-1.22.0';Expand-Clean $oa $or;$og=Get-ChildItem $or -Recurse -File|Where-Object Name -in @('opengrep.exe','opengrep-core.exe')|Select-Object -First 1
-$tc=Join-Path $downloads 'trivy_checksums.txt';Get-Verified 'https://github.com/aquasecurity/trivy/releases/download/v0.73.0/trivy_0.73.0_checksums.txt' $tc '36890275ffdff13025e9bd9fe039724c6e36bf58e698499856b801f619046fe2';$l=Get-Content $tc|Where-Object{$_-match'(?i)windows-64bit\.zip$'}|Select-Object -First 1;$p=$l-split'\s+',2;$ta=Join-Path $downloads $p[1].TrimStart('*');Get-Verified "https://github.com/aquasecurity/trivy/releases/download/v0.73.0/$($p[1].TrimStart('*'))" $ta $p[0];$tr=Join-Path $root 'trivy-0.73.0';Expand-Clean $ta $tr;$tv=Get-ChildItem $tr -Recurse -Filter trivy.exe|Select-Object -First 1
-$gc=Join-Path $downloads 'gitleaks_checksums.txt';Get-Verified 'https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_checksums.txt' $gc '061476c21adaf5441516f96f185c1a4706a83cd6329b9b38762271b3d4a52fae';$pat=if($env:PROCESSOR_ARCHITECTURE-eq'ARM64'){'(?i)windows_arm64\.zip$'}else{'(?i)windows_x32\.zip$'};$l=Get-Content $gc|Where-Object{$_-match$pat}|Select-Object -First 1;$p=$l-split'\s+',2;$ga=Join-Path $downloads $p[1].TrimStart('*');Get-Verified "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/$($p[1].TrimStart('*'))" $ga $p[0];$gr=Join-Path $root 'gitleaks-8.30.1';Expand-Clean $ga $gr;$gl=Get-ChildItem $gr -Recurse -Filter gitleaks.exe|Select-Object -First 1
-if(-not(Get-Command py -ErrorAction SilentlyContinue)){throw 'Python avec le lanceur py est requis.'};$zr=Join-Path $root 'zizmor-1.29.0';if($Force){Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $zr};if(-not(Test-Path $zr)){& py -3.12 -m venv $zr;if($LASTEXITCODE){& py -3 -m venv $zr}};&(Join-Path $zr 'Scripts\python.exe')-m pip install --disable-pip-version-check --no-input 'zizmor==1.29.0';if($LASTEXITCODE){throw 'Installation zizmor impossible.'}
-@{tools=@{opengrep=@{version='1.22.0';executable=$og.FullName};trivy=@{version='0.73.0';executable=$tv.FullName};gitleaks=@{version='8.30.1';executable=$gl.FullName};zizmor=@{version='1.29.0';executable=(Join-Path $zr 'Scripts\zizmor.exe')}}}|ConvertTo-Json -Depth 5|Set-Content -Encoding UTF8 (Join-Path $root 'installed-tools.json');Write-Host "Installation terminée: $root" -ForegroundColor Green
+[CmdletBinding()]
+param([switch]$Force)
+$ErrorActionPreference='Stop'
+$Manifest=Join-Path $env:LOCALAPPDATA 'ussmarines-security-tools\installed-tools.json'
+if(Test-Path $Manifest){
+ $Tools=(Get-Content -Raw $Manifest|ConvertFrom-Json).tools
+ $Expected=@{opengrep='1.22.0';trivy='0.70.0';gitleaks='8.30.1';zizmor='1.26.1'}
+ foreach($Name in $Expected.Keys){if($Tools.$Name.version-ne$Expected[$Name]){throw "Version partagée incorrecte pour $Name. Relance l’installateur canonique."}}
+ Write-Host 'Les outils partagés vérifiés sont déjà installés.' -ForegroundColor Green
+ exit 0
+}
+throw 'Installe les outils une seule fois depuis SpaceShooter-2D-web ou MailPerch avec .\tools\security\install-security-tools.ps1, puis relance ce script.'
