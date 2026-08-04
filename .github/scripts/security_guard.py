@@ -18,10 +18,14 @@ FORBIDDEN_NAMES = {
     "service-account.json", "id_rsa", "id_ed25519",
 }
 FORBIDDEN_SUFFIXES = {".pem", ".key", ".p12", ".pfx", ".jks", ".keystore", ".tfstate"}
+# Split the signatures in source so external secret scanners do not treat this
+# detector's own inert constants as leaked private-key material.
 PRIVATE_KEY_MARKERS = (
-    b"-----BEGIN PRIVATE KEY-----", b"-----BEGIN ENCRYPTED PRIVATE KEY-----",
-    b"-----BEGIN RSA PRIVATE KEY-----", b"-----BEGIN OPENSSH PRIVATE KEY-----",
-    b"-----BEGIN EC PRIVATE KEY-----",
+    b"-----BEGIN " + b"PRIVATE KEY-----",
+    b"-----BEGIN " + b"ENCRYPTED PRIVATE KEY-----",
+    b"-----BEGIN " + b"RSA PRIVATE KEY-----",
+    b"-----BEGIN " + b"OPENSSH PRIVATE KEY-----",
+    b"-----BEGIN " + b"EC PRIVATE KEY-----",
 )
 # Hashes keep the private identity terms out of source and CI output.
 FORBIDDEN_IDENTITY_HASHES = {
@@ -71,7 +75,6 @@ def main() -> int:
             findings.add(f"{path}: unreadable tracked file")
             continue
 
-        # The scanner contains the detection markers as inert constants.
         if path.resolve() != SELF and any(marker in data for marker in PRIVATE_KEY_MARKERS):
             findings.add(f"{path}: private-key material marker")
         if b"\0" in data:
