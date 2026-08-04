@@ -1,0 +1,38 @@
+rules:
+  - id: javascript-eval
+    message: Dynamic code execution requires explicit security review.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern: eval(...)
+  - id: javascript-shell-execution
+    message: Shell command execution requires strict validation.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: exec(...)
+      - pattern: execSync(...)
+      - pattern: spawn(...)
+  - id: javascript-html-injection
+    message: Review HTML assignment for untrusted content.
+    severity: WARNING
+    languages: [javascript, typescript]
+    pattern: $EL.innerHTML = $VALUE
+  - id: php-eval
+    message: Dynamic PHP execution is prohibited.
+    severity: ERROR
+    languages: [php]
+    pattern: eval(...)
+  - id: php-shell-command
+    message: OS command execution requires explicit review.
+    severity: ERROR
+    languages: [php]
+    pattern-either:
+      - pattern: shell_exec(...)
+      - pattern: exec(...)
+      - pattern: system(...)
+      - pattern: passthru(...)
+  - id: php-unserialize
+    message: Review unserialize input and prefer structured formats.
+    severity: WARNING
+    languages: [php]
+    pattern: unserialize(...)
