@@ -12,7 +12,7 @@ def run(name,cmd,results,cwd,output=None):
  results[name]={'exit_code':code,'status':'passed' if code==0 else 'findings-or-error'};print(f"[{name}] {'OK' if code==0 else 'inspect sanitized report'}")
 def main():
  p=argparse.ArgumentParser();p.add_argument('--profile',choices=('quick','full'),default='full');p.add_argument('--enforce',action='store_true');a=p.parse_args();repo=Path(__file__).resolve().parents[2];mp=Path(os.environ['LOCALAPPDATA'])/'ussmarines-security-tools'/'installed-tools.json'
- if not mp.is_file():raise RuntimeError('Run tools/security/install-security-tools.ps1 first.')
+ if not mp.is_file():raise RuntimeError('Run the canonical installer from SpaceShooter-2D-web or MailPerch first.')
  t=json.loads(mp.read_text(encoding='utf-8-sig'))['tools'];reports=repo/'tools'/'security'/'.reports'/datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S');reports.mkdir(parents=True);r={};guard=[sys.executable,str(repo/'.github/scripts/security_guard.py'),'--report',str(reports/'identity-guard.json')]
  if a.profile=='full':guard.append('--history')
  run('identity-guard',guard,r,repo);g=[t['gitleaks']['executable'],'git' if a.profile=='full' else 'dir','.'];
@@ -22,5 +22,5 @@ def main():
  if (repo/'composer.lock').is_file():
   c=shutil.which('composer.bat') or shutil.which('composer')
   if c:run('composer-audit',[c,'audit','--locked','--format=json'],r,repo,reports/'composer-audit.json')
- run('zizmor',[t['zizmor']['executable'],'--format','json',str(repo)],r,repo,reports/'zizmor.json');failed=sum(x['exit_code']!=0 for x in r.values());(reports/'summary.json').write_text(json.dumps({'schema_version':1,'generated_at_utc':datetime.now(timezone.utc).isoformat(),'profile':a.profile,'safe_output':True,'matched_values_included':False,'failed_checks':failed,'results':r},indent=2,ensure_ascii=False)+'\n',encoding='utf-8');print(f'Sanitized reports: {reports}');return 1 if a.enforce and failed else 0
+ run('zizmor',[t['zizmor']['executable'],'--offline','--format','json',str(repo)],r,repo,reports/'zizmor.json');failed=sum(x['exit_code']!=0 for x in r.values());(reports/'summary.json').write_text(json.dumps({'schema_version':1,'generated_at_utc':datetime.now(timezone.utc).isoformat(),'profile':a.profile,'safe_output':True,'matched_values_included':False,'failed_checks':failed,'results':r},indent=2,ensure_ascii=False)+'\n',encoding='utf-8');print(f'Sanitized reports: {reports}');return 1 if a.enforce and failed else 0
 if __name__=='__main__':raise SystemExit(main())
