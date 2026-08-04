@@ -17,7 +17,6 @@ service-account.json
 service-account*.json
 !credentials.example.json
 !service-account.example.json
-.npmrc
 .pypirc
 .netrc
 *.pem
