@@ -22,8 +22,8 @@ This document records the evidence available on 2026-07-12. It is a technical di
 
 | Evidence | Finding | Required conclusion |
 | --- | --- | --- |
-| Plugin header and `readme.txt` | Author/contributor name is `elliot` | Confirm the legal identity and preferred copyright notice. |
-| Git history and GitHub contributor API | Commits are attributed to `ussmarines`; the API lists only that account | This supports repository control, not sole copyright ownership. Confirm whether `elliot` and `ussmarines` are the same rights holder. |
+| Plugin header and `readme.txt` | Author/contributor metadata identifies `ussmarines` | Confirm the verified rights holder and preferred copyright notice without publishing civil identity data. |
+| Git history and GitHub contributor API | Commits are attributed to `ussmarines`; the API lists only that account | This supports repository control, not sole copyright ownership. Retain documentary evidence linking the public account to the verified rights holder. |
 | Repository records | No CLA, assignment, employment statement, or contributor agreement was found | Sole ownership is not demonstrated. Obtain and retain written evidence before relicensing. |
 | Runtime PHP, JS, and CSS | No bundled vendor directory, remote executable code, fonts, images, or third-party runtime library was found; jQuery is supplied by WordPress | Record the provenance of any code copied or generated outside this repository even if no notice is currently present. |
 | Development dependencies | Composer/npm packages are development-only and excluded from the ZIP | Their licenses do not become runtime package content, but lockfile audits and notices must remain part of release QA. |
@@ -80,7 +80,7 @@ Do not put a draft proprietary license into the final ZIP. Keep the present GPL 
 
 ## Legal checks still required
 
-- Verify the identity relationship between `elliot` and `ussmarines`.
+- Verify the legal rights-holder identity associated with `ussmarines` without publishing civil identity data.
 - Collect authorship/assignment records for every contribution, including any code obtained outside Git.
 - Locate any previously distributed 2.2.1, 2.2.2, 2.2.3, or 2.2.5 artifacts and preserve their license evidence.
 - Confirm whether employment, contractor, AI-tool, template, or copied-code terms affect ownership.

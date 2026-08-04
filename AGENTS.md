@@ -8,9 +8,18 @@
 - Preserve capability checks, nonces, input validation, sanitization, SQL safety, and late output escaping.
 - Do not add a frontend framework or pipeline without a demonstrated need.
 - Do not add a production dependency without justification; use development dependencies for QA tools.
-- Never push directly to `main`.
+- Never push directly to `main` unless the owner has explicitly authorized that exact bounded operation in the current request. Never force-push or rewrite history.
 - Do not bump the plugin version for documentation-only or CI-only changes.
 - For every future release, synchronize the PHP plugin header, `IUA_VERSION`, `readme.txt` stable tag and changelog, and POT version/catalog.
+
+## Secrets, identité et agents
+
+- Lire et appliquer `SECURITY_PRODUCTION_RULES.md` avant toute opération touchant la configuration, la CI, la production, une release ou des credentials.
+- Ne jamais ouvrir, afficher, copier ou résumer un `.env`, un fichier de credentials, un coffre, une clé privée ou `~/.codex/auth.json` sans nécessité exacte et autorisation explicite.
+- Vérifier les chemins, permissions, schémas et noms de variables sans exposer les valeurs.
+- Les secrets restent dans un coffre et sont injectés uniquement à l’exécution. Ils ne passent ni dans les prompts, arguments, URL, logs, captures, artefacts ou rapports.
+- Tout secret exposé doit être révoqué ou tourné immédiatement, puis l’incident et sa cause doivent être examinés.
+- Utiliser uniquement l’identité publique `ussmarines` et le profil `https://github.com/ussmarines`.
 
 ## Test reuse protocol
 
