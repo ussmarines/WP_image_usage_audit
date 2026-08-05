@@ -58,6 +58,7 @@ jobs:
         run: |
           npm ci
           npm audit --audit-level=high
+          composer update --lock --no-install --no-interaction
           composer install --no-interaction --prefer-dist
           composer validate --strict --no-interaction
           composer audit --locked --no-interaction
