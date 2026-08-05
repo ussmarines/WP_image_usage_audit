@@ -6,6 +6,7 @@ const runtimePaths = [
   'pixcensus-media-audit.php',
   'uninstall.php',
   'readme.txt',
+  'LICENSE',
   'assets/admin.css',
   'assets/admin.js',
   'assets/pixcensus-media-audit-mark.svg',
@@ -26,8 +27,37 @@ for (const relativePath of runtimePaths) {
   }
 }
 
+const forbiddenLegacyPaths = [
+  'image-usage-audit.php',
+  'assets/image-usage-audit-mark.svg',
+  'includes/class-iua-cdn-settings.php',
+  'includes/class-iua-csv.php',
+  'includes/class-iua-scanner.php',
+  'languages/image-usage-audit.pot',
+];
+for (const relativePath of forbiddenLegacyPaths) {
+  if (fs.existsSync(path.join(root, relativePath))) {
+    throw new Error(`Legacy runtime path remains: ${relativePath}`);
+  }
+}
+
+const directoryAssets = [
+  '.wordpress-org/banner-772x250.png',
+  '.wordpress-org/banner-1544x500.png',
+  '.wordpress-org/icon-128x128.png',
+  '.wordpress-org/icon-256x256.png',
+  '.wordpress-org/banner-source.svg',
+  '.wordpress-org/icon.svg',
+];
+for (const relativePath of directoryAssets) {
+  if (!fs.existsSync(path.join(root, relativePath))) {
+    throw new Error(`Missing WordPress.org PixCensus asset: ${relativePath}`);
+  }
+}
+
 const main = fs.readFileSync(path.join(root, 'pixcensus-media-audit.php'), 'utf8');
 const readme = fs.readFileSync(path.join(root, 'readme.txt'), 'utf8');
+const githubReadme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 const requiredMain = [
   'Plugin Name: PixCensus — Media Usage Audit',
   'Version: 3.0.1',
@@ -42,6 +72,9 @@ for (const token of requiredMain) {
   if (!main.includes(token)) throw new Error(`Required main-plugin control is missing: ${token}`);
 }
 if (!readme.includes('Stable tag: 3.0.1')) throw new Error('The WordPress.org stable tag is not 3.0.1.');
+if (!githubReadme.includes('.wordpress-org/banner-1544x500.png')) {
+  throw new Error('The GitHub README does not use the PixCensus banner.');
+}
 
 const ajaxMethods = [
   'ajax_run_scan',
