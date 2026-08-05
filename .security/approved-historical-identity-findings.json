@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "findings": [
+    {"location": "blob:0bead63b1ba8:readme.txt:2", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:1630284eb7ff:image-usage-audit.php:7", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:2980d91a9c22:readme.txt:2", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:349ef9cd85f8:image-usage-audit.php:7", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:51d42cb8b11d:readme.txt:2", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:59258b8191a0:image-usage-audit.php:7", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:a5f01c391209:docs/codex/LICENSING_DECISION.md:25", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:a5f01c391209:docs/codex/LICENSING_DECISION.md:26", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:a5f01c391209:docs/codex/LICENSING_DECISION.md:83", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:d93490601d7e:image-usage-audit.php:7", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:e65fb8e6e873:languages/image-usage-audit.pot:1", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:e65fb8e6e873:languages/image-usage-audit.pot:33", "category": "forbidden personal identifier in historical content"},
+    {"location": "blob:fbb56eac99e2:readme.txt:2", "category": "forbidden personal identifier in historical content"}
+  ]
+}

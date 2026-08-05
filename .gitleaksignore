@@ -1,2 +1,5 @@
 # Verified localStorage preference identifier; not a credential.
 assets/admin.js:generic-api-key:254
+
+# Historical scanner source contains private-key header markers as detection constants, not key material.
+9fd824a54e56a402a55e62e66773496492bf9ece:.github/scripts/security_guard.py:private-key:22
