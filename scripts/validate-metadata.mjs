@@ -16,7 +16,10 @@ const checks = [
 	[main.includes(`define( 'IUA_VERSION', '${version}' )`), 'IUA_VERSION'],
 	[readme.includes(`Stable tag: ${version}`), 'readme stable tag'],
 	[donateLinkMatch !== null && donateLinkMatch[1] === donationUrl, 'WordPress.org donate link'],
-	[funding.trim() === expectedFunding, 'GitHub funding link'],
+	[
+	funding.replace(/\r\n/g, '\n').trim() === expectedFunding,
+	'GitHub funding link',
+],
 	[pot.includes(`Project-Id-Version: Image Usage Audit ${version}`), 'POT project version'],
 	[main.includes('Text Domain: image-usage-audit'), 'plugin text domain'],
 	[pot.includes('Language-Team:'), 'POT metadata'],
