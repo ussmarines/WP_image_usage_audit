@@ -44,15 +44,25 @@ jobs:
           python3 -m pip install --disable-pip-version-check --no-input --only-binary=:all: 'Pillow==11.3.0'
           python3 - <<'PY'
           from pathlib import Path
-          path = Path('scripts/internal-pixcensus-migration.py')
-          content = path.read_text(encoding='utf-8')
+          migration = Path('scripts/internal-pixcensus-migration.py')
+          content = migration.read_text(encoding='utf-8')
           old = 'if path.name != "readme.txt":\n            updated = updated.replace("3.0.0", VERSION)'
           new = 'if path.name not in {"readme.txt", "package-lock.json", "composer.lock"}:\n            updated = updated.replace("3.0.0", VERSION)'
           if old not in content:
               raise SystemExit('Expected version-replacement guard was not found.')
-          path.write_text(content.replace(old, new, 1), encoding='utf-8', newline='\n')
+          migration.write_text(content.replace(old, new, 1), encoding='utf-8', newline='\n')
           PY
           python3 scripts/internal-pixcensus-migration.py
+          python3 - <<'PY'
+          from pathlib import Path
+          validator = Path('scripts/validate-branding.mjs')
+          content = validator.read_text(encoding='utf-8')
+          old = "  'check_ajax_referer(',"
+          new = "  'wp_verify_nonce(',"
+          if old not in content:
+              raise SystemExit('Expected AJAX nonce assertion was not found.')
+          validator.write_text(content.replace(old, new, 1), encoding='utf-8', newline='\n')
+          PY
 
       - name: Install locked development dependencies
         run: |
