@@ -1,0 +1,86 @@
+name: Prepare PixCensus 3.0.1
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - '.github/workflows/prepare-pixcensus-3.0.1.yml'
+      - 'scripts/internal-pixcensus-migration.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: prepare-pixcensus-3.0.1
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/pixcensus-rebrand-3.0.1-work'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: feat/pixcensus-rebrand-3.0.1-work
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Generate the complete PixCensus migration
+        run: |
+          python3 -m pip install --disable-pip-version-check --no-input --only-binary=:all: 'Pillow==11.3.0'
+          python3 scripts/internal-pixcensus-migration.py
+
+      - name: Install locked development dependencies
+        run: |
+          npm ci
+          npm audit --audit-level=high
+          composer install --no-interaction --prefer-dist
+          composer validate --strict --no-interaction
+          composer audit --locked --no-interaction
+
+      - name: Rebuild the translation catalog
+        run: |
+          npx wp-env start
+          npx wp-env run cli wp i18n make-pot /var/www/html/wp-content/plugins/WP_image_usage_audit /var/www/html/wp-content/plugins/WP_image_usage_audit/languages/pixcensus-media-audit.pot --domain=pixcensus-media-audit --exclude=.agents,docs,tests,vendor,node_modules,scripts,dist --headers='{"POT-Creation-Date":"2026-08-05T17:30:00+00:00","Report-Msgid-Bugs-To":"https://github.com/ussmarines/WP_image_usage_audit/issues"}'
+          npx wp-env stop
+
+      - name: Validate the migrated plugin
+        run: |
+          composer analyse
+          composer test
+          composer lint
+          npm run test:property
+          npm run validate:metadata
+          npm run validate:config
+          npm run validate:branding
+          npm run build:zip
+          php -l pixcensus-media-audit.php
+          find includes views tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+          php -l uninstall.php
+          node --check assets/admin.js
+          git diff --check
+
+      - name: Commit the reviewed migration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git add -A
+          git commit -m 'feat: rebrand plugin as PixCensus 3.0.1'
+          git push origin HEAD:feat/pixcensus-rebrand-3.0.1-work
