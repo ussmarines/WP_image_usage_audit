@@ -71,6 +71,7 @@ jobs:
 
       - name: Validate the migrated plugin
         run: |
+          composer lint:fix
           composer analyse
           composer test
           composer lint
