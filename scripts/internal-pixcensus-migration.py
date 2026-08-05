@@ -95,7 +95,7 @@ def replace_identity() -> None:
         updated = content
         for old, new in REPLACEMENTS:
             updated = updated.replace(old, new)
-        if path.name != "readme.txt":
+        if path.name not in {"readme.txt", "package-lock.json", "composer.lock"}:
             updated = updated.replace("3.0.0", VERSION)
         if updated != content:
             path.write_text(updated, encoding="utf-8", newline="\n")

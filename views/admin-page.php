@@ -3,12 +3,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$iua_include_drafts = '1' === get_option( 'iua_include_drafts', '1' );
-$iua_cdn_aliases    = (string) get_option( 'iua_cdn_aliases', '' );
-$iua_cdn_rewrites   = (string) get_option( 'iua_cdn_rewrites', '' );
+$pixcensus_include_drafts = '1' === get_option( 'pixcensus_include_drafts', '1' );
+$pixcensus_cdn_aliases    = (string) get_option( 'pixcensus_cdn_aliases', '' );
+$pixcensus_cdn_rewrites   = (string) get_option( 'pixcensus_cdn_rewrites', '' );
 
-$iua_usage = get_option(
-	'iua_usage_results',
+$pixcensus_usage = get_option(
+	'pixcensus_usage_results',
 	array(
 		'used_ids'       => array(),
 		'draft_only_ids' => array(),
@@ -19,122 +19,122 @@ $iua_usage = get_option(
 	)
 );
 
-$iua_manual_ids = array_map( 'intval', (array) get_option( 'iua_manual_used_ids', array() ) );
+$pixcensus_manual_ids = array_map( 'intval', (array) get_option( 'pixcensus_manual_used_ids', array() ) );
 
-$iua_unused_ids = array_values(
+$pixcensus_unused_ids = array_values(
 	array_diff(
-		array_map( 'intval', (array) ( $iua_usage['unused_ids'] ?? array() ) ),
-		$iua_manual_ids
+		array_map( 'intval', (array) ( $pixcensus_usage['unused_ids'] ?? array() ) ),
+		$pixcensus_manual_ids
 	)
 );
 
-$iua_draft_ids = array_values(
+$pixcensus_draft_ids = array_values(
 	array_diff(
-		array_map( 'intval', (array) ( $iua_usage['draft_only_ids'] ?? array() ) ),
-		$iua_manual_ids
+		array_map( 'intval', (array) ( $pixcensus_usage['draft_only_ids'] ?? array() ) ),
+		$pixcensus_manual_ids
 	)
 );
 
-$iua_used_ids = array_values(
+$pixcensus_used_ids = array_values(
 	array_unique(
 		array_merge(
-			array_map( 'intval', (array) ( $iua_usage['used_ids'] ?? array() ) ),
-			$iua_manual_ids
+			array_map( 'intval', (array) ( $pixcensus_usage['used_ids'] ?? array() ) ),
+			$pixcensus_manual_ids
 		)
 	)
 );
 
-$iua_raw_tab = filter_input( INPUT_GET, 'iua_tab', FILTER_UNSAFE_RAW );
-$iua_tab     = is_string( $iua_raw_tab ) ? sanitize_key( $iua_raw_tab ) : 'unused';
+$pixcensus_raw_tab = filter_input( INPUT_GET, 'pixcensus_tab', FILTER_UNSAFE_RAW );
+$pixcensus_tab     = is_string( $pixcensus_raw_tab ) ? sanitize_key( $pixcensus_raw_tab ) : 'unused';
 
-if ( ! in_array( $iua_tab, array( 'unused', 'draft', 'used' ), true ) ) {
-	$iua_tab = 'unused';
+if ( ! in_array( $pixcensus_tab, array( 'unused', 'draft', 'used' ), true ) ) {
+	$pixcensus_tab = 'unused';
 }
 
-$iua_raw_filter = filter_input( INPUT_GET, 'iua_filter', FILTER_UNSAFE_RAW );
-$iua_filter     = is_string( $iua_raw_filter ) ? sanitize_key( $iua_raw_filter ) : '';
+$pixcensus_raw_filter = filter_input( INPUT_GET, 'pixcensus_filter', FILTER_UNSAFE_RAW );
+$pixcensus_filter     = is_string( $pixcensus_raw_filter ) ? sanitize_key( $pixcensus_raw_filter ) : '';
 
-if ( ! in_array( $iua_filter, array( '', 'manual' ), true ) ) {
-	$iua_filter = '';
+if ( ! in_array( $pixcensus_filter, array( '', 'manual' ), true ) ) {
+	$pixcensus_filter = '';
 }
 
-$iua_manual_used_ids = array_values( array_intersect( $iua_used_ids, $iua_manual_ids ) );
-$iua_all_ids         = array();
+$pixcensus_manual_used_ids = array_values( array_intersect( $pixcensus_used_ids, $pixcensus_manual_ids ) );
+$pixcensus_all_ids         = array();
 
-if ( 'unused' === $iua_tab ) {
-	$iua_all_ids = $iua_unused_ids;
-} elseif ( 'draft' === $iua_tab ) {
-	$iua_all_ids = $iua_draft_ids;
+if ( 'unused' === $pixcensus_tab ) {
+	$pixcensus_all_ids = $pixcensus_unused_ids;
+} elseif ( 'draft' === $pixcensus_tab ) {
+	$pixcensus_all_ids = $pixcensus_draft_ids;
 } else {
-	$iua_all_ids = ( 'manual' === $iua_filter ) ? $iua_manual_used_ids : $iua_used_ids;
+	$pixcensus_all_ids = ( 'manual' === $pixcensus_filter ) ? $pixcensus_manual_used_ids : $pixcensus_used_ids;
 }
 
-$iua_per_page = 50;
-$iua_total    = count( $iua_all_ids );
+$pixcensus_per_page = 50;
+$pixcensus_total    = count( $pixcensus_all_ids );
 
-$iua_raw_page = filter_input( INPUT_GET, 'iua_page', FILTER_VALIDATE_INT );
-$iua_page     = ( false !== $iua_raw_page && null !== $iua_raw_page ) ? max( 1, absint( $iua_raw_page ) ) : 1;
-$iua_offset   = ( $iua_page - 1 ) * $iua_per_page;
-$iua_ids      = array_slice( $iua_all_ids, $iua_offset, $iua_per_page );
+$pixcensus_raw_page = filter_input( INPUT_GET, 'pixcensus_page', FILTER_VALIDATE_INT );
+$pixcensus_page     = ( false !== $pixcensus_raw_page && null !== $pixcensus_raw_page ) ? max( 1, absint( $pixcensus_raw_page ) ) : 1;
+$pixcensus_offset   = ( $pixcensus_page - 1 ) * $pixcensus_per_page;
+$pixcensus_ids      = array_slice( $pixcensus_all_ids, $pixcensus_offset, $pixcensus_per_page );
 
-$iua_scanned_at = ! empty( $iua_usage['scanned_at'] )
-	? wp_date( 'Y-m-d H:i', (int) $iua_usage['scanned_at'] )
-	: __( 'Never', 'image-usage-audit' );
+$pixcensus_scanned_at = ! empty( $pixcensus_usage['scanned_at'] )
+	? wp_date( 'Y-m-d H:i', (int) $pixcensus_usage['scanned_at'] )
+	: __( 'Never', 'pixcensus-media-audit' );
 
-$iua_export_url = wp_nonce_url(
+$pixcensus_export_url = wp_nonce_url(
 	add_query_arg(
 		array(
-			'action' => 'iua_export_csv',
-			'tab'    => $iua_tab,
-			'filter' => ( 'used' === $iua_tab && 'manual' === $iua_filter ) ? 'manual' : null,
+			'action' => 'pixcensus_export_csv',
+			'tab'    => $pixcensus_tab,
+			'filter' => ( 'used' === $pixcensus_tab && 'manual' === $pixcensus_filter ) ? 'manual' : null,
 		),
 		admin_url( 'admin-post.php' )
 	),
-	'iua_export_csv'
+	'pixcensus_export_csv'
 );
 
-$iua_total_pages = max( 1, (int) ceil( $iua_total / $iua_per_page ) );
+$pixcensus_total_pages = max( 1, (int) ceil( $pixcensus_total / $pixcensus_per_page ) );
 
-$iua_raw_notice = filter_input( INPUT_GET, 'iua_notice', FILTER_UNSAFE_RAW );
-$iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice ) : '';
+$pixcensus_raw_notice = filter_input( INPUT_GET, 'pixcensus_notice', FILTER_UNSAFE_RAW );
+$pixcensus_notice     = is_string( $pixcensus_raw_notice ) ? sanitize_key( $pixcensus_raw_notice ) : '';
 ?>
-<div class="wrap" id="iua-admin">
-	<?php if ( 'settings-saved' === $iua_notice ) : ?>
+<div class="wrap" id="pixcensus-admin">
+	<?php if ( 'settings-saved' === $pixcensus_notice ) : ?>
 		<div class="notice notice-success is-dismissible">
-			<p><?php esc_html_e( 'Settings saved.', 'image-usage-audit' ); ?></p>
+			<p><?php esc_html_e( 'Settings saved.', 'pixcensus-media-audit' ); ?></p>
 		</div>
-	<?php elseif ( 'invalid-cdn-settings' === $iua_notice ) : ?>
+	<?php elseif ( 'invalid-cdn-settings' === $pixcensus_notice ) : ?>
 		<div class="notice notice-error is-dismissible">
-			<p><?php esc_html_e( 'CDN settings were not saved. Use at most 20 host-only aliases and 20 FROM => /wp-content/uploads rewrite rules.', 'image-usage-audit' ); ?></p>
+			<p><?php esc_html_e( 'CDN settings were not saved. Use at most 20 host-only aliases and 20 FROM => /wp-content/uploads rewrite rules.', 'pixcensus-media-audit' ); ?></p>
 		</div>
 	<?php endif; ?>
 
-	<div class="iua-hero">
-		<img class="iua-brand-mark" src="<?php echo esc_url( plugins_url( 'assets/image-usage-audit-mark.svg', dirname( __DIR__ ) . '/image-usage-audit.php' ) ); ?>" alt="" aria-hidden="true" />
-		<div class="iua-hero-copy"><h1><?php esc_html_e( 'Image Usage Audit', 'image-usage-audit' ); ?></h1><div class="iua-sub"><?php esc_html_e( 'Audit image usage with provenance and safe review tools.', 'image-usage-audit' ); ?></div></div>
-		<span class="iua-version"><?php echo esc_html( 'v' . IUA_VERSION ); ?></span>
+	<div class="pixcensus-hero">
+		<img class="pixcensus-brand-mark" src="<?php echo esc_url( plugins_url( 'assets/pixcensus-media-audit-mark.svg', dirname( __DIR__ ) . '/pixcensus-media-audit.php' ) ); ?>" alt="" aria-hidden="true" />
+		<div class="pixcensus-hero-copy"><h1><?php esc_html_e( 'PixCensus — Media Usage Audit', 'pixcensus-media-audit' ); ?></h1><div class="pixcensus-sub"><?php esc_html_e( 'Audit image usage with provenance and safe review tools.', 'pixcensus-media-audit' ); ?></div></div>
+		<span class="pixcensus-version"><?php echo esc_html( 'v' . PIXCENSUS_VERSION ); ?></span>
 	</div>
 
-	<div class="iua-grid">
-		<div class="iua-card">
-			<h2><?php esc_html_e( 'Scan', 'image-usage-audit' ); ?></h2>
-			<p class="iua-help"><?php esc_html_e( 'The audit is not live. Re-run the scan to reflect content changes.', 'image-usage-audit' ); ?></p>
-			<p class="iua-help"><?php esc_html_e( 'Tip: unchecking drafts makes the scan faster.', 'image-usage-audit' ); ?></p>
+	<div class="pixcensus-grid">
+		<div class="pixcensus-card">
+			<h2><?php esc_html_e( 'Scan', 'pixcensus-media-audit' ); ?></h2>
+			<p class="pixcensus-help"><?php esc_html_e( 'The audit is not live. Re-run the scan to reflect content changes.', 'pixcensus-media-audit' ); ?></p>
+			<p class="pixcensus-help"><?php esc_html_e( 'Tip: unchecking drafts makes the scan faster.', 'pixcensus-media-audit' ); ?></p>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="iua_save_settings" />
-				<input type="hidden" name="iua_section" value="scan" />
-				<?php wp_nonce_field( 'iua_save_scan_settings', 'iua_settings_nonce' ); ?>
+				<input type="hidden" name="action" value="pixcensus_save_settings" />
+				<input type="hidden" name="pixcensus_section" value="scan" />
+				<?php wp_nonce_field( 'pixcensus_save_scan_settings', 'pixcensus_settings_nonce' ); ?>
 
-				<label class="iua-form-row">
-					<input type="checkbox" name="iua_include_drafts" value="1" <?php checked( $iua_include_drafts, true ); ?> />
-					<?php esc_html_e( 'Include drafts in scan (Draft-only list).', 'image-usage-audit' ); ?>
+				<label class="pixcensus-form-row">
+					<input type="checkbox" name="pixcensus_include_drafts" value="1" <?php checked( $pixcensus_include_drafts, true ); ?> />
+					<?php esc_html_e( 'Include drafts in scan (Draft-only list).', 'pixcensus-media-audit' ); ?>
 				</label>
 
 				<p class="submit">
-					<button type="submit" class="button"><?php esc_html_e( 'Save settings', 'image-usage-audit' ); ?></button>
-					<button type="button" class="button button-primary" id="iua-run-scan">
-						<?php echo esc_html( ! empty( $iua_usage['scanned_at'] ) ? __( 'Run scan again', 'image-usage-audit' ) : __( 'Run scan', 'image-usage-audit' ) ); ?>
+					<button type="submit" class="button"><?php esc_html_e( 'Save settings', 'pixcensus-media-audit' ); ?></button>
+					<button type="button" class="button button-primary" id="pixcensus-run-scan">
+						<?php echo esc_html( ! empty( $pixcensus_usage['scanned_at'] ) ? __( 'Run scan again', 'pixcensus-media-audit' ) : __( 'Run scan', 'pixcensus-media-audit' ) ); ?>
 					</button>
 				</p>
 
@@ -143,8 +143,8 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 					echo esc_html(
 						sprintf(
 							/* translators: %s: last scan datetime. */
-							__( 'Last scan: %s', 'image-usage-audit' ),
-							$iua_scanned_at
+							__( 'Last scan: %s', 'pixcensus-media-audit' ),
+							$pixcensus_scanned_at
 						)
 					);
 					?>
@@ -152,60 +152,60 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 			</form>
 
 			<div class="notice notice-warning inline">
-				<p><strong><?php esc_html_e( 'Disclaimer:', 'image-usage-audit' ); ?></strong> <?php esc_html_e( 'Images referenced via custom CSS, HTML widgets, theme files, plugin files, or external/CDN domains may require manual review.', 'image-usage-audit' ); ?></p>
+				<p><strong><?php esc_html_e( 'Disclaimer:', 'pixcensus-media-audit' ); ?></strong> <?php esc_html_e( 'Images referenced via custom CSS, HTML widgets, theme files, plugin files, or external/CDN domains may require manual review.', 'pixcensus-media-audit' ); ?></p>
 			</div>
 
 			<div class="notice notice-error inline">
-				<p><strong><?php esc_html_e( 'Backup:', 'image-usage-audit' ); ?></strong> <?php esc_html_e( 'Make a full backup before deleting any images from the Media Library.', 'image-usage-audit' ); ?></p>
+				<p><strong><?php esc_html_e( 'Backup:', 'pixcensus-media-audit' ); ?></strong> <?php esc_html_e( 'Make a full backup before deleting any images from the Media Library.', 'pixcensus-media-audit' ); ?></p>
 			</div>
 		</div>
 
-		<div class="iua-card">
-			<h2><?php esc_html_e( 'CDN support', 'image-usage-audit' ); ?></h2>
+		<div class="pixcensus-card">
+			<h2><?php esc_html_e( 'CDN support', 'pixcensus-media-audit' ); ?></h2>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="iua_save_settings" />
-				<input type="hidden" name="iua_section" value="cdn" />
-				<?php wp_nonce_field( 'iua_save_cdn_settings', 'iua_settings_nonce' ); ?>
+				<input type="hidden" name="action" value="pixcensus_save_settings" />
+				<input type="hidden" name="pixcensus_section" value="cdn" />
+				<?php wp_nonce_field( 'pixcensus_save_cdn_settings', 'pixcensus_settings_nonce' ); ?>
 
-				<label class="iua-form-row">
-					<span><?php esc_html_e( 'CDN aliases (comma-separated)', 'image-usage-audit' ); ?></span>
-					<input type="text" name="iua_cdn_aliases" value="<?php echo esc_attr( $iua_cdn_aliases ); ?>" class="regular-text" placeholder="cdn.example.com, media.example.net" />
+				<label class="pixcensus-form-row">
+					<span><?php esc_html_e( 'CDN aliases (comma-separated)', 'pixcensus-media-audit' ); ?></span>
+					<input type="text" name="pixcensus_cdn_aliases" value="<?php echo esc_attr( $pixcensus_cdn_aliases ); ?>" class="regular-text" placeholder="cdn.example.com, media.example.net" />
 				</label>
 
-				<label class="iua-form-row">
-					<span><?php esc_html_e( 'Advanced CDN rewrites (one per line, format: FROM => TO)', 'image-usage-audit' ); ?></span>
-					<textarea name="iua_cdn_rewrites" rows="4" class="large-text code" placeholder="https://cdn.example.com/assets => /wp-content/uploads&#10;/media => /wp-content/uploads"><?php echo esc_textarea( $iua_cdn_rewrites ); ?></textarea>
-					<span class="description"><?php esc_html_e( 'Each rule is applied read-only during the scan.', 'image-usage-audit' ); ?></span>
+				<label class="pixcensus-form-row">
+					<span><?php esc_html_e( 'Advanced CDN rewrites (one per line, format: FROM => TO)', 'pixcensus-media-audit' ); ?></span>
+					<textarea name="pixcensus_cdn_rewrites" rows="4" class="large-text code" placeholder="https://cdn.example.com/assets => /wp-content/uploads&#10;/media => /wp-content/uploads"><?php echo esc_textarea( $pixcensus_cdn_rewrites ); ?></textarea>
+					<span class="description"><?php esc_html_e( 'Each rule is applied read-only during the scan.', 'pixcensus-media-audit' ); ?></span>
 				</label>
 
 				<p class="submit">
-					<button type="submit" class="button button-secondary"><?php esc_html_e( 'Save CDN settings', 'image-usage-audit' ); ?></button>
+					<button type="submit" class="button button-secondary"><?php esc_html_e( 'Save CDN settings', 'pixcensus-media-audit' ); ?></button>
 				</p>
 			</form>
 		</div>
 	</div>
 
-	<h2 class="nav-tab-wrapper iua-tabs">
+	<h2 class="nav-tab-wrapper pixcensus-tabs">
 		<a href="
 		<?php
 		echo esc_url(
 			add_query_arg(
 				array(
-					'page'    => 'iua-audit',
-					'iua_tab' => 'unused',
+					'page'          => 'pixcensus-audit',
+					'pixcensus_tab' => 'unused',
 				),
 				admin_url( 'upload.php' )
 			)
 		);
 		?>
-		" class="nav-tab <?php echo esc_attr( 'unused' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
+		" class="nav-tab <?php echo esc_attr( 'unused' === $pixcensus_tab ? 'nav-tab-active' : '' ); ?>">
 			<?php
 			echo esc_html(
 				sprintf(
 					/* translators: %d: number of unused images. */
-					__( 'Unused (%d)', 'image-usage-audit' ),
-					count( $iua_unused_ids )
+					__( 'Unused (%d)', 'pixcensus-media-audit' ),
+					count( $pixcensus_unused_ids )
 				)
 			);
 			?>
@@ -215,20 +215,20 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 		echo esc_url(
 			add_query_arg(
 				array(
-					'page'    => 'iua-audit',
-					'iua_tab' => 'draft',
+					'page'          => 'pixcensus-audit',
+					'pixcensus_tab' => 'draft',
 				),
 				admin_url( 'upload.php' )
 			)
 		);
 		?>
-		" class="nav-tab <?php echo esc_attr( 'draft' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
+		" class="nav-tab <?php echo esc_attr( 'draft' === $pixcensus_tab ? 'nav-tab-active' : '' ); ?>">
 			<?php
 			echo esc_html(
 				sprintf(
 					/* translators: %d: number of images used only in drafts. */
-					__( 'Draft-only (%d)', 'image-usage-audit' ),
-					count( $iua_draft_ids )
+					__( 'Draft-only (%d)', 'pixcensus-media-audit' ),
+					count( $pixcensus_draft_ids )
 				)
 			);
 			?>
@@ -238,20 +238,20 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 		echo esc_url(
 			add_query_arg(
 				array(
-					'page'    => 'iua-audit',
-					'iua_tab' => 'used',
+					'page'          => 'pixcensus-audit',
+					'pixcensus_tab' => 'used',
 				),
 				admin_url( 'upload.php' )
 			)
 		);
 		?>
-		" class="nav-tab <?php echo esc_attr( 'used' === $iua_tab ? 'nav-tab-active' : '' ); ?>">
+		" class="nav-tab <?php echo esc_attr( 'used' === $pixcensus_tab ? 'nav-tab-active' : '' ); ?>">
 			<?php
 			echo esc_html(
 				sprintf(
 					/* translators: %d: number of used images. */
-					__( 'Used (published) (%d)', 'image-usage-audit' ),
-					count( $iua_used_ids )
+					__( 'Used (published) (%d)', 'pixcensus-media-audit' ),
+					count( $pixcensus_used_ids )
 				)
 			);
 			?>
@@ -259,60 +259,60 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 	</h2>
 
 	<p>
-		<a class="button" href="<?php echo esc_url( $iua_export_url ); ?>"><?php esc_html_e( 'Export current tab (CSV with provenance)', 'image-usage-audit' ); ?></a>
+		<a class="button" href="<?php echo esc_url( $pixcensus_export_url ); ?>"><?php esc_html_e( 'Export current tab (CSV with provenance)', 'pixcensus-media-audit' ); ?></a>
 	</p>
 
-	<div class="iua-toolbar">
-		<div class="iua-left">
-			<label><input type="checkbox" class="iua-select-all-toggle" /> <?php esc_html_e( 'Select all visible', 'image-usage-audit' ); ?></label>
+	<div class="pixcensus-toolbar">
+		<div class="pixcensus-left">
+			<label><input type="checkbox" class="pixcensus-select-all-toggle" /> <?php esc_html_e( 'Select all visible', 'pixcensus-media-audit' ); ?></label>
 
-			<?php if ( 'unused' === $iua_tab ) : ?>
-				<button class="button button-secondary" id="iua-bulk-mark"><?php esc_html_e( 'Mark selected as Used (manual)', 'image-usage-audit' ); ?></button>
-			<?php elseif ( 'used' === $iua_tab ) : ?>
-				<button class="button button-secondary" id="iua-bulk-unmark"><?php esc_html_e( 'Unmark selected (manual)', 'image-usage-audit' ); ?></button>
+			<?php if ( 'unused' === $pixcensus_tab ) : ?>
+				<button class="button button-secondary" id="pixcensus-bulk-mark"><?php esc_html_e( 'Mark selected as Used (manual)', 'pixcensus-media-audit' ); ?></button>
+			<?php elseif ( 'used' === $pixcensus_tab ) : ?>
+				<button class="button button-secondary" id="pixcensus-bulk-unmark"><?php esc_html_e( 'Unmark selected (manual)', 'pixcensus-media-audit' ); ?></button>
 
-				<?php if ( 'manual' === $iua_filter ) : ?>
-					<span class="iua-chip"><?php esc_html_e( 'Manual only', 'image-usage-audit' ); ?></span>
+				<?php if ( 'manual' === $pixcensus_filter ) : ?>
+					<span class="pixcensus-chip"><?php esc_html_e( 'Manual only', 'pixcensus-media-audit' ); ?></span>
 				<?php endif; ?>
 			<?php endif; ?>
 		</div>
 
-		<div class="iua-right">
-			<div class="iua-columns">
-				<button class="button" id="iua-columns-toggle"><?php esc_html_e( 'Columns', 'image-usage-audit' ); ?></button>
-				<div id="iua-columns-panel" class="iua-columns-panel" style="display:none;">
-					<label><input type="checkbox" class="iua-col-toggle" id="iua-col-thumb" data-col="thumb" checked /> <?php esc_html_e( 'Thumb', 'image-usage-audit' ); ?></label>
-					<label><input type="checkbox" class="iua-col-toggle" id="iua-col-id" data-col="id" checked /> <?php esc_html_e( 'ID', 'image-usage-audit' ); ?></label>
-					<label><input type="checkbox" class="iua-col-toggle" id="iua-col-file" data-col="file" checked /> <?php esc_html_e( 'File', 'image-usage-audit' ); ?></label>
-					<label><input type="checkbox" class="iua-col-toggle" id="iua-col-uploaded" data-col="uploaded" checked /> <?php esc_html_e( 'Uploaded', 'image-usage-audit' ); ?></label>
-					<label><input type="checkbox" class="iua-col-toggle" id="iua-col-provenance" data-col="provenance" checked /> <?php esc_html_e( 'Where used', 'image-usage-audit' ); ?></label>
-					<label><input type="checkbox" class="iua-col-toggle" id="iua-col-count" data-col="count" checked /> <?php esc_html_e( 'Count', 'image-usage-audit' ); ?></label>
-					<div class="iua-columns-actions">
-						<a href="#" id="iua-columns-reset"><?php esc_html_e( 'Reset', 'image-usage-audit' ); ?></a>
-						<span class="description"><?php esc_html_e( 'Saved locally in your browser.', 'image-usage-audit' ); ?></span>
+		<div class="pixcensus-right">
+			<div class="pixcensus-columns">
+				<button class="button" id="pixcensus-columns-toggle"><?php esc_html_e( 'Columns', 'pixcensus-media-audit' ); ?></button>
+				<div id="pixcensus-columns-panel" class="pixcensus-columns-panel" style="display:none;">
+					<label><input type="checkbox" class="pixcensus-col-toggle" id="pixcensus-col-thumb" data-col="thumb" checked /> <?php esc_html_e( 'Thumb', 'pixcensus-media-audit' ); ?></label>
+					<label><input type="checkbox" class="pixcensus-col-toggle" id="pixcensus-col-id" data-col="id" checked /> <?php esc_html_e( 'ID', 'pixcensus-media-audit' ); ?></label>
+					<label><input type="checkbox" class="pixcensus-col-toggle" id="pixcensus-col-file" data-col="file" checked /> <?php esc_html_e( 'File', 'pixcensus-media-audit' ); ?></label>
+					<label><input type="checkbox" class="pixcensus-col-toggle" id="pixcensus-col-uploaded" data-col="uploaded" checked /> <?php esc_html_e( 'Uploaded', 'pixcensus-media-audit' ); ?></label>
+					<label><input type="checkbox" class="pixcensus-col-toggle" id="pixcensus-col-provenance" data-col="provenance" checked /> <?php esc_html_e( 'Where used', 'pixcensus-media-audit' ); ?></label>
+					<label><input type="checkbox" class="pixcensus-col-toggle" id="pixcensus-col-count" data-col="count" checked /> <?php esc_html_e( 'Count', 'pixcensus-media-audit' ); ?></label>
+					<div class="pixcensus-columns-actions">
+						<a href="#" id="pixcensus-columns-reset"><?php esc_html_e( 'Reset', 'pixcensus-media-audit' ); ?></a>
+						<span class="description"><?php esc_html_e( 'Saved locally in your browser.', 'pixcensus-media-audit' ); ?></span>
 					</div>
 				</div>
 			</div>
 
-			<div class="iua-quick">
-				<input type="search" id="iua-quick-filter" placeholder="<?php esc_attr_e( 'Quick filter (ID, file, provenance)…', 'image-usage-audit' ); ?>" />
-				<span id="iua-quick-count" class="description"></span>
+			<div class="pixcensus-quick">
+				<input type="search" id="pixcensus-quick-filter" placeholder="<?php esc_attr_e( 'Quick filter (ID, file, provenance)…', 'pixcensus-media-audit' ); ?>" />
+				<span id="pixcensus-quick-count" class="description"></span>
 			</div>
 
-			<div class="iua-density">
-				<button class="button button-primary" data-iua-density="comfortable"><?php esc_html_e( 'Comfortable', 'image-usage-audit' ); ?></button>
-				<button class="button" data-iua-density="compact"><?php esc_html_e( 'Compact', 'image-usage-audit' ); ?></button>
+			<div class="pixcensus-density">
+				<button class="button button-primary" data-pixcensus-density="comfortable"><?php esc_html_e( 'Comfortable', 'pixcensus-media-audit' ); ?></button>
+				<button class="button" data-pixcensus-density="compact"><?php esc_html_e( 'Compact', 'pixcensus-media-audit' ); ?></button>
 			</div>
 
-			<?php if ( 'used' === $iua_tab ) : ?>
-				<form method="get" class="iua-inline-form">
-					<input type="hidden" name="page" value="iua-audit" />
-					<input type="hidden" name="iua_tab" value="used" />
+			<?php if ( 'used' === $pixcensus_tab ) : ?>
+				<form method="get" class="pixcensus-inline-form">
+					<input type="hidden" name="page" value="pixcensus-audit" />
+					<input type="hidden" name="pixcensus_tab" value="used" />
 					<label>
-						<?php esc_html_e( 'Filter:', 'image-usage-audit' ); ?>
-						<select name="iua_filter" onchange="this.form.submit()">
-							<option value="" <?php selected( $iua_filter, '' ); ?>><?php esc_html_e( 'All used', 'image-usage-audit' ); ?></option>
-							<option value="manual" <?php selected( $iua_filter, 'manual' ); ?>><?php esc_html_e( 'Only manual (false negatives)', 'image-usage-audit' ); ?></option>
+						<?php esc_html_e( 'Filter:', 'pixcensus-media-audit' ); ?>
+						<select name="pixcensus_filter" onchange="this.form.submit()">
+							<option value="" <?php selected( $pixcensus_filter, '' ); ?>><?php esc_html_e( 'All used', 'pixcensus-media-audit' ); ?></option>
+							<option value="manual" <?php selected( $pixcensus_filter, 'manual' ); ?>><?php esc_html_e( 'Only manual (false negatives)', 'pixcensus-media-audit' ); ?></option>
 						</select>
 					</label>
 				</form>
@@ -320,7 +320,7 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 		</div>
 	</div>
 
-	<?php if ( $iua_total_pages > 1 ) : ?>
+	<?php if ( $pixcensus_total_pages > 1 ) : ?>
 		<div class="tablenav top">
 			<div class="tablenav-pages">
 				<?php
@@ -329,18 +329,18 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 						array(
 							'base'      => add_query_arg(
 								array(
-									'page'       => 'iua-audit',
-									'iua_tab'    => $iua_tab,
-									'iua_filter' => $iua_filter,
-									'iua_page'   => '%#%',
+									'page'             => 'pixcensus-audit',
+									'pixcensus_tab'    => $pixcensus_tab,
+									'pixcensus_filter' => $pixcensus_filter,
+									'pixcensus_page'   => '%#%',
 								),
 								admin_url( 'upload.php' )
 							),
 							'format'    => '',
-							'current'   => $iua_page,
-							'total'     => $iua_total_pages,
-							'prev_text' => esc_html__( '« Previous', 'image-usage-audit' ),
-							'next_text' => esc_html__( 'Next »', 'image-usage-audit' ),
+							'current'   => $pixcensus_page,
+							'total'     => $pixcensus_total_pages,
+							'prev_text' => esc_html__( '« Previous', 'pixcensus-media-audit' ),
+							'next_text' => esc_html__( 'Next »', 'pixcensus-media-audit' ),
 						)
 					)
 				);
@@ -352,81 +352,81 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 	<table class="widefat fixed striped">
 		<thead>
 			<tr>
-				<th style="width:28px;"><input type="checkbox" class="iua-select-all-toggle" /></th>
-				<th data-col="thumb"><?php esc_html_e( 'Thumb', 'image-usage-audit' ); ?></th>
-				<th data-col="id"><?php esc_html_e( 'ID', 'image-usage-audit' ); ?></th>
-				<th data-col="file"><?php esc_html_e( 'File', 'image-usage-audit' ); ?></th>
-				<th data-col="uploaded"><?php esc_html_e( 'Uploaded', 'image-usage-audit' ); ?></th>
-				<th data-col="provenance"><?php esc_html_e( 'Where used (provenance)', 'image-usage-audit' ); ?></th>
-				<th data-col="count"><?php esc_html_e( 'Count', 'image-usage-audit' ); ?></th>
-				<th data-col="actions"><?php esc_html_e( 'Actions', 'image-usage-audit' ); ?></th>
+				<th style="width:28px;"><input type="checkbox" class="pixcensus-select-all-toggle" /></th>
+				<th data-col="thumb"><?php esc_html_e( 'Thumb', 'pixcensus-media-audit' ); ?></th>
+				<th data-col="id"><?php esc_html_e( 'ID', 'pixcensus-media-audit' ); ?></th>
+				<th data-col="file"><?php esc_html_e( 'File', 'pixcensus-media-audit' ); ?></th>
+				<th data-col="uploaded"><?php esc_html_e( 'Uploaded', 'pixcensus-media-audit' ); ?></th>
+				<th data-col="provenance"><?php esc_html_e( 'Where used (provenance)', 'pixcensus-media-audit' ); ?></th>
+				<th data-col="count"><?php esc_html_e( 'Count', 'pixcensus-media-audit' ); ?></th>
+				<th data-col="actions"><?php esc_html_e( 'Actions', 'pixcensus-media-audit' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
-			<?php if ( ! empty( $iua_ids ) ) : ?>
-				<?php foreach ( $iua_ids as $iua_attachment_id ) : ?>
+			<?php if ( ! empty( $pixcensus_ids ) ) : ?>
+				<?php foreach ( $pixcensus_ids as $pixcensus_attachment_id ) : ?>
 					<?php
-					$iua_file_path  = get_attached_file( $iua_attachment_id );
-					$iua_thumb_html = wp_get_attachment_image( $iua_attachment_id, array( 60, 60 ), true, array( 'style' => 'max-width:60px;height:auto' ) );
-					$iua_edit_url   = admin_url( 'post.php?post=' . $iua_attachment_id . '&action=edit' );
-					$iua_provenance = ( isset( $iua_usage['provenance'][ $iua_attachment_id ] ) && is_array( $iua_usage['provenance'][ $iua_attachment_id ] ) ) ? array_values( $iua_usage['provenance'][ $iua_attachment_id ] ) : array();
-					$iua_count      = count( $iua_provenance );
-					$iua_haystack   = strtolower(
+					$pixcensus_file_path  = get_attached_file( $pixcensus_attachment_id );
+					$pixcensus_thumb_html = wp_get_attachment_image( $pixcensus_attachment_id, array( 60, 60 ), true, array( 'style' => 'max-width:60px;height:auto' ) );
+					$pixcensus_edit_url   = admin_url( 'post.php?post=' . $pixcensus_attachment_id . '&action=edit' );
+					$pixcensus_provenance = ( isset( $pixcensus_usage['provenance'][ $pixcensus_attachment_id ] ) && is_array( $pixcensus_usage['provenance'][ $pixcensus_attachment_id ] ) ) ? array_values( $pixcensus_usage['provenance'][ $pixcensus_attachment_id ] ) : array();
+					$pixcensus_count      = count( $pixcensus_provenance );
+					$pixcensus_haystack   = strtolower(
 						implode(
 							' ',
 							array(
-								(string) $iua_attachment_id,
-								$iua_file_path ? basename( $iua_file_path ) : '',
-								implode( ' ', $iua_provenance ),
+								(string) $pixcensus_attachment_id,
+								$pixcensus_file_path ? basename( $pixcensus_file_path ) : '',
+								implode( ' ', $pixcensus_provenance ),
 							)
 						)
 					);
 					?>
-					<tr class="iua-row" id="iua-row-<?php echo esc_attr( $iua_attachment_id ); ?>" data-iua-haystack="<?php echo esc_attr( $iua_haystack ); ?>">
-						<td><input type="checkbox" class="iua-select" value="<?php echo esc_attr( $iua_attachment_id ); ?>" /></td>
-						<td data-col="thumb" class="iua-thumb"><?php echo $iua_thumb_html ? wp_kses_post( $iua_thumb_html ) : '&nbsp;'; ?></td>
-						<td data-col="id"><?php echo esc_html( (string) $iua_attachment_id ); ?></td>
-						<td data-col="file"><?php echo esc_html( $iua_file_path ? basename( $iua_file_path ) : __( '(unknown)', 'image-usage-audit' ) ); ?></td>
-						<td data-col="uploaded"><?php echo esc_html( get_the_date( 'Y-m-d H:i', $iua_attachment_id ) ); ?></td>
+					<tr class="pixcensus-row" id="pixcensus-row-<?php echo esc_attr( $pixcensus_attachment_id ); ?>" data-pixcensus-haystack="<?php echo esc_attr( $pixcensus_haystack ); ?>">
+						<td><input type="checkbox" class="pixcensus-select" value="<?php echo esc_attr( $pixcensus_attachment_id ); ?>" /></td>
+						<td data-col="thumb" class="pixcensus-thumb"><?php echo $pixcensus_thumb_html ? wp_kses_post( $pixcensus_thumb_html ) : '&nbsp;'; ?></td>
+						<td data-col="id"><?php echo esc_html( (string) $pixcensus_attachment_id ); ?></td>
+						<td data-col="file"><?php echo esc_html( $pixcensus_file_path ? basename( $pixcensus_file_path ) : __( '(unknown)', 'pixcensus-media-audit' ) ); ?></td>
+						<td data-col="uploaded"><?php echo esc_html( get_the_date( 'Y-m-d H:i', $pixcensus_attachment_id ) ); ?></td>
 						<td data-col="provenance">
-							<?php if ( ! empty( $iua_provenance ) ) : ?>
-								<?php if ( 'used' === $iua_tab ) : ?>
+							<?php if ( ! empty( $pixcensus_provenance ) ) : ?>
+								<?php if ( 'used' === $pixcensus_tab ) : ?>
 									<?php
-									$iua_first_provenance = reset( $iua_provenance );
-									$iua_other_provenance = array_slice( $iua_provenance, 1 );
+									$pixcensus_first_provenance = reset( $pixcensus_provenance );
+									$pixcensus_other_provenance = array_slice( $pixcensus_provenance, 1 );
 									?>
-									<div class="iua-prov-wrap">
-										<?php if ( $iua_first_provenance ) : ?>
-											<code><?php echo esc_html( $iua_first_provenance ); ?></code>
+									<div class="pixcensus-prov-wrap">
+										<?php if ( $pixcensus_first_provenance ) : ?>
+											<code><?php echo esc_html( $pixcensus_first_provenance ); ?></code>
 										<?php endif; ?>
 
-										<?php if ( ! empty( $iua_other_provenance ) ) : ?>
-											<div class="iua-prov-more" style="display:none;margin-top:6px;">
+										<?php if ( ! empty( $pixcensus_other_provenance ) ) : ?>
+											<div class="pixcensus-prov-more" style="display:none;margin-top:6px;">
 												<ul>
-													<?php foreach ( $iua_other_provenance as $iua_provenance_item ) : ?>
-														<li><code><?php echo esc_html( $iua_provenance_item ); ?></code></li>
+													<?php foreach ( $pixcensus_other_provenance as $pixcensus_provenance_item ) : ?>
+														<li><code><?php echo esc_html( $pixcensus_provenance_item ); ?></code></li>
 													<?php endforeach; ?>
 												</ul>
 											</div>
-											<p class="iua-provenance-toggle">
-												<a href="#" class="button-link iua-toggle-prov"><?php esc_html_e( 'Show more', 'image-usage-audit' ); ?></a>
+											<p class="pixcensus-provenance-toggle">
+												<a href="#" class="button-link pixcensus-toggle-prov"><?php esc_html_e( 'Show more', 'pixcensus-media-audit' ); ?></a>
 											</p>
 										<?php endif; ?>
 									</div>
 								<?php else : ?>
 									<ul>
-										<?php foreach ( array_slice( $iua_provenance, 0, 6 ) as $iua_provenance_item ) : ?>
-											<li><code><?php echo esc_html( $iua_provenance_item ); ?></code></li>
+										<?php foreach ( array_slice( $pixcensus_provenance, 0, 6 ) as $pixcensus_provenance_item ) : ?>
+											<li><code><?php echo esc_html( $pixcensus_provenance_item ); ?></code></li>
 										<?php endforeach; ?>
 
-										<?php if ( $iua_count > 6 ) : ?>
+										<?php if ( $pixcensus_count > 6 ) : ?>
 											<li>
 												<?php
 												echo esc_html(
 													sprintf(
 														/* translators: %d: hidden provenance count. */
-														__( '…and %d more', 'image-usage-audit' ),
-														$iua_count - 6
+														__( '…and %d more', 'pixcensus-media-audit' ),
+														$pixcensus_count - 6
 													)
 												);
 												?>
@@ -435,31 +435,31 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 									</ul>
 								<?php endif; ?>
 							<?php else : ?>
-								<span class="iua-muted-dash"><?php esc_html_e( '—', 'image-usage-audit' ); ?></span>
+								<span class="pixcensus-muted-dash"><?php esc_html_e( '—', 'pixcensus-media-audit' ); ?></span>
 							<?php endif; ?>
 						</td>
-						<td data-col="count"><?php echo esc_html( (string) $iua_count ); ?></td>
-						<td data-col="actions" class="iua-actions">
-							<a class="button" href="<?php echo esc_url( $iua_edit_url ); ?>"><?php esc_html_e( 'Open in Media', 'image-usage-audit' ); ?></a>
+						<td data-col="count"><?php echo esc_html( (string) $pixcensus_count ); ?></td>
+						<td data-col="actions" class="pixcensus-actions">
+							<a class="button" href="<?php echo esc_url( $pixcensus_edit_url ); ?>"><?php esc_html_e( 'Open in Media', 'pixcensus-media-audit' ); ?></a>
 
-							<?php if ( 'unused' === $iua_tab ) : ?>
-								<a class="button button-secondary iua-mark-used" data-id="<?php echo esc_attr( $iua_attachment_id ); ?>" href="#"><?php esc_html_e( 'Mark as Used (manual)', 'image-usage-audit' ); ?></a>
-							<?php elseif ( in_array( $iua_attachment_id, $iua_manual_ids, true ) ) : ?>
-								<span class="iua-badge"><?php esc_html_e( 'manual', 'image-usage-audit' ); ?></span>
-								<a class="button button-link-delete iua-unmark-used" data-id="<?php echo esc_attr( $iua_attachment_id ); ?>" href="#"><?php esc_html_e( 'Unmark', 'image-usage-audit' ); ?></a>
+							<?php if ( 'unused' === $pixcensus_tab ) : ?>
+								<a class="button button-secondary pixcensus-mark-used" data-id="<?php echo esc_attr( $pixcensus_attachment_id ); ?>" href="#"><?php esc_html_e( 'Mark as Used (manual)', 'pixcensus-media-audit' ); ?></a>
+							<?php elseif ( in_array( $pixcensus_attachment_id, $pixcensus_manual_ids, true ) ) : ?>
+								<span class="pixcensus-badge"><?php esc_html_e( 'manual', 'pixcensus-media-audit' ); ?></span>
+								<a class="button button-link-delete pixcensus-unmark-used" data-id="<?php echo esc_attr( $pixcensus_attachment_id ); ?>" href="#"><?php esc_html_e( 'Unmark', 'pixcensus-media-audit' ); ?></a>
 							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endforeach; ?>
 			<?php else : ?>
 				<tr>
-					<td colspan="8"><?php esc_html_e( 'No items.', 'image-usage-audit' ); ?></td>
+					<td colspan="8"><?php esc_html_e( 'No items.', 'pixcensus-media-audit' ); ?></td>
 				</tr>
 			<?php endif; ?>
 		</tbody>
 	</table>
 
-	<?php if ( $iua_total_pages > 1 ) : ?>
+	<?php if ( $pixcensus_total_pages > 1 ) : ?>
 		<div class="tablenav bottom">
 			<div class="tablenav-pages">
 				<?php
@@ -468,18 +468,18 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 						array(
 							'base'      => add_query_arg(
 								array(
-									'page'       => 'iua-audit',
-									'iua_tab'    => $iua_tab,
-									'iua_filter' => $iua_filter,
-									'iua_page'   => '%#%',
+									'page'             => 'pixcensus-audit',
+									'pixcensus_tab'    => $pixcensus_tab,
+									'pixcensus_filter' => $pixcensus_filter,
+									'pixcensus_page'   => '%#%',
 								),
 								admin_url( 'upload.php' )
 							),
 							'format'    => '',
-							'current'   => $iua_page,
-							'total'     => $iua_total_pages,
-							'prev_text' => esc_html__( '« Previous', 'image-usage-audit' ),
-							'next_text' => esc_html__( 'Next »', 'image-usage-audit' ),
+							'current'   => $pixcensus_page,
+							'total'     => $pixcensus_total_pages,
+							'prev_text' => esc_html__( '« Previous', 'pixcensus-media-audit' ),
+							'next_text' => esc_html__( 'Next »', 'pixcensus-media-audit' ),
 						)
 					)
 				);
@@ -488,12 +488,12 @@ $iua_notice     = is_string( $iua_raw_notice ) ? sanitize_key( $iua_raw_notice )
 		</div>
 	<?php endif; ?>
 
-	<div class="iua-card" style="margin-top: 20px;">
-		<h2><?php esc_html_e( 'Support the project', 'image-usage-audit' ); ?></h2>
-		<p><?php esc_html_e( 'If Image Usage Audit has been useful to you, you can support its continued development with an optional donation.', 'image-usage-audit' ); ?></p>
+	<div class="pixcensus-card" style="margin-top: 20px;">
+		<h2><?php esc_html_e( 'Support the project', 'pixcensus-media-audit' ); ?></h2>
+		<p><?php esc_html_e( 'If PixCensus — Media Usage Audit has been useful to you, you can support its continued development with an optional donation.', 'pixcensus-media-audit' ); ?></p>
 		<p>
 			<a class="button button-secondary" href="<?php echo esc_url( 'https://paypal.me/ussmarinesdot' ); ?>" target="_blank" rel="noopener noreferrer">
-				<?php esc_html_e( 'Support via PayPal', 'image-usage-audit' ); ?>
+				<?php esc_html_e( 'Support via PayPal', 'pixcensus-media-audit' ); ?>
 			</a>
 		</p>
 	</div>

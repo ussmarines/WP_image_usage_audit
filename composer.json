@@ -1,6 +1,6 @@
 {
-  "name": "ussmarines/image-usage-audit",
-  "description": "Development tooling for the Image Usage Audit WordPress plugin.",
+  "name": "ussmarines/pixcensus-media-audit",
+  "description": "Development tooling for the PixCensus — Media Usage Audit WordPress plugin.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [

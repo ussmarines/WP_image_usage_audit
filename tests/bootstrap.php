@@ -7,18 +7,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', dirname( __DIR__ ) . DIRECTORY_SEPARATOR );
 }
 
-$GLOBALS['iua_test_options'] = array();
-$GLOBALS['iua_test_site_options'] = array();
-$GLOBALS['iua_test_current_blog'] = 1;
-$GLOBALS['iua_test_blog_stack'] = array();
-$GLOBALS['iua_test_sites'] = array( 1 );
-$GLOBALS['iua_test_multisite'] = false;
-$GLOBALS['iua_test_can_manage'] = true;
-$GLOBALS['iua_test_post_types'] = array();
-$GLOBALS['iua_test_actions'] = array();
-$GLOBALS['iua_test_get_posts'] = null;
+$GLOBALS['pixcensus_test_options'] = array();
+$GLOBALS['pixcensus_test_site_options'] = array();
+$GLOBALS['pixcensus_test_current_blog'] = 1;
+$GLOBALS['pixcensus_test_blog_stack'] = array();
+$GLOBALS['pixcensus_test_sites'] = array( 1 );
+$GLOBALS['pixcensus_test_multisite'] = false;
+$GLOBALS['pixcensus_test_can_manage'] = true;
+$GLOBALS['pixcensus_test_post_types'] = array();
+$GLOBALS['pixcensus_test_actions'] = array();
+$GLOBALS['pixcensus_test_get_posts'] = null;
 
-final class IUA_Test_Json_Response extends RuntimeException {
+final class PIXCENSUS_Test_Json_Response extends RuntimeException {
 	/** @var bool */
 	public $success;
 
@@ -42,12 +42,12 @@ final class IUA_Test_Json_Response extends RuntimeException {
 }
 
 function get_option( $name, $default = false ) {
-	$iua_blog_id = $GLOBALS['iua_test_current_blog'];
-	$iua_options = 1 === $iua_blog_id
-		? $GLOBALS['iua_test_options']
-		: ( $GLOBALS['iua_test_site_options'][ $iua_blog_id ] ?? array() );
+	$pixcensus_blog_id = $GLOBALS['pixcensus_test_current_blog'];
+	$pixcensus_options = 1 === $pixcensus_blog_id
+		? $GLOBALS['pixcensus_test_options']
+		: ( $GLOBALS['pixcensus_test_site_options'][ $pixcensus_blog_id ] ?? array() );
 
-	return array_key_exists( $name, $iua_options ) ? $iua_options[ $name ] : $default;
+	return array_key_exists( $name, $pixcensus_options ) ? $pixcensus_options[ $name ] : $default;
 }
 
 function add_option( $name, $value, $deprecated = '', $autoload = null ) {
@@ -59,26 +59,26 @@ function add_option( $name, $value, $deprecated = '', $autoload = null ) {
 }
 
 function update_option( $name, $value, $autoload = null ) {
-	$iua_blog_id = $GLOBALS['iua_test_current_blog'];
+	$pixcensus_blog_id = $GLOBALS['pixcensus_test_current_blog'];
 
-	if ( 1 === $iua_blog_id ) {
-		$GLOBALS['iua_test_options'][ $name ] = $value;
+	if ( 1 === $pixcensus_blog_id ) {
+		$GLOBALS['pixcensus_test_options'][ $name ] = $value;
 	} else {
-		$GLOBALS['iua_test_site_options'][ $iua_blog_id ][ $name ] = $value;
+		$GLOBALS['pixcensus_test_site_options'][ $pixcensus_blog_id ][ $name ] = $value;
 	}
 
-	$GLOBALS['iua_test_autoload'][ $iua_blog_id ][ $name ] = $autoload;
+	$GLOBALS['pixcensus_test_autoload'][ $pixcensus_blog_id ][ $name ] = $autoload;
 
 	return true;
 }
 
 function delete_option( $name ) {
-	$iua_blog_id = $GLOBALS['iua_test_current_blog'];
+	$pixcensus_blog_id = $GLOBALS['pixcensus_test_current_blog'];
 
-	if ( 1 === $iua_blog_id ) {
-		unset( $GLOBALS['iua_test_options'][ $name ] );
+	if ( 1 === $pixcensus_blog_id ) {
+		unset( $GLOBALS['pixcensus_test_options'][ $name ] );
 	} else {
-		unset( $GLOBALS['iua_test_site_options'][ $iua_blog_id ][ $name ] );
+		unset( $GLOBALS['pixcensus_test_site_options'][ $pixcensus_blog_id ][ $name ] );
 	}
 
 	return true;
@@ -101,19 +101,19 @@ function plugin_dir_path( $file ) {
 }
 
 function plugin_dir_url( $file ) {
-	return 'https://example.test/wp-content/plugins/image-usage-audit/';
+	return 'https://example.test/wp-content/plugins/pixcensus-media-audit/';
 }
 
 function add_action( $hook, $callback ) {
-	$GLOBALS['iua_test_actions'][ $hook ] = $callback;
+	$GLOBALS['pixcensus_test_actions'][ $hook ] = $callback;
 }
 
 function register_activation_hook( $file, $callback ) {
-	$GLOBALS['iua_test_activation_hook'] = $callback;
+	$GLOBALS['pixcensus_test_activation_hook'] = $callback;
 }
 
 function current_user_can( $capability ) {
-	return 'manage_options' === $capability && $GLOBALS['iua_test_can_manage'];
+	return 'manage_options' === $capability && $GLOBALS['pixcensus_test_can_manage'];
 }
 
 function wp_verify_nonce( $nonce, $action ) {
@@ -157,15 +157,15 @@ function __( $text, $domain = 'default' ) {
 }
 
 function wp_send_json_error( $data = null, $status_code = null ) {
-	throw new IUA_Test_Json_Response( false, $data, (int) ( $status_code ?: 200 ) );
+	throw new PIXCENSUS_Test_Json_Response( false, $data, (int) ( $status_code ?: 200 ) );
 }
 
 function wp_send_json_success( $data = null, $status_code = null ) {
-	throw new IUA_Test_Json_Response( true, $data, (int) ( $status_code ?: 200 ) );
+	throw new PIXCENSUS_Test_Json_Response( true, $data, (int) ( $status_code ?: 200 ) );
 }
 
 function get_post_type( $post_id ) {
-	return $GLOBALS['iua_test_post_types'][ (int) $post_id ] ?? false;
+	return $GLOBALS['pixcensus_test_post_types'][ (int) $post_id ] ?? false;
 }
 
 function wp_raise_memory_limit( $context = 'admin' ) {
@@ -173,10 +173,10 @@ function wp_raise_memory_limit( $context = 'admin' ) {
 }
 
 function wp_generate_uuid4() {
-	static $iua_uuid = 0;
-	++$iua_uuid;
+	static $pixcensus_uuid = 0;
+	++$pixcensus_uuid;
 
-	return sprintf( '00000000-0000-4000-8000-%012d', $iua_uuid );
+	return sprintf( '00000000-0000-4000-8000-%012d', $pixcensus_uuid );
 }
 
 function maybe_serialize( $value ) {
@@ -188,29 +188,29 @@ function wp_cache_delete( $key, $group = '' ) {
 }
 
 function is_multisite() {
-	return $GLOBALS['iua_test_multisite'];
+	return $GLOBALS['pixcensus_test_multisite'];
 }
 
 function get_sites( $args = array() ) {
-	$iua_offset = isset( $args['offset'] ) ? (int) $args['offset'] : 0;
-	$iua_number = isset( $args['number'] ) ? (int) $args['number'] : count( $GLOBALS['iua_test_sites'] );
+	$pixcensus_offset = isset( $args['offset'] ) ? (int) $args['offset'] : 0;
+	$pixcensus_number = isset( $args['number'] ) ? (int) $args['number'] : count( $GLOBALS['pixcensus_test_sites'] );
 
-	return array_slice( $GLOBALS['iua_test_sites'], $iua_offset, $iua_number );
+	return array_slice( $GLOBALS['pixcensus_test_sites'], $pixcensus_offset, $pixcensus_number );
 }
 
 function switch_to_blog( $blog_id ) {
-	$GLOBALS['iua_test_blog_stack'][] = $GLOBALS['iua_test_current_blog'];
-	$GLOBALS['iua_test_current_blog'] = (int) $blog_id;
+	$GLOBALS['pixcensus_test_blog_stack'][] = $GLOBALS['pixcensus_test_current_blog'];
+	$GLOBALS['pixcensus_test_current_blog'] = (int) $blog_id;
 
 	return true;
 }
 
 function restore_current_blog() {
-	if ( empty( $GLOBALS['iua_test_blog_stack'] ) ) {
+	if ( empty( $GLOBALS['pixcensus_test_blog_stack'] ) ) {
 		return false;
 	}
 
-	$GLOBALS['iua_test_current_blog'] = array_pop( $GLOBALS['iua_test_blog_stack'] );
+	$GLOBALS['pixcensus_test_current_blog'] = array_pop( $GLOBALS['pixcensus_test_blog_stack'] );
 
 	return true;
 }
@@ -224,14 +224,14 @@ function get_allowed_mime_types() {
 }
 
 function get_posts( $args = array() ) {
-	if ( is_callable( $GLOBALS['iua_test_get_posts'] ) ) {
-		return call_user_func( $GLOBALS['iua_test_get_posts'], $args );
+	if ( is_callable( $GLOBALS['pixcensus_test_get_posts'] ) ) {
+		return call_user_func( $GLOBALS['pixcensus_test_get_posts'], $args );
 	}
 
 	return array();
 }
 
-require_once dirname( __DIR__ ) . '/includes/class-iua-scanner.php';
-require_once dirname( __DIR__ ) . '/includes/class-iua-csv.php';
-require_once dirname( __DIR__ ) . '/includes/class-iua-cdn-settings.php';
-require_once dirname( __DIR__ ) . '/image-usage-audit.php';
+require_once dirname( __DIR__ ) . '/includes/class-pixcensus-scanner.php';
+require_once dirname( __DIR__ ) . '/includes/class-pixcensus-csv.php';
+require_once dirname( __DIR__ ) . '/includes/class-pixcensus-cdn-settings.php';
+require_once dirname( __DIR__ ) . '/pixcensus-media-audit.php';

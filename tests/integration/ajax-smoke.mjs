@@ -1,4 +1,4 @@
-const baseUrl = process.env.IUA_BASE_URL || 'http://localhost:8888';
+const baseUrl = process.env.PIXCENSUS_BASE_URL || 'http://localhost:8888';
 
 function assert(condition, message) {
 	if (!condition) {
@@ -32,12 +32,12 @@ async function login(username, password) {
 }
 
 async function fetchAdminState(cookie) {
-	const response = await fetch(`${baseUrl}/wp-admin/upload.php?page=iua-audit`, {
+	const response = await fetch(`${baseUrl}/wp-admin/upload.php?page=pixcensus-audit`, {
 		headers: { Cookie: cookie }
 	});
 	const html = await response.text();
-	const configMatch = html.match(/var IUAAdmin = (\{.*?\});/s);
-	const idMatch = html.match(/class="button button-secondary iua-mark-used" data-id="(\d+)"/);
+	const configMatch = html.match(/var PixCensusAdmin = (\{.*?\});/s);
+	const idMatch = html.match(/class="button button-secondary pixcensus-mark-used" data-id="(\d+)"/);
 
 	assert(response.status === 200, `Plugin admin page returned ${response.status}.`);
 	assert(configMatch, 'Localized AJAX configuration was not found.');
@@ -75,10 +75,10 @@ async function ajax(cookie, fields, method = 'POST') {
 }
 
 const adminCookie = await login('admin', 'password');
-const editorCookie = await login('iua-ajax-editor', 'iua-ajax-editor-password');
+const editorCookie = await login('pixcensus-ajax-editor', 'pixcensus-ajax-editor-password');
 const { config, attachmentId } = await fetchAdminState(adminCookie);
 const endpoint = {
-	action: 'iua_mark_manual_used',
+	action: 'pixcensus_mark_manual_used',
 	nonce: config.nonces.mark_manual,
 	id: String(attachmentId)
 };
@@ -106,7 +106,7 @@ assert(result.response.status === 200 && result.payload.success === true, 'Autho
 assert(result.payload.data.id === attachmentId, 'Authorized manual mark returned the wrong attachment ID.');
 
 result = await ajax(adminCookie, {
-	action: 'iua_mark_manual_used_bulk',
+	action: 'pixcensus_mark_manual_used_bulk',
 	nonce: config.nonces.mark_manual_bulk,
 	'ids[0][nested]': String(attachmentId)
 });

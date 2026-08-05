@@ -3,36 +3,36 @@
 use PHPUnit\Framework\TestCase;
 
 final class PluginSecurityTest extends TestCase {
-	/** @var IUA_Plugin */
+	/** @var PIXCENSUS_Plugin */
 	private $plugin;
 
 	protected function setUp(): void {
 		parent::setUp();
 
-		$GLOBALS['iua_test_options']      = array();
-		$GLOBALS['iua_test_site_options'] = array();
-		$GLOBALS['iua_test_current_blog'] = 1;
-		$GLOBALS['iua_test_blog_stack']   = array();
-		$GLOBALS['iua_test_sites']        = array( 1 );
-		$GLOBALS['iua_test_multisite']    = false;
-		$GLOBALS['iua_test_can_manage']   = true;
-		$GLOBALS['iua_test_post_types']   = array();
+		$GLOBALS['pixcensus_test_options']      = array();
+		$GLOBALS['pixcensus_test_site_options'] = array();
+		$GLOBALS['pixcensus_test_current_blog'] = 1;
+		$GLOBALS['pixcensus_test_blog_stack']   = array();
+		$GLOBALS['pixcensus_test_sites']        = array( 1 );
+		$GLOBALS['pixcensus_test_multisite']    = false;
+		$GLOBALS['pixcensus_test_can_manage']   = true;
+		$GLOBALS['pixcensus_test_post_types']   = array();
 		$_POST                            = array();
 		$_SERVER['REQUEST_METHOD']        = 'POST';
-		$this->plugin                     = IUA_Plugin::instance();
+		$this->plugin                     = PIXCENSUS_Plugin::instance();
 	}
 
 	/**
 	 * @param callable $callback Callback expected to emit JSON.
 	 * @param bool     $success Expected success flag.
 	 * @param int      $status Expected status.
-	 * @return IUA_Test_Json_Response
+	 * @return PIXCENSUS_Test_Json_Response
 	 */
-	private function capture_json( callable $callback, bool $success, int $status ): IUA_Test_Json_Response {
+	private function capture_json( callable $callback, bool $success, int $status ): PIXCENSUS_Test_Json_Response {
 		try {
 			$callback();
 			$this->fail( 'Expected a JSON response.' );
-		} catch ( IUA_Test_Json_Response $response ) {
+		} catch ( PIXCENSUS_Test_Json_Response $response ) {
 			$this->assertSame( $success, $response->success );
 			$this->assertSame( $status, $response->status );
 			$this->assertIsArray( $response->data );
@@ -51,58 +51,58 @@ final class PluginSecurityTest extends TestCase {
 
 	public function test_unauthenticated_ajax_actions_have_stable_json_hooks(): void {
 		$actions = array(
-			'iua_run_scan',
-			'iua_mark_manual_used',
-			'iua_unmark_manual_used',
-			'iua_mark_manual_used_bulk',
-			'iua_unmark_manual_used_bulk',
+			'pixcensus_run_scan',
+			'pixcensus_mark_manual_used',
+			'pixcensus_unmark_manual_used',
+			'pixcensus_mark_manual_used_bulk',
+			'pixcensus_unmark_manual_used_bulk',
 		);
 
 		foreach ( $actions as $action ) {
-			$this->assertArrayHasKey( 'wp_ajax_nopriv_' . $action, $GLOBALS['iua_test_actions'] );
+			$this->assertArrayHasKey( 'wp_ajax_nopriv_' . $action, $GLOBALS['pixcensus_test_actions'] );
 		}
 
 		$this->capture_json( array( $this->plugin, 'ajax_unauthorized' ), false, 401 );
 	}
 
 	public function test_ajax_rejects_wrong_method_action_permission_and_nonce(): void {
-		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used', 'pixcensus_mark_manual_used-valid' );
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 405 );
 
 		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$this->set_request( 'iua_unmark_manual_used', 'iua_mark_manual_used-valid' );
+		$this->set_request( 'pixcensus_unmark_manual_used', 'pixcensus_mark_manual_used-valid' );
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 400 );
 
-		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
-		$GLOBALS['iua_test_can_manage'] = false;
+		$this->set_request( 'pixcensus_mark_manual_used', 'pixcensus_mark_manual_used-valid' );
+		$GLOBALS['pixcensus_test_can_manage'] = false;
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 403 );
 
-		$GLOBALS['iua_test_can_manage'] = true;
-		$this->set_request( 'iua_mark_manual_used', '' );
+		$GLOBALS['pixcensus_test_can_manage'] = true;
+		$this->set_request( 'pixcensus_mark_manual_used', '' );
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 403 );
 
-		$this->set_request( 'iua_mark_manual_used', 'iua_unmark_manual_used-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used', 'pixcensus_unmark_manual_used-valid' );
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 403 );
 	}
 
 	public function test_single_ajax_accepts_numeric_ids_and_preserves_action_responses(): void {
-		$GLOBALS['iua_test_post_types'][11] = 'attachment';
-		$GLOBALS['iua_test_post_types'][12] = 'attachment';
+		$GLOBALS['pixcensus_test_post_types'][11] = 'attachment';
+		$GLOBALS['pixcensus_test_post_types'][12] = 'attachment';
 
-		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used', 'pixcensus_mark_manual_used-valid' );
 		$_POST['id'] = 11;
 		$response     = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), true, 200 );
 		$this->assertSame( 11, $response->data['id'] );
 		$this->assertSame( array( 11 ), $response->data['manual'] );
 
-		$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used', 'pixcensus_mark_manual_used-valid' );
 		$_POST['id'] = ' 12 ';
 		$response     = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), true, 200 );
 		$this->assertSame( 12, $response->data['id'] );
 		$this->assertSame( array( 11, 12 ), $response->data['manual'] );
 
-		$this->set_request( 'iua_unmark_manual_used', 'iua_unmark_manual_used-valid' );
+		$this->set_request( 'pixcensus_unmark_manual_used', 'pixcensus_unmark_manual_used-valid' );
 		$_POST['id'] = '11';
 		$response     = $this->capture_json( array( $this->plugin, 'ajax_unmark_manual_used' ), true, 200 );
 		$this->assertSame( 11, $response->data['id'] );
@@ -110,7 +110,7 @@ final class PluginSecurityTest extends TestCase {
 	}
 
 	public function test_single_ajax_rejects_missing_malformed_and_non_attachment_ids(): void {
-		$GLOBALS['iua_test_post_types'][11] = 'attachment';
+		$GLOBALS['pixcensus_test_post_types'][11] = 'attachment';
 
 		$invalid_ids = array(
 			null,
@@ -128,7 +128,7 @@ final class PluginSecurityTest extends TestCase {
 		);
 
 		foreach ( $invalid_ids as $invalid_id ) {
-			$this->set_request( 'iua_mark_manual_used', 'iua_mark_manual_used-valid' );
+			$this->set_request( 'pixcensus_mark_manual_used', 'pixcensus_mark_manual_used-valid' );
 
 			if ( null !== $invalid_id ) {
 				$_POST['id'] = $invalid_id;
@@ -137,26 +137,26 @@ final class PluginSecurityTest extends TestCase {
 			$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used' ), false, 400 );
 		}
 
-		$this->assertFalse( get_option( 'iua_manual_used_ids' ) );
+		$this->assertFalse( get_option( 'pixcensus_manual_used_ids' ) );
 	}
 
 	public function test_bulk_ajax_accepts_valid_ids_deduplicates_and_filters_non_attachments(): void {
-		$GLOBALS['iua_test_post_types'][11] = 'attachment';
-		$GLOBALS['iua_test_post_types'][12] = 'attachment';
+		$GLOBALS['pixcensus_test_post_types'][11] = 'attachment';
+		$GLOBALS['pixcensus_test_post_types'][12] = 'attachment';
 
-		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used_bulk', 'pixcensus_mark_manual_used_bulk-valid' );
 		$_POST['ids'] = array( '11', ' 12 ', '11', '999' );
 		$response      = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), true, 200 );
 		$this->assertSame( array( 11, 12 ), $response->data['ids'] );
 		$this->assertSame( array( 11, 12 ), $response->data['manual'] );
 
-		$this->set_request( 'iua_unmark_manual_used_bulk', 'iua_unmark_manual_used_bulk-valid' );
+		$this->set_request( 'pixcensus_unmark_manual_used_bulk', 'pixcensus_unmark_manual_used_bulk-valid' );
 		$_POST['ids'] = array( '11', '12' );
 		$response      = $this->capture_json( array( $this->plugin, 'ajax_unmark_manual_used_bulk' ), true, 200 );
 		$this->assertSame( array( 11, 12 ), $response->data['ids'] );
 		$this->assertSame( array(), $response->data['manual'] );
 
-		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used_bulk', 'pixcensus_mark_manual_used_bulk-valid' );
 		$_POST['ids'] = array( '999' );
 		$response      = $this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), true, 200 );
 		$this->assertSame( array(), $response->data['ids'] );
@@ -164,7 +164,7 @@ final class PluginSecurityTest extends TestCase {
 	}
 
 	public function test_bulk_ajax_rejects_empty_oversized_malformed_and_unexpected_inputs(): void {
-		$GLOBALS['iua_test_post_types'][11] = 'attachment';
+		$GLOBALS['pixcensus_test_post_types'][11] = 'attachment';
 
 		$invalid_selections = array(
 			array(),
@@ -179,52 +179,52 @@ final class PluginSecurityTest extends TestCase {
 		);
 
 		foreach ( $invalid_selections as $invalid_selection ) {
-			$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
+			$this->set_request( 'pixcensus_mark_manual_used_bulk', 'pixcensus_mark_manual_used_bulk-valid' );
 			$_POST['ids'] = $invalid_selection;
 			$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), false, 400 );
 		}
 
-		$this->assertFalse( get_option( 'iua_manual_used_ids' ) );
+		$this->assertFalse( get_option( 'pixcensus_manual_used_ids' ) );
 	}
 
 	public function test_bulk_ajax_rejects_missing_ids(): void {
-		$this->set_request( 'iua_mark_manual_used_bulk', 'iua_mark_manual_used_bulk-valid' );
+		$this->set_request( 'pixcensus_mark_manual_used_bulk', 'pixcensus_mark_manual_used_bulk-valid' );
 		$this->capture_json( array( $this->plugin, 'ajax_mark_manual_used_bulk' ), false, 400 );
 	}
 
 	public function test_concurrent_scan_is_refused_with_conflict_response(): void {
 		update_option(
-			'iua_scan_lock',
+			'pixcensus_scan_lock',
 			array(
 				'token'      => 'another-request',
 				'expires_at' => time() + 300,
 			),
 			false
 		);
-		$this->set_request( 'iua_run_scan', 'iua_run_scan-valid' );
+		$this->set_request( 'pixcensus_run_scan', 'pixcensus_run_scan-valid' );
 
 		$this->capture_json( array( $this->plugin, 'ajax_run_scan' ), false, 409 );
 	}
 
 	public function test_scan_lock_is_non_autoloaded_and_owner_released(): void {
-		$acquire = new ReflectionMethod( IUA_Plugin::class, 'acquire_scan_lock' );
-		$release = new ReflectionMethod( IUA_Plugin::class, 'release_scan_lock' );
+		$acquire = new ReflectionMethod( PIXCENSUS_Plugin::class, 'acquire_scan_lock' );
+		$release = new ReflectionMethod( PIXCENSUS_Plugin::class, 'release_scan_lock' );
 		$acquire->setAccessible( true );
 		$release->setAccessible( true );
 
 		$this->assertTrue( $acquire->invoke( $this->plugin ) );
 		$this->assertFalse( $acquire->invoke( $this->plugin ) );
-		$this->assertFalse( $GLOBALS['iua_test_autoload'][1]['iua_scan_lock'] );
+		$this->assertFalse( $GLOBALS['pixcensus_test_autoload'][1]['pixcensus_scan_lock'] );
 
-		$owned_lock = get_option( 'iua_scan_lock' );
+		$owned_lock = get_option( 'pixcensus_scan_lock' );
 		$this->assertIsArray( $owned_lock );
 		$this->assertArrayHasKey( 'token', $owned_lock );
 		$release->invoke( $this->plugin );
-		$this->assertFalse( get_option( 'iua_scan_lock', false ) );
+		$this->assertFalse( get_option( 'pixcensus_scan_lock', false ) );
 
 		$this->assertTrue( $acquire->invoke( $this->plugin ) );
 		update_option(
-			'iua_scan_lock',
+			'pixcensus_scan_lock',
 			array(
 				'token'      => 'replacement-owner',
 				'expires_at' => time() + 300,
@@ -232,20 +232,20 @@ final class PluginSecurityTest extends TestCase {
 			false
 		);
 		$release->invoke( $this->plugin );
-		$this->assertSame( 'replacement-owner', get_option( 'iua_scan_lock' )['token'] );
+		$this->assertSame( 'replacement-owner', get_option( 'pixcensus_scan_lock' )['token'] );
 	}
 
 	public function test_network_activation_initializes_each_site_and_restores_context(): void {
-		$GLOBALS['iua_test_multisite'] = true;
-		$GLOBALS['iua_test_sites']     = array( 1, 2, 3 );
+		$GLOBALS['pixcensus_test_multisite'] = true;
+		$GLOBALS['pixcensus_test_sites']     = array( 1, 2, 3 );
 
-		IUA_Plugin::activate( true );
+		PIXCENSUS_Plugin::activate( true );
 
-		$this->assertSame( 1, $GLOBALS['iua_test_current_blog'] );
-		$this->assertSame( array(), $GLOBALS['iua_test_blog_stack'] );
-		$this->assertSame( '1', $GLOBALS['iua_test_options']['iua_include_drafts'] );
-		$this->assertSame( '1', $GLOBALS['iua_test_site_options'][2]['iua_include_drafts'] );
-		$this->assertSame( '1', $GLOBALS['iua_test_site_options'][3]['iua_include_drafts'] );
-		$this->assertFalse( $GLOBALS['iua_test_autoload'][2]['iua_manual_used_ids'] );
+		$this->assertSame( 1, $GLOBALS['pixcensus_test_current_blog'] );
+		$this->assertSame( array(), $GLOBALS['pixcensus_test_blog_stack'] );
+		$this->assertSame( '1', $GLOBALS['pixcensus_test_options']['pixcensus_include_drafts'] );
+		$this->assertSame( '1', $GLOBALS['pixcensus_test_site_options'][2]['pixcensus_include_drafts'] );
+		$this->assertSame( '1', $GLOBALS['pixcensus_test_site_options'][3]['pixcensus_include_drafts'] );
+		$this->assertFalse( $GLOBALS['pixcensus_test_autoload'][2]['pixcensus_manual_used_ids'] );
 	}
 }

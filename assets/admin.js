@@ -1,7 +1,7 @@
 (function ($) {
 	function getString(key, fallback) {
-		if (window.IUAAdmin && IUAAdmin.i18n && IUAAdmin.i18n[key]) {
-			return IUAAdmin.i18n[key];
+		if (window.PixCensusAdmin && PixCensusAdmin.i18n && PixCensusAdmin.i18n[key]) {
+			return PixCensusAdmin.i18n[key];
 		}
 		return fallback;
 	}
@@ -9,7 +9,7 @@
 	function showNotice(type, text) {
 		var $notice = $('<div class="notice is-dismissible"></div>').addClass('notice-' + type);
 		$notice.append($('<p />').text(text));
-		$('#iua-admin').prepend($notice);
+		$('#pixcensus-admin').prepend($notice);
 
 		window.setTimeout(function () {
 			$notice.fadeOut(200, function () {
@@ -35,12 +35,12 @@
 			$tab.text(text.replace(/\(\d+\)/, '(' + nextValue + ')'));
 		}
 
-		adjust($('.nav-tab[href*="iua_tab=unused"]'), deltaUnused || 0);
-		adjust($('.nav-tab[href*="iua_tab=used"]'), deltaUsed || 0);
+		adjust($('.nav-tab[href*="pixcensus_tab=unused"]'), deltaUnused || 0);
+		adjust($('.nav-tab[href*="pixcensus_tab=used"]'), deltaUsed || 0);
 	}
 
 	function removeRow(id) {
-		$('#iua-row-' + id).fadeOut(120, function () {
+		$('#pixcensus-row-' + id).fadeOut(120, function () {
 			$(this).remove();
 		});
 	}
@@ -48,7 +48,7 @@
 	function getSelected() {
 		var ids = [];
 
-		$('.iua-select:checked:visible').each(function () {
+		$('.pixcensus-select:checked:visible').each(function () {
 			var id = parseInt($(this).val(), 10);
 			if (id) {
 				ids.push(id);
@@ -59,30 +59,30 @@
 	}
 
 	function syncSelectAllState() {
-		var $visible = $('.iua-select:visible');
-		var $checked = $('.iua-select:visible:checked');
+		var $visible = $('.pixcensus-select:visible');
+		var $checked = $('.pixcensus-select:visible:checked');
 		var allChecked = $visible.length > 0 && $visible.length === $checked.length;
 
-		$('.iua-select-all-toggle').prop('checked', allChecked);
+		$('.pixcensus-select-all-toggle').prop('checked', allChecked);
 	}
 
 	function updateQuickCount() {
-		var query = ($('#iua-quick-filter').val() || '').toString().toLowerCase().trim();
-		var shown = $('.iua-row:visible').length;
+		var query = ($('#pixcensus-quick-filter').val() || '').toString().toLowerCase().trim();
+		var shown = $('.pixcensus-row:visible').length;
 
 		if (!query) {
-			$('#iua-quick-count').text('');
+			$('#pixcensus-quick-count').text('');
 			return;
 		}
 
-		$('#iua-quick-count').text(getString('shown_count', '%d shown').replace('%d', shown));
+		$('#pixcensus-quick-count').text(getString('shown_count', '%d shown').replace('%d', shown));
 	}
 
 	function applyQuickFilter() {
-		var query = ($('#iua-quick-filter').val() || '').toString().toLowerCase().trim();
+		var query = ($('#pixcensus-quick-filter').val() || '').toString().toLowerCase().trim();
 
-		$('.iua-row').each(function () {
-			var haystack = ($(this).attr('data-iua-haystack') || '').toString();
+		$('.pixcensus-row').each(function () {
+			var haystack = ($(this).attr('data-pixcensus-haystack') || '').toString();
 			var matches = !query || haystack.indexOf(query) !== -1;
 			$(this).toggle(matches);
 		});
@@ -91,16 +91,16 @@
 		updateQuickCount();
 	}
 
-	$(document).on('click', '#iua-run-scan', function (event) {
+	$(document).on('click', '#pixcensus-run-scan', function (event) {
 		event.preventDefault();
 
 		var $button = $(this);
 
 		$button.prop('disabled', true).text(getString('scanning', 'Scanning…'));
 
-		$.post(IUAAdmin.ajax_url, {
-			action: 'iua_run_scan',
-			nonce: IUAAdmin.nonces.run_scan
+		$.post(PixCensusAdmin.ajax_url, {
+			action: 'pixcensus_run_scan',
+			nonce: PixCensusAdmin.nonces.run_scan
 		})
 			.done(function (response) {
 				if (response && response.success) {
@@ -114,12 +114,12 @@
 				showNotice('error', getString('scan_error', 'Scan error.'));
 			})
 			.always(function () {
-				var label = IUAAdmin.last_scan ? getString('run_scan_again', 'Run scan again') : getString('run_scan', 'Run scan');
+				var label = PixCensusAdmin.last_scan ? getString('run_scan_again', 'Run scan again') : getString('run_scan', 'Run scan');
 				$button.prop('disabled', false).text(label);
 			});
 	});
 
-	$(document).on('click', '.iua-mark-used', function (event) {
+	$(document).on('click', '.pixcensus-mark-used', function (event) {
 		event.preventDefault();
 
 		var id = parseInt($(this).data('id'), 10);
@@ -127,9 +127,9 @@
 			return;
 		}
 
-		$.post(IUAAdmin.ajax_url, {
-			action: 'iua_mark_manual_used',
-			nonce: IUAAdmin.nonces.mark_manual,
+		$.post(PixCensusAdmin.ajax_url, {
+			action: 'pixcensus_mark_manual_used',
+			nonce: PixCensusAdmin.nonces.mark_manual,
 			id: id
 		})
 			.done(function (response) {
@@ -147,7 +147,7 @@
 			});
 	});
 
-	$(document).on('click', '.iua-unmark-used', function (event) {
+	$(document).on('click', '.pixcensus-unmark-used', function (event) {
 		event.preventDefault();
 
 		var id = parseInt($(this).data('id'), 10);
@@ -155,9 +155,9 @@
 			return;
 		}
 
-		$.post(IUAAdmin.ajax_url, {
-			action: 'iua_unmark_manual_used',
-			nonce: IUAAdmin.nonces.unmark_manual,
+		$.post(PixCensusAdmin.ajax_url, {
+			action: 'pixcensus_unmark_manual_used',
+			nonce: PixCensusAdmin.nonces.unmark_manual,
 			id: id
 		})
 			.done(function (response) {
@@ -175,7 +175,7 @@
 			});
 	});
 
-	$(document).on('click', '#iua-bulk-mark', function (event) {
+	$(document).on('click', '#pixcensus-bulk-mark', function (event) {
 		event.preventDefault();
 
 		var ids = getSelected();
@@ -185,9 +185,9 @@
 			return;
 		}
 
-		$.post(IUAAdmin.ajax_url, {
-			action: 'iua_mark_manual_used_bulk',
-			nonce: IUAAdmin.nonces.mark_manual_bulk,
+		$.post(PixCensusAdmin.ajax_url, {
+			action: 'pixcensus_mark_manual_used_bulk',
+			nonce: PixCensusAdmin.nonces.mark_manual_bulk,
 			ids: ids
 		})
 			.done(function (response) {
@@ -205,7 +205,7 @@
 			});
 	});
 
-	$(document).on('click', '#iua-bulk-unmark', function (event) {
+	$(document).on('click', '#pixcensus-bulk-unmark', function (event) {
 		event.preventDefault();
 
 		var ids = getSelected();
@@ -215,9 +215,9 @@
 			return;
 		}
 
-		$.post(IUAAdmin.ajax_url, {
-			action: 'iua_unmark_manual_used_bulk',
-			nonce: IUAAdmin.nonces.unmark_bulk,
+		$.post(PixCensusAdmin.ajax_url, {
+			action: 'pixcensus_unmark_manual_used_bulk',
+			nonce: PixCensusAdmin.nonces.unmark_bulk,
 			ids: ids
 		})
 			.done(function (response) {
@@ -235,12 +235,12 @@
 			});
 	});
 
-	$(document).on('click', '.iua-toggle-prov', function (event) {
+	$(document).on('click', '.pixcensus-toggle-prov', function (event) {
 		event.preventDefault();
 
 		var $button = $(this);
-		var $wrap = $button.closest('.iua-prov-wrap');
-		var $more = $wrap.find('.iua-prov-more');
+		var $wrap = $button.closest('.pixcensus-prov-wrap');
+		var $more = $wrap.find('.pixcensus-prov-more');
 
 		if ($more.is(':visible')) {
 			$more.slideUp(120);
@@ -251,7 +251,7 @@
 		}
 	});
 
-	var key = 'iua_columns_v1';
+	var key = 'pixcensus_columns_v1';
 	var defaultColumns = {
 		thumb: true,
 		id: true,
@@ -290,12 +290,12 @@
 	}
 
 	function mountPanel(columns) {
-		$('#iua-col-thumb').prop('checked', !!columns.thumb);
-		$('#iua-col-id').prop('checked', !!columns.id);
-		$('#iua-col-file').prop('checked', !!columns.file);
-		$('#iua-col-uploaded').prop('checked', !!columns.uploaded);
-		$('#iua-col-provenance').prop('checked', !!columns.provenance);
-		$('#iua-col-count').prop('checked', !!columns.count);
+		$('#pixcensus-col-thumb').prop('checked', !!columns.thumb);
+		$('#pixcensus-col-id').prop('checked', !!columns.id);
+		$('#pixcensus-col-file').prop('checked', !!columns.file);
+		$('#pixcensus-col-uploaded').prop('checked', !!columns.uploaded);
+		$('#pixcensus-col-provenance').prop('checked', !!columns.provenance);
+		$('#pixcensus-col-count').prop('checked', !!columns.count);
 	}
 
 	$(function () {
@@ -306,24 +306,24 @@
 		updateQuickCount();
 	});
 
-	$(document).on('click', '#iua-columns-toggle', function (event) {
+	$(document).on('click', '#pixcensus-columns-toggle', function (event) {
 		event.preventDefault();
-		$('#iua-columns-panel').toggle();
+		$('#pixcensus-columns-panel').toggle();
 	});
 
 	$(document).on('click', function (event) {
-		var $panel = $('#iua-columns-panel');
+		var $panel = $('#pixcensus-columns-panel');
 
 		if (!$panel.length) {
 			return;
 		}
 
-		if (!$(event.target).closest('#iua-columns-panel, #iua-columns-toggle').length) {
+		if (!$(event.target).closest('#pixcensus-columns-panel, #pixcensus-columns-toggle').length) {
 			$panel.hide();
 		}
 	});
 
-	$(document).on('change', '.iua-col-toggle', function () {
+	$(document).on('change', '.pixcensus-col-toggle', function () {
 		var columns = loadColumns();
 		var columnKey = $(this).data('col');
 
@@ -332,7 +332,7 @@
 		applyColumns(columns);
 	});
 
-	$(document).on('click', '#iua-columns-reset', function (event) {
+	$(document).on('click', '#pixcensus-columns-reset', function (event) {
 		event.preventDefault();
 
 		var columns = $.extend({}, defaultColumns);
@@ -341,36 +341,36 @@
 		mountPanel(columns);
 	});
 
-	$(document).on('change', '.iua-select-all-toggle', function () {
+	$(document).on('change', '.pixcensus-select-all-toggle', function () {
 		var checked = $(this).is(':checked');
 
-		$('.iua-select:visible').prop('checked', checked);
-		$('.iua-select-all-toggle').prop('checked', checked);
+		$('.pixcensus-select:visible').prop('checked', checked);
+		$('.pixcensus-select-all-toggle').prop('checked', checked);
 	});
 
-	$(document).on('change', '.iua-select', function () {
+	$(document).on('change', '.pixcensus-select', function () {
 		syncSelectAllState();
 	});
 
-	$(document).on('input', '#iua-quick-filter', function () {
+	$(document).on('input', '#pixcensus-quick-filter', function () {
 		applyQuickFilter();
 	});
 
-	$(document).on('click', '[data-iua-density]', function (event) {
+	$(document).on('click', '[data-pixcensus-density]', function (event) {
 		event.preventDefault();
 
 		var mode = $(this).data('iuaDensity');
-		var $root = $('#iua-admin');
+		var $root = $('#pixcensus-admin');
 
-		$('[data-iua-density]').removeClass('button-primary');
+		$('[data-pixcensus-density]').removeClass('button-primary');
 
 		if ('compact' === mode) {
-			$root.addClass('iua-compact');
-			$('[data-iua-density="compact"]').addClass('button-primary');
+			$root.addClass('pixcensus-compact');
+			$('[data-pixcensus-density="compact"]').addClass('button-primary');
 			return;
 		}
 
-		$root.removeClass('iua-compact');
-		$('[data-iua-density="comfortable"]').addClass('button-primary');
+		$root.removeClass('pixcensus-compact');
+		$('[data-pixcensus-density="comfortable"]').addClass('button-primary');
 	});
 })(jQuery);
