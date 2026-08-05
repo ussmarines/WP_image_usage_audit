@@ -8,64 +8,64 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
  *
  * @return void
  */
-function iua_delete_plugin_options(): void {
-	delete_option( 'iua_usage_results' );
-	delete_option( 'iua_include_drafts' );
-	delete_option( 'iua_manual_used_ids' );
-	delete_option( 'iua_cdn_aliases' );
-	delete_option( 'iua_cdn_rewrites' );
-	delete_option( 'iua_scan_lock' );
+function pixcensus_delete_plugin_options(): void {
+	delete_option( 'pixcensus_usage_results' );
+	delete_option( 'pixcensus_include_drafts' );
+	delete_option( 'pixcensus_manual_used_ids' );
+	delete_option( 'pixcensus_cdn_aliases' );
+	delete_option( 'pixcensus_cdn_rewrites' );
+	delete_option( 'pixcensus_scan_lock' );
 }
 
-iua_delete_plugin_options();
+pixcensus_delete_plugin_options();
 
 if ( is_multisite() ) {
-	$iua_current_blog_id = get_current_blog_id();
-	$iua_offset          = 0;
-	$iua_batch_size      = 100;
+	$pixcensus_current_blog_id = get_current_blog_id();
+	$pixcensus_offset          = 0;
+	$pixcensus_batch_size      = 100;
 
 	do {
 		try {
-			$iua_blog_ids = get_sites(
+			$pixcensus_blog_ids = get_sites(
 				array(
 					'fields'  => 'ids',
-					'number'  => $iua_batch_size,
-					'offset'  => $iua_offset,
+					'number'  => $pixcensus_batch_size,
+					'offset'  => $pixcensus_offset,
 					'deleted' => 0,
 				)
 			);
-		} catch ( Throwable $iua_exception ) {
+		} catch ( Throwable $pixcensus_exception ) {
 			break;
 		}
 
-		if ( ! is_array( $iua_blog_ids ) || empty( $iua_blog_ids ) ) {
+		if ( ! is_array( $pixcensus_blog_ids ) || empty( $pixcensus_blog_ids ) ) {
 			break;
 		}
 
-		foreach ( $iua_blog_ids as $iua_blog_id ) {
-			if ( $iua_current_blog_id === (int) $iua_blog_id ) {
+		foreach ( $pixcensus_blog_ids as $pixcensus_blog_id ) {
+			if ( $pixcensus_current_blog_id === (int) $pixcensus_blog_id ) {
 				continue;
 			}
 
-			$iua_switched = false;
+			$pixcensus_switched = false;
 
 			try {
-				$iua_switched = switch_to_blog( (int) $iua_blog_id );
+				$pixcensus_switched = switch_to_blog( (int) $pixcensus_blog_id );
 
-				if ( $iua_switched ) {
-					iua_delete_plugin_options();
+				if ( $pixcensus_switched ) {
+					pixcensus_delete_plugin_options();
 				}
-			} catch ( Throwable $iua_exception ) {
+			} catch ( Throwable $pixcensus_exception ) {
 				// Continue so one unavailable site does not prevent cleanup elsewhere.
 				continue;
 			} finally {
-				if ( $iua_switched ) {
+				if ( $pixcensus_switched ) {
 					restore_current_blog();
 				}
 			}
 		}
 
-		$iua_count   = count( $iua_blog_ids );
-		$iua_offset += $iua_count;
-	} while ( $iua_count === $iua_batch_size );
+		$pixcensus_count   = count( $pixcensus_blog_ids );
+		$pixcensus_offset += $pixcensus_count;
+	} while ( $pixcensus_count === $pixcensus_batch_size );
 }

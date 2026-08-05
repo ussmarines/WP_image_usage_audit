@@ -38,7 +38,7 @@ Use this path to submit to WordPress.org or publish a directory-compatible ZIP:
 1. Keep `GPL-2.0-or-later` for the whole distributed plugin and all bundled assets.
 2. Permit modification, redistribution, forks, and sale under the GPL.
 3. Preserve applicable copyright and license notices without requiring a frontend credit.
-4. Build only with `npm run build:zip` and distribute `dist/image-usage-audit.zip`.
+4. Build only with `npm run build:zip` and distribute `dist/pixcensus-media-audit.zip`.
 5. Submit the validated ZIP through the WordPress.org plugin process, then use the assigned SVN repository and release tags if accepted.
 
 This path is technically compatible with WordPress.org but cannot prevent forks, redistribution, or third-party resale. Directory review remains discretionary and technical readiness is not an acceptance guarantee.
@@ -62,7 +62,7 @@ A restrictive future build can remain technically installable on WordPress, but 
 - `CREDITS.md` is not added now because the repository contains no verified third-party runtime credit beyond the existing author/contributor metadata. Add it only when verified names, components, or asset licenses make it useful.
 - Official releases can be distinguished through the canonical repository, signed release artifacts, checksums, and an explicit official-distribution statement. Those measures do not remove GPL redistribution rights.
 - Copyright protects original code and artwork; it does not by itself reserve exclusive control over redistribution already licensed under the GPL.
-- A separate trademark policy can control use of a protected project name or logo in ways that avoid confusion about modified builds. No evidence shows that `Image Usage Audit` or a logo is a registered trademark, so no registration claim should be made.
+- A separate trademark policy can control use of a protected project name or logo in ways that avoid confusion about modified builds. No evidence shows that `PixCensus — Media Usage Audit` or a logo is a registered trademark, so no registration claim should be made.
 - The current name does not imply affiliation with WordPress.org. A special no-affiliation notice is not technically necessary now; counsel may recommend one for future branding or private distribution.
 
 ## Files to change only after a restrictive-license decision
@@ -70,11 +70,11 @@ A restrictive future build can remain technically installable on WordPress, but 
 A coordinated future release would need an explicit review of at least:
 
 - `LICENSE` and any new legal notices;
-- the `License` and `License URI` fields in `image-usage-audit.php` and `readme.txt`;
+- the `License` and `License URI` fields in `pixcensus-media-audit.php` and `readme.txt`;
 - `composer.json`, `package.json`, and `README.md` license declarations;
 - `scripts/validate-metadata.mjs` and `scripts/build-zip.ps1`, which currently enforce GPL metadata;
 - `SECURITY.md`, distribution documentation, release notes, and any website terms;
-- plugin version, `IUA_VERSION`, stable tag, changelog, upgrade notice, and POT project version for the deliberate release.
+- plugin version, `PIXCENSUS_VERSION`, stable tag, changelog, upgrade notice, and POT project version for the deliberate release.
 
 Do not put a draft proprietary license into the final ZIP. Keep the present GPL license for every WordPress.org-targeted build.
 

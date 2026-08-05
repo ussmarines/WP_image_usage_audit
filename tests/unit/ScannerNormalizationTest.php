@@ -4,15 +4,15 @@ use PHPUnit\Framework\TestCase;
 
 final class ScannerNormalizationTest extends TestCase {
 	protected function tearDown(): void {
-		$GLOBALS['iua_test_get_posts'] = null;
+		$GLOBALS['pixcensus_test_get_posts'] = null;
 		parent::tearDown();
 	}
 
 	/**
 	 * @return mixed
 	 */
-	private function call_private( IUA_Scanner $scanner, string $method, array $arguments = array() ) {
-		$reflection = new ReflectionMethod( IUA_Scanner::class, $method );
+	private function call_private( PIXCENSUS_Scanner $scanner, string $method, array $arguments = array() ) {
+		$reflection = new ReflectionMethod( PIXCENSUS_Scanner::class, $method );
 
 		if ( PHP_VERSION_ID < 80100 ) {
 			$reflection->setAccessible( true );
@@ -22,11 +22,11 @@ final class ScannerNormalizationTest extends TestCase {
 	}
 
 	public function test_cdn_aliases_and_rewrites_normalize_upload_urls() : void {
-		$GLOBALS['iua_test_options'] = array(
-			'iua_cdn_aliases'  => 'cdn.example.test, media.example.test',
-			'iua_cdn_rewrites' => 'https://assets.example.test/media => /wp-content/uploads',
+		$GLOBALS['pixcensus_test_options'] = array(
+			'pixcensus_cdn_aliases'  => 'cdn.example.test, media.example.test',
+			'pixcensus_cdn_rewrites' => 'https://assets.example.test/media => /wp-content/uploads',
 		);
-		$scanner = new IUA_Scanner();
+		$scanner = new PIXCENSUS_Scanner();
 
 		$this->call_private( $scanner, 'load_cdn_settings' );
 
@@ -41,7 +41,7 @@ final class ScannerNormalizationTest extends TestCase {
 	}
 
 	public function test_upload_urls_match_generated_sizes_and_record_provenance() : void {
-		$scanner  = new IUA_Scanner();
+		$scanner  = new PIXCENSUS_Scanner();
 		$used     = array();
 		$path_map = array(
 			'2024/image.jpg'         => 11,
@@ -65,7 +65,7 @@ final class ScannerNormalizationTest extends TestCase {
 	 * @dataProvider upload_reference_variants
 	 */
 	public function test_upload_reference_variants_are_normalized( string $reference ) : void {
-		$scanner  = new IUA_Scanner();
+		$scanner  = new PIXCENSUS_Scanner();
 		$used     = array();
 		$path_map = array( '2024/image.jpg' => 11 );
 
@@ -90,7 +90,7 @@ final class ScannerNormalizationTest extends TestCase {
 	}
 
 	public function test_blocks_and_shortcodes_only_match_explicit_attachment_fields() : void {
-		$scanner = new IUA_Scanner();
+		$scanner = new PIXCENSUS_Scanner();
 		$used    = array();
 
 		$this->call_private(
@@ -104,7 +104,7 @@ final class ScannerNormalizationTest extends TestCase {
 	}
 
 	public function test_close_filenames_and_duplicate_basenames_do_not_false_match() : void {
-		$scanner  = new IUA_Scanner();
+		$scanner  = new PIXCENSUS_Scanner();
 		$used     = array();
 		$path_map = array(
 			'2024/image.jpg' => 11,
@@ -120,13 +120,13 @@ final class ScannerNormalizationTest extends TestCase {
 
 	public function test_attachment_queries_are_batched(): void {
 		$calls = array();
-		$GLOBALS['iua_test_get_posts'] = static function ( array $args ) use ( &$calls ): array {
+		$GLOBALS['pixcensus_test_get_posts'] = static function ( array $args ) use ( &$calls ): array {
 			$calls[] = $args;
 
 			return 1 === $args['paged'] ? range( 1, 200 ) : array( 201 );
 		};
 
-		$scanner = new IUA_Scanner();
+		$scanner = new PIXCENSUS_Scanner();
 		$ids     = $this->call_private( $scanner, 'get_image_attachment_ids' );
 
 		$this->assertCount( 201, $ids );
@@ -137,28 +137,28 @@ final class ScannerNormalizationTest extends TestCase {
 	}
 
 	public function test_orphan_results_are_relative_to_uploads_directory(): void {
-		$iua_basedir = trailingslashit( sys_get_temp_dir() ) . 'iua-orphans-' . bin2hex( random_bytes( 8 ) );
-		$iua_subdir  = $iua_basedir . '/2026/08';
-		$iua_file    = $iua_subdir . '/orphan.jpg';
+		$pixcensus_basedir = trailingslashit( sys_get_temp_dir() ) . 'pixcensus-orphans-' . bin2hex( random_bytes( 8 ) );
+		$pixcensus_subdir  = $pixcensus_basedir . '/2026/08';
+		$pixcensus_file    = $pixcensus_subdir . '/orphan.jpg';
 
-		$this->assertTrue( mkdir( $iua_subdir, 0700, true ) );
-		$this->assertNotFalse( file_put_contents( $iua_file, 'fixture' ) );
+		$this->assertTrue( mkdir( $pixcensus_subdir, 0700, true ) );
+		$this->assertNotFalse( file_put_contents( $pixcensus_file, 'fixture' ) );
 
 		try {
-			$iua_orphans = $this->call_private( new IUA_Scanner(), 'find_orphans', array( array(), $iua_basedir ) );
+			$pixcensus_orphans = $this->call_private( new PIXCENSUS_Scanner(), 'find_orphans', array( array(), $pixcensus_basedir ) );
 
-			$this->assertSame( array( '2026/08/orphan.jpg' ), $iua_orphans );
-			$this->assertStringNotContainsString( wp_normalize_path( $iua_basedir ), $iua_orphans[0] );
+			$this->assertSame( array( '2026/08/orphan.jpg' ), $pixcensus_orphans );
+			$this->assertStringNotContainsString( wp_normalize_path( $pixcensus_basedir ), $pixcensus_orphans[0] );
 		} finally {
-			unlink( $iua_file );
-			rmdir( $iua_subdir );
-			rmdir( dirname( $iua_subdir ) );
-			rmdir( $iua_basedir );
+			unlink( $pixcensus_file );
+			rmdir( $pixcensus_subdir );
+			rmdir( dirname( $pixcensus_subdir ) );
+			rmdir( $pixcensus_basedir );
 		}
 	}
 
 	public function test_builder_ids_are_detected_and_provenance_is_capped() : void {
-		$scanner = new IUA_Scanner();
+		$scanner = new PIXCENSUS_Scanner();
 		$used    = array();
 
 		$this->call_private( $scanner, 'scan_builder_value_for_ids', array( '{"id":27,"nested":{"id":28}}', &$used, 'post:8 meta:_elementor_data' ) );
@@ -177,7 +177,7 @@ final class ScannerNormalizationTest extends TestCase {
 	 * @dataProvider dangerous_csv_values
 	 */
 	public function test_csv_formula_values_are_neutralized( string $value ) : void {
-		$this->assertSame( "'" . $value, IUA_CSV::neutralize_formula( $value ) );
+		$this->assertSame( "'" . $value, PIXCENSUS_CSV::neutralize_formula( $value ) );
 	}
 
 	public function dangerous_csv_values() : array {
@@ -193,12 +193,12 @@ final class ScannerNormalizationTest extends TestCase {
 	}
 
 	public function test_safe_csv_values_are_unchanged() : void {
-		$this->assertSame( 'image.jpg', IUA_CSV::neutralize_formula( 'image.jpg' ) );
-		$this->assertSame( 'https://example.test/image.jpg', IUA_CSV::neutralize_formula( 'https://example.test/image.jpg' ) );
+		$this->assertSame( 'image.jpg', PIXCENSUS_CSV::neutralize_formula( 'image.jpg' ) );
+		$this->assertSame( 'https://example.test/image.jpg', PIXCENSUS_CSV::neutralize_formula( 'https://example.test/image.jpg' ) );
 	}
 
 	public function test_cdn_settings_accept_bounded_hosts_and_upload_rewrites() : void {
-		$result = IUA_CDN_Settings::validate(
+		$result = PIXCENSUS_CDN_Settings::validate(
 			'CDN.Example.test, 192.0.2.10',
 			"https://assets.example.test/media => /wp-content/uploads\n/media => /wp-content/uploads"
 		);
@@ -212,7 +212,7 @@ final class ScannerNormalizationTest extends TestCase {
 	 * @dataProvider invalid_cdn_settings
 	 */
 	public function test_cdn_settings_reject_malformed_or_dangerous_values( string $aliases, string $rewrites ) : void {
-		$result = IUA_CDN_Settings::validate( $aliases, $rewrites );
+		$result = PIXCENSUS_CDN_Settings::validate( $aliases, $rewrites );
 
 		$this->assertFalse( $result['valid'] );
 		$this->assertNotEmpty( $result['errors'] );

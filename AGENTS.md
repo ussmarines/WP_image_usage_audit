@@ -10,7 +10,7 @@
 - Do not add a production dependency without justification; use development dependencies for QA tools.
 - Never push directly to `main` unless the owner has explicitly authorized that exact bounded operation in the current request. Never force-push or rewrite history.
 - Do not bump the plugin version for documentation-only or CI-only changes.
-- For every future release, synchronize the PHP plugin header, `IUA_VERSION`, `readme.txt` stable tag and changelog, and POT version/catalog.
+- For every future release, synchronize the PHP plugin header, `PIXCENSUS_VERSION`, `readme.txt` stable tag and changelog, and POT version/catalog.
 
 ## Secrets, identité et agents
 

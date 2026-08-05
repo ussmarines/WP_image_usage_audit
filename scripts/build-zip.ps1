@@ -1,5 +1,5 @@
 param(
-	[string] $OutputPath = 'dist/image-usage-audit.zip'
+	[string] $OutputPath = 'dist/pixcensus-media-audit.zip'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -15,15 +15,15 @@ if (-not $outputFullPath.StartsWith($repoPrefix, [System.StringComparison]::Ordi
 
 $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $tempPrefix = [System.IO.Path]::TrimEndingDirectorySeparator($tempRoot) + [System.IO.Path]::DirectorySeparatorChar
-$stagingBase = [System.IO.Path]::GetFullPath((Join-Path $tempRoot ('iua-package-' + [System.Guid]::NewGuid().ToString('N'))))
+$stagingBase = [System.IO.Path]::GetFullPath((Join-Path $tempRoot ('pixcensus-package-' + [System.Guid]::NewGuid().ToString('N'))))
 
 if (-not $stagingBase.StartsWith($tempPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
 	throw 'The staging directory must stay inside the system temporary directory.'
 }
 
-$packageRoot = Join-Path $stagingBase 'image-usage-audit'
+$packageRoot = Join-Path $stagingBase 'pixcensus-media-audit'
 $runtimeFiles = @(
-	'image-usage-audit.php',
+	'pixcensus-media-audit.php',
 	'uninstall.php',
 	'readme.txt',
 	'LICENSE'
@@ -67,14 +67,14 @@ try {
 	try {
 		$entries = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\', '/') })
 		$required = @(
-			'image-usage-audit/image-usage-audit.php',
-			'image-usage-audit/readme.txt',
-			'image-usage-audit/LICENSE',
-			'image-usage-audit/uninstall.php'
+			'pixcensus-media-audit/pixcensus-media-audit.php',
+			'pixcensus-media-audit/readme.txt',
+			'pixcensus-media-audit/LICENSE',
+			'pixcensus-media-audit/uninstall.php'
 		)
 
 		foreach ($entry in $entries) {
-			if (-not $entry.StartsWith('image-usage-audit/', [System.StringComparison]::Ordinal)) {
+			if (-not $entry.StartsWith('pixcensus-media-audit/', [System.StringComparison]::Ordinal)) {
 				throw "Unexpected ZIP root entry: $entry"
 			}
 
@@ -89,7 +89,7 @@ try {
 			}
 		}
 
-		$mainEntry = $archive.GetEntry('image-usage-audit/image-usage-audit.php')
+		$mainEntry = $archive.GetEntry('pixcensus-media-audit/pixcensus-media-audit.php')
 		$reader = [System.IO.StreamReader]::new($mainEntry.Open())
 		try { $mainContent = $reader.ReadToEnd() } finally { $reader.Dispose() }
 
@@ -102,11 +102,11 @@ try {
 		$pluginVersion = $versionMatch.Groups[1].Value
 		$escapedVersion = [System.Text.RegularExpressions.Regex]::Escape($pluginVersion)
 
-		if ($mainContent -notmatch "define\(\s*'IUA_VERSION'\s*,\s*'$escapedVersion'\s*\)" ) {
-			throw 'The plugin header and IUA_VERSION are inconsistent in the ZIP.'
+		if ($mainContent -notmatch "define\(\s*'PIXCENSUS_VERSION'\s*,\s*'$escapedVersion'\s*\)" ) {
+			throw 'The plugin header and PIXCENSUS_VERSION are inconsistent in the ZIP.'
 		}
 
-		$readmeEntry = $archive.GetEntry('image-usage-audit/readme.txt')
+		$readmeEntry = $archive.GetEntry('pixcensus-media-audit/readme.txt')
 		$reader = [System.IO.StreamReader]::new($readmeEntry.Open())
 		try { $readmeContent = $reader.ReadToEnd() } finally { $reader.Dispose() }
 
@@ -126,7 +126,7 @@ try {
 		checksum = $checksumFullPath
 		sha256 = $sha256
 		entries = $entries.Count
-		root = 'image-usage-audit/'
+		root = 'pixcensus-media-audit/'
 		result = 'pass'
 	} | ConvertTo-Json -Compress
 } finally {

@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 $version = '1.7.12'
 $tempRoot = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
 $tempPrefix = [System.IO.Path]::TrimEndingDirectorySeparator($tempRoot) + [System.IO.Path]::DirectorySeparatorChar
-$stagingBase = [System.IO.Path]::GetFullPath((Join-Path $tempRoot ('iua-actionlint-' + [System.Guid]::NewGuid().ToString('N'))))
+$stagingBase = [System.IO.Path]::GetFullPath((Join-Path $tempRoot ('pixcensus-actionlint-' + [System.Guid]::NewGuid().ToString('N'))))
 
 if (-not $stagingBase.StartsWith($tempPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
 	throw 'The actionlint staging directory must stay inside the system temporary directory.'

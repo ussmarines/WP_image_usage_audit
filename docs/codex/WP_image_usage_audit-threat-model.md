@@ -1,4 +1,4 @@
-# Threat model: Image Usage Audit
+# Threat model: PixCensus — Media Usage Audit
 
 ## Executive summary
 
@@ -19,8 +19,8 @@ Open questions that could change ranking: the intended minimum role for access, 
 
 ### Primary components
 
-- WordPress admin bootstrap and handlers: `image-usage-audit.php` / `IUA_Plugin`.
-- Scanner: `includes/class-iua-scanner.php` / `IUA_Scanner`.
+- WordPress admin bootstrap and handlers: `pixcensus-media-audit.php` / `PIXCENSUS_Plugin`.
+- Scanner: `includes/class-pixcensus-scanner.php` / `PIXCENSUS_Scanner`.
 - Admin output and browser interactions: `views/admin-page.php`, `assets/admin.js`, and `assets/admin.css`.
 - WordPress database/options and uploads filesystem.
 - Uninstall lifecycle: `uninstall.php`.
@@ -84,12 +84,12 @@ flowchart LR
 
 | Surface | How reached | Trust boundary | Notes | Evidence |
 | --- | --- | --- | --- | --- |
-| Admin page | Media submenu/direct URL | User -> admin | Baseline capability is `upload_files` | `image-usage-audit.php` / `register_menu`, `render_admin_page` |
-| Settings save | `admin-post.php` | User -> settings | Section nonces; CDN values lack strict structure/length bounds | `IUA_Plugin::handle_save_settings` |
-| Run scan | `admin-ajax.php` | User -> scanner | Nonce/capability present; synchronous and unlocked | `IUA_Plugin::ajax_run_scan` |
+| Admin page | Media submenu/direct URL | User -> admin | Baseline capability is `upload_files` | `pixcensus-media-audit.php` / `register_menu`, `render_admin_page` |
+| Settings save | `admin-post.php` | User -> settings | Section nonces; CDN values lack strict structure/length bounds | `PIXCENSUS_Plugin::handle_save_settings` |
+| Run scan | `admin-ajax.php` | User -> scanner | Nonce/capability present; synchronous and unlocked | `PIXCENSUS_Plugin::ajax_run_scan` |
 | Manual mark actions | `admin-ajax.php` | User -> option | Shared nonce; attachment validation present; bulk input unbounded | `ajax_*manual_used*`, `filter_attachment_ids` |
-| CSV export | `admin-post.php` | Snapshot -> spreadsheet | Nonce/capability and `fputcsv`; no formula neutralization | `IUA_Plugin::export_csv` |
-| Options/content/meta/terms | Scanner APIs/query | Database -> scanner | Broad read scope; options query is unbounded | `IUA_Scanner::run`, `scan_options_for_uploads` |
+| CSV export | `admin-post.php` | Snapshot -> spreadsheet | Nonce/capability and `fputcsv`; no formula neutralization | `PIXCENSUS_Plugin::export_csv` |
+| Options/content/meta/terms | Scanner APIs/query | Database -> scanner | Broad read scope; options query is unbounded | `PIXCENSUS_Scanner::run`, `scan_options_for_uploads` |
 | Upload tree | Recursive iterator | Filesystem -> scanner | Read-only; large trees/permission errors affect availability | `find_upload_images` |
 | Uninstall | WordPress uninstall | Plugin -> multisite DB | Plugin options only; blog switch stack is not restored correctly | `uninstall.php` |
 | CI and locks | GitHub Actions | Source -> build runner | Mutable action tags and scripts execute with repository token | `.github/workflows/qa.yml`, lockfiles |
@@ -109,7 +109,7 @@ flowchart LR
 
 | Threat ID | Threat source | Prerequisites | Threat action | Impact | Impacted assets | Existing controls (evidence) | Gaps | Recommended mitigations | Detection ideas | Likelihood | Impact severity | Priority |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| TM-001 | Author account | Valid account with `upload_files` | Run/export a global scan beyond the author’s own content | Confidential editorial/operational metadata disclosure | Content references, option names, paths | Nonces and server-side capability checks in `IUA_Plugin` | Capability is too broad for cross-site audit data | Require `manage_options`; document role scope; test denied roles | Log/observe denied action responses in integration tests | High | Medium | High |
+| TM-001 | Author account | Valid account with `upload_files` | Run/export a global scan beyond the author’s own content | Confidential editorial/operational metadata disclosure | Content references, option names, paths | Nonces and server-side capability checks in `PIXCENSUS_Plugin` | Capability is too broad for cross-site audit data | Require `manage_options`; document role scope; test denied roles | Log/observe denied action responses in integration tests | High | Medium | High |
 | TM-002 | Site data or content author | Administrator opens exported CSV in a spreadsheet | Place formula-leading text in filename, URL, date, or provenance | Local formula execution/data access in spreadsheet context | CSV consumer | RFC-style quoting by `fputcsv` | CSV quoting does not prevent formula interpretation | Prefix dangerous leading characters after whitespace with an apostrophe; unit test markers | Test exported-cell sanitizer corpus | Medium | High | High |
 | TM-003 | Authorized administrator or accidental double click | Ability to start scan | Launch concurrent, unbounded scans | PHP/DB exhaustion and last-writer-wins results | Worker capacity, snapshot | Capability/nonce; provenance cap | No lock, batch limits, or cancellation | Add atomic expiring lock; bound bulk input; batch options; document residual synchronous limits | Return explicit “scan already running”; monitor request duration | Medium | Medium | Medium |
 | TM-004 | Authorized administrator | Can save CDN settings | Store malformed, excessive, or broad aliases/rewrites | CPU amplification and false classifications | Availability, snapshot integrity | Text sanitization; `preg_quote` for alias regex | No count/length/host/path validation or explicit rejection | Strict parser, count/length limits, reject invalid rules, show error notice | Unit tests for malformed/long rules | Medium | Medium | Medium |
@@ -129,8 +129,8 @@ flowchart LR
 
 | Path | Why it matters | Related Threat IDs |
 | --- | --- | --- |
-| `image-usage-audit.php` | All authorization, CSRF, settings, locking, option writes, and CSV handling | TM-001, TM-002, TM-003, TM-004 |
-| `includes/class-iua-scanner.php` | Broad database/filesystem reads and classification integrity | TM-003, TM-004, TM-005, TM-006, TM-008 |
+| `pixcensus-media-audit.php` | All authorization, CSRF, settings, locking, option writes, and CSV handling | TM-001, TM-002, TM-003, TM-004 |
+| `includes/class-pixcensus-scanner.php` | Broad database/filesystem reads and classification integrity | TM-003, TM-004, TM-005, TM-006, TM-008 |
 | `views/admin-page.php` | Sensitive snapshot output and safety messaging | TM-001, TM-006 |
 | `assets/admin.js` | AJAX invocation and client-side error handling | TM-003 |
 | `uninstall.php` | Multisite context and deletion boundaries | TM-008 |

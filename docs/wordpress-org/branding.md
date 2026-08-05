@@ -1,7 +1,14 @@
-# Visual identity
+# PixCensus visual identity
 
-Image Usage Audit 3.0.0 uses one coherent visual identity across GitHub, the plugin administration screen, and the WordPress.org directory assets.
+PixCensus uses a scanned census-grid motif to represent media inventory, provenance, and review status. The identity is self-contained and does not load remote fonts, images, scripts, or tracking resources.
 
-The wide banner belongs in the GitHub README and the WordPress.org directory. Inside WordPress administration, a compact mark and restrained navy-to-teal hero are used so the scan controls remain visible and the page stays usable on smaller screens.
+## Palette
 
-The local administration asset is `assets/image-usage-audit-mark.svg`. WordPress.org uses the exported banner and icon PNG files from the submission pack. The Plugins screen will use the WordPress.org icon after directory publication.
+- Navy: `#07162b`
+- Structural blue: `#102f52`
+- Teal: `#38e4c4`
+- Cyan: `#55c9ff`
+- Violet: `#786fff`
+- Light text: `#f6fbff`
+
+The wide banner is used in the GitHub README and WordPress.org directory. The compact mark is bundled in the plugin administration screen. Directory PNG assets are stored in `.wordpress-org/`; SVG files remain the editable source.

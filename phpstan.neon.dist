@@ -1,7 +1,7 @@
 parameters:
     level: 1
     paths:
-        - image-usage-audit.php
+        - pixcensus-media-audit.php
         - includes
         - views
         - uninstall.php

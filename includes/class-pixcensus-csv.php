@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * CSV output safety helpers.
  */
-final class IUA_CSV {
+final class PIXCENSUS_CSV {
 
 	/**
 	 * Neutralize values that spreadsheet applications may interpret as formulas.
@@ -15,12 +15,12 @@ final class IUA_CSV {
 	 * @return string
 	 */
 	public static function neutralize_formula( $value ): string {
-		$iua_value = (string) $value;
+		$pixcensus_value = (string) $value;
 
-		if ( preg_match( '/^[\x00-\x20]*[=+\-@]/', $iua_value ) || preg_match( '/^[\t\r\n]/', $iua_value ) ) {
-			return "'" . $iua_value;
+		if ( preg_match( '/^[\x00-\x20]*[=+\-@]/', $pixcensus_value ) || preg_match( '/^[\t\r\n]/', $pixcensus_value ) ) {
+			return "'" . $pixcensus_value;
 		}
 
-		return $iua_value;
+		return $pixcensus_value;
 	}
 }

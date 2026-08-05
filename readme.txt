@@ -1,19 +1,19 @@
-=== Image Usage Audit ===
+=== PixCensus — Media Usage Audit ===
 Contributors: ussmarines
 Donate link: https://paypal.me/ussmarinesdot
 Tags: media, attachments, audit, images, csv
 Requires at least: 5.9
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Audit image usage in your WordPress Media Library with provenance, CSV export, manual review tools, and CDN rewrite support.
+Inventory media usage with provenance, CSV export, manual review tools, and CDN rewrite support.
 
 == Description ==
 
-Image Usage Audit helps you review where images are used before you clean up the Media Library.
+PixCensus — Media Usage Audit helps you review where images are used before you clean up the Media Library.
 
 Features:
 * Scan published content and optionally drafts.
@@ -27,7 +27,7 @@ Supported builders and editors include WordPress core, Elementor, Divi, Beaver B
 
 = Support the project =
 
-If Image Usage Audit has been useful to you, you can support its continued development with an optional donation: https://paypal.me/ussmarinesdot
+If PixCensus — Media Usage Audit has been useful to you, you can support its continued development with an optional donation: https://paypal.me/ussmarinesdot
 
 Important:
 Images referenced only in custom CSS, raw HTML widgets, theme files, plugin files, or some external/CDN setups may still require manual review. Always make a full backup before deleting media.
@@ -35,7 +35,7 @@ Images referenced only in custom CSS, raw HTML widgets, theme files, plugin file
 == Installation ==
 
 1. Upload and activate the plugin.
-2. Open **Media → Image Usage Audit**.
+2. Open **Media → PixCensus — Media Usage Audit**.
 3. Click **Run scan**.
 
 == Frequently Asked Questions ==
@@ -50,8 +50,14 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 
 == Changelog ==
 
+= 3.0.1 =
+* Renamed the plugin to PixCensus — Media Usage Audit with the distinctive `pixcensus-media-audit` slug.
+* Replaced all active PHP, WordPress, JavaScript, CSS, option, nonce, and AJAX prefixes with `pixcensus_` / `PIXCENSUS_`.
+* Introduced a new self-contained PixCensus visual identity for the administration screen, GitHub README, and WordPress.org directory assets.
+* Revalidated administrator capabilities, action-specific nonces, package metadata, multisite behavior, and the non-destructive scan workflow.
+
 = 3.0.0 =
-* Applied a complete Image Usage Audit visual identity to the administration screen and project documentation.
+* Applied a complete PixCensus — Media Usage Audit visual identity to the administration screen and project documentation.
 * Added a bundled, self-contained brand mark with no remote resources or tracking.
 * Added WordPress.org banner and icon sources, submission guidance, and safer release-preparation helpers.
 * Preserved the non-destructive scanner, existing security controls, and WordPress 5.9 / PHP 7.4 compatibility.
@@ -107,6 +113,10 @@ Typical cases include custom CSS, HTML widgets, theme files, rewritten CDN domai
 * First public release based on the internal stable branch.
 
 == Upgrade Notice ==
+
+= 3.0.1 =
+
+Renames the plugin and its identifiers to PixCensus, adds the new directory artwork, and preserves the audited non-destructive workflow.
 
 = 3.0.0 =
 

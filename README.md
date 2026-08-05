@@ -1,10 +1,10 @@
 <p align="center">
-  <img src=".wordpress-org/banner-source.svg" alt="Image Usage Audit — Review media usage before cleanup" width="772">
+  <img src=".wordpress-org/banner-1544x500.png" alt="PixCensus — Media Usage Audit" width="772">
 </p>
 
-# Image Usage Audit
+# PixCensus — Media Usage Audit
 
-A non-destructive WordPress plugin for reviewing image usage before cleaning up the Media Library.
+A non-destructive WordPress plugin that maps where media is referenced before you clean up the Media Library.
 
 [![QA](https://github.com/ussmarines/WP_image_usage_audit/actions/workflows/qa.yml/badge.svg)](https://github.com/ussmarines/WP_image_usage_audit/actions/workflows/qa.yml)
 [![Latest release](https://img.shields.io/github/v/release/ussmarines/WP_image_usage_audit)](https://github.com/ussmarines/WP_image_usage_audit/releases/latest)
@@ -12,9 +12,9 @@ A non-destructive WordPress plugin for reviewing image usage before cleaning up 
 
 ## Overview
 
-Version 3.0.0 introduces the complete Image Usage Audit visual identity across the project documentation, WordPress.org assets, and the plugin administration screen while preserving the same non-destructive audit behavior.
+Version 3.0.1 introduces the complete PixCensus — Media Usage Audit visual identity across the project documentation, WordPress.org assets, and the plugin administration screen while preserving the same non-destructive audit behavior.
 
-Image Usage Audit scans a WordPress site and groups registered image attachments as used, used only in draft content, or potentially unused. It also records where matches were found, reports image files that are not registered attachments, and exports the latest results as CSV.
+PixCensus — Media Usage Audit scans a WordPress site and groups registered image attachments as used, used only in draft content, or potentially unused. It also records where matches were found, reports image files that are not registered attachments, and exports the latest results as CSV.
 
 The plugin is a review tool, not an automatic cleanup tool. Its findings are heuristic and should always be checked before you make changes to the Media Library.
 
@@ -31,7 +31,7 @@ The plugin is a review tool, not an automatic cleanup tool. Its findings are heu
 
 ## Non-destructive by design
 
-Image Usage Audit never deletes, moves, edits, or rewrites media, posts, metadata, terms, or upload files. It writes only its own WordPress options for settings, scan results, manual decisions, and a temporary scan lock. Uninstalling the plugin removes only those plugin-owned options.
+PixCensus — Media Usage Audit never deletes, moves, edits, or rewrites media, posts, metadata, terms, or upload files. It writes only its own WordPress options for settings, scan results, manual decisions, and a temporary scan lock. Uninstalling the plugin removes only those plugin-owned options.
 
 Always create and verify a full backup before deleting media manually.
 
@@ -43,10 +43,10 @@ Always create and verify a full backup before deleting media manually.
 
 ## Installation
 
-1. Download `image-usage-audit.zip` from the [latest GitHub release](https://github.com/ussmarines/WP_image_usage_audit/releases/latest).
+1. Download `pixcensus-media-audit.zip` from the [latest GitHub release](https://github.com/ussmarines/WP_image_usage_audit/releases/latest).
 2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
-3. Select the ZIP, install it, and activate **Image Usage Audit**.
-4. Open **Media → Image Usage Audit**.
+3. Select the ZIP, install it, and activate **PixCensus — Media Usage Audit**.
+4. Open **Media → PixCensus — Media Usage Audit**.
 
 The plugin is not currently published in the WordPress.org Plugin Directory. GitHub Releases are the canonical download source.
 
@@ -112,16 +112,16 @@ The GitHub Actions matrix also tests WordPress 5.9, current WordPress, multisite
 Each GitHub release includes the plugin ZIP, a SHA-256 checksum, and a GitHub artifact attestation. Download both files, then run:
 
 ```bash
-sha256sum --check image-usage-audit.zip.sha256
-gh attestation verify image-usage-audit.zip --repo ussmarines/WP_image_usage_audit
-gh release verify-asset TAG image-usage-audit.zip --repo ussmarines/WP_image_usage_audit
+sha256sum --check pixcensus-media-audit.zip.sha256
+gh attestation verify pixcensus-media-audit.zip --repo ussmarines/WP_image_usage_audit
+gh release verify-asset TAG pixcensus-media-audit.zip --repo ussmarines/WP_image_usage_audit
 ```
 
 Replace `TAG` with the release tag you downloaded.
 
 ## Support the project
 
-If Image Usage Audit has been useful to you, you can support its continued development with an optional donation:
+If PixCensus — Media Usage Audit has been useful to you, you can support its continued development with an optional donation:
 
 [Support the project via PayPal](https://paypal.me/ussmarinesdot)
 
@@ -135,4 +135,4 @@ Security reports belong in GitHub’s private vulnerability reporting flow, not 
 
 ## License
 
-Image Usage Audit is licensed under [GPL-2.0-or-later](LICENSE).
+PixCensus — Media Usage Audit is licensed under [GPL-2.0-or-later](LICENSE).

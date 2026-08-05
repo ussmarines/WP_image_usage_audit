@@ -6,37 +6,37 @@
 - Release preparation: `2.2.8` on `fix/plugin-check-readme-2.2.8`, based on `main` commit `f08293b30386aa7701de24304b0f8ddb45f46349`.
 - Plugin version: `2.2.8`.
 - Declared compatibility: WordPress 5.9+, PHP 7.4+, tested through WordPress 7.0.
-- Entry point: `image-usage-audit.php`.
-- Text domain: `image-usage-audit`; translations live under `languages/`.
+- Entry point: `pixcensus-media-audit.php`.
+- Text domain: `pixcensus-media-audit`; translations live under `languages/`.
 - Canonical project URL: `https://github.com/ussmarines/WP_image_usage_audit` (the WordPress.org slug was not published when checked on 2026-07-12).
 
 ## Architecture and responsibilities
 
 | Path | Responsibility |
 | --- | --- |
-| `image-usage-audit.php` | Metadata, constants, autoloader, plugin lifecycle, administrator-only Media submenu, action-specific nonces, scan lock, settings handlers, AJAX scan/manual actions, and hardened CSV export. |
-| `includes/class-iua-scanner.php` | Image attachment discovery, path map, content/meta/options/terms/site-identity scans, CDN normalization, provenance, classification, and orphan-file enumeration. |
-| `includes/class-iua-cdn-settings.php` | Pure, bounded validation/canonicalization for host aliases and upload-path rewrite rules. |
-| `includes/class-iua-csv.php` | Spreadsheet-formula neutralization for exported site-derived values. |
+| `pixcensus-media-audit.php` | Metadata, constants, autoloader, plugin lifecycle, administrator-only Media submenu, action-specific nonces, scan lock, settings handlers, AJAX scan/manual actions, and hardened CSV export. |
+| `includes/class-pixcensus-scanner.php` | Image attachment discovery, path map, content/meta/options/terms/site-identity scans, CDN normalization, provenance, classification, and orphan-file enumeration. |
+| `includes/class-pixcensus-cdn-settings.php` | Pure, bounded validation/canonicalization for host aliases and upload-path rewrite rules. |
+| `includes/class-pixcensus-csv.php` | Spreadsheet-formula neutralization for exported site-derived values. |
 | `views/admin-page.php` | Admin settings, result tabs, pagination, filters, escaped output, bulk/manual controls, and export link. |
 | `assets/admin.js` | Authenticated AJAX calls, result-row updates, quick filtering, column preferences in browser local storage, density controls, and notices. |
 | `assets/admin.css` | Admin-only layout and responsive presentation. |
 | `uninstall.php` | Deletes only plugin-owned options for the current site and every multisite site. |
-| `scripts/build-zip.ps1` | Builds and inspects an allow-listed, deterministic `image-usage-audit/` distribution ZIP and writes its SHA-256 checksum. |
+| `scripts/build-zip.ps1` | Builds and inspects an allow-listed, deterministic `pixcensus-media-audit/` distribution ZIP and writes its SHA-256 checksum. |
 | `scripts/validate-metadata.mjs` | Checks version, text-domain, GPL, tags, short-description, and screenshot metadata invariants. |
 | `scripts/validate-release-tag.mjs` | Rejects a release tag that does not exactly match the semantic plugin version. |
 | `readme.txt` | WordPress plugin metadata, end-user description, changelog, and privacy statement. |
-| `languages/image-usage-audit.pot` | Reproducible translation template generated from the PHP and JavaScript source with the `image-usage-audit` text domain. |
+| `languages/pixcensus-media-audit.pot` | Reproducible translation template generated from the PHP and JavaScript source with the `pixcensus-media-audit` text domain. |
 
 Runtime code remains dependency-free. Composer/npm are development-only, WordPress is supplied ephemerally by wp-env, unit and disposable integration-smoke tests live under `tests/`, and GitHub Actions runs the locked QA workflow.
 
 ## Data flow
 
-1. An administrator with `manage_options` opens **Media → Image Usage Audit**.
-2. WordPress localizes the admin AJAX URL, action-specific nonces, last-scan time, page URLs, and UI strings into `IUAAdmin`.
-3. **Run scan** posts to `wp_ajax_iua_run_scan`; the handler verifies nonce and capability, then calls `IUA_Scanner::run()`.
+1. An administrator with `manage_options` opens **Media → PixCensus — Media Usage Audit**.
+2. WordPress localizes the admin AJAX URL, action-specific nonces, last-scan time, page URLs, and UI strings into `PixCensusAdmin`.
+3. **Run scan** posts to `wp_ajax_pixcensus_run_scan`; the handler verifies nonce and capability, then calls `PIXCENSUS_Scanner::run()`.
 4. The scanner loads settings, enumerates image attachments, maps originals/generated sizes, scans supported sources, classifies IDs, enumerates orphan files, and limits provenance to 12 labels per attachment.
-5. An atomic 15-minute option lock rejects concurrent scans. Results are stored with autoload disabled in `iua_usage_results` and rendered from the saved snapshot. Manual decisions are merged into display/export classifications.
+5. An atomic 15-minute option lock rejects concurrent scans. Results are stored with autoload disabled in `pixcensus_usage_results` and rendered from the saved snapshot. Manual decisions are merged into display/export classifications.
 6. Settings and CSV exports use authenticated `admin-post.php` handlers. CSV generation reads saved results and attachment metadata, neutralizes formula-leading cells, and does not alter media.
 
 ## Sources inspected by the scanner
@@ -56,17 +56,17 @@ Runtime code remains dependency-free. Composer/npm are development-only, WordPre
 
 | Option | Shape / purpose | Lifecycle |
 | --- | --- | --- |
-| `iua_include_drafts` | `'1'` or `'0'`; enables draft-only scanning. | Defaulted on bootstrap; deleted on uninstall. |
-| `iua_manual_used_ids` | Array of validated attachment IDs manually treated as used. | Defaulted on bootstrap; deleted on uninstall. |
-| `iua_cdn_aliases` | Comma-separated CDN hosts. | Defaulted on bootstrap; deleted on uninstall. |
-| `iua_cdn_rewrites` | Newline-separated `FROM => TO` rules. | Defaulted on bootstrap; deleted on uninstall. |
-| `iua_usage_results` | Used/draft-only/unused IDs, orphan paths, timestamp, draft flag, and provenance. | Written after scans; deleted on uninstall. |
-| `iua_scan_lock` | Owner token and expiry for the atomic concurrent-scan guard. | Non-autoloaded; written only during a scan, owner-released afterward, and deleted on uninstall. |
+| `pixcensus_include_drafts` | `'1'` or `'0'`; enables draft-only scanning. | Defaulted on bootstrap; deleted on uninstall. |
+| `pixcensus_manual_used_ids` | Array of validated attachment IDs manually treated as used. | Defaulted on bootstrap; deleted on uninstall. |
+| `pixcensus_cdn_aliases` | Comma-separated CDN hosts. | Defaulted on bootstrap; deleted on uninstall. |
+| `pixcensus_cdn_rewrites` | Newline-separated `FROM => TO` rules. | Defaulted on bootstrap; deleted on uninstall. |
+| `pixcensus_usage_results` | Used/draft-only/unused IDs, orphan paths, timestamp, draft flag, and provenance. | Written after scans; deleted on uninstall. |
+| `pixcensus_scan_lock` | Owner token and expiry for the atomic concurrent-scan guard. | Non-autoloaded; written only during a scan, owner-released afterward, and deleted on uninstall. |
 
 ## Security-sensitive surfaces
 
 - Capability: every admin render/action uses `manage_options` so authors cannot inspect global private provenance or options.
-- CSRF: settings use section-specific admin nonces; CSV uses `iua_export_csv`; every AJAX action uses a distinct nonce.
+- CSRF: settings use section-specific admin nonces; CSV uses `pixcensus_export_csv`; every AJAX action uses a distinct nonce.
 - Input: tabs/filters/sections are sanitized then allow-listed; IDs use `absint`, attachment validation, scalar checks, and a 500-ID bulk cap; CDN settings are structurally validated and bounded.
 - SQL: the sole direct query is a prepared, read-only, ID-paginated enumeration of the current site's options table. No user input enters SQL.
 - Output: admin HTML uses `esc_html*`, `esc_attr*`, `esc_url`, `esc_textarea`, or constrained `wp_kses_post`; redirects use `wp_safe_redirect`.

@@ -6,7 +6,7 @@
 - Original audit reference commit: `54e640aaeb0ded2999273cd08ba16c8a70e3260c`; final distribution revalidation commit: `def18f0be8fe0b2ebe248dbc33e39d9f86847efa`.
 - Inspected branch: `main` (pre-existing; Codex did not create or switch branches).
 - Scope: every tracked runtime, development, test, documentation, CI, skill, configuration, translation, lock, and distribution source in the repository, plus the generated untracked ZIP.
-- Starting worktree: clean. All changes described here were produced by this audit; `dist/image-usage-audit.zip` is generated and ignored.
+- Starting worktree: clean. All changes described here were produced by this audit; `dist/pixcensus-media-audit.zip` is generated and ignored.
 - Compatibility preserved: WordPress 5.9+, PHP 7.4+, tested metadata through WordPress 7.0.
 
 ## Executive assessment
@@ -58,24 +58,24 @@ All sources were consulted on 2026-07-12.
 
 | Class | Files |
 | --- | --- |
-| Runtime/distribution | `image-usage-audit.php`, `includes/*.php`, `views/admin-page.php`, `assets/admin.{js,css}`, `uninstall.php`, `readme.txt`, `LICENSE`, `languages/image-usage-audit.pot` |
+| Runtime/distribution | `pixcensus-media-audit.php`, `includes/*.php`, `views/admin-page.php`, `assets/admin.{js,css}`, `uninstall.php`, `readme.txt`, `LICENSE`, `languages/pixcensus-media-audit.pot` |
 | Development/QA | `composer.*`, `package*.json`, `phpcs.xml.dist`, `phpstan.neon.dist`, `phpunit.xml.dist`, `.wp-env.json`, `scripts/*` |
 | Tests | `tests/bootstrap.php`, `tests/unit/*`, `tests/integration/*`, `tests/README.md` |
 | Documentation | `README.md`, `SECURITY.md`, `docs/codex/*` |
 | CI | `.github/workflows/qa.yml` |
 | Codex | `AGENTS.md`, `.codex/test-ledger.json`, `.agents/skills/*` |
 | Distribution policy | `.distignore`, `.gitignore` |
-| Generated/temporary | `vendor/`, `node_modules/`, `dist/image-usage-audit.zip`, wp-env/Docker state; all excluded from Git/ZIP as applicable |
+| Generated/temporary | `vendor/`, `node_modules/`, `dist/pixcensus-media-audit.zip`, wp-env/Docker state; all excluded from Git/ZIP as applicable |
 | Obsolete | None proven; no tracked file was deleted |
 
-The ZIP allow-list contains exactly 11 runtime files beneath `image-usage-audit/`: the main plugin, uninstall, readme, license, two assets, three include classes, POT, and admin view. It excludes Git, CI, Codex, docs, tests, scripts, locks/configs, caches, development dependencies, and prior archives.
+The ZIP allow-list contains exactly 11 runtime files beneath `pixcensus-media-audit/`: the main plugin, uninstall, readme, license, two assets, three include classes, POT, and admin view. It excludes Git, CI, Codex, docs, tests, scripts, locks/configs, caches, development dependencies, and prior archives.
 
 ## Validated findings and corrections
 
 | ID | Severity | Evidence and exploitability | Correction | Validation |
 | --- | --- | --- | --- | --- |
 | IUA-SEC-001 | High | `upload_files` normally lets authors invoke a global scan/export exposing private post IDs, option names, filenames, and paths | All menu/render/action/export checks now require `manage_options`; action-specific nonces retained | Static review, PHPCS/PHPStan, and successful wp-env role smoke in public CI |
-| IUA-SEC-002 | High | `fputcsv` quoting does not stop spreadsheet interpretation of values beginning `=`, `+`, `-`, `@`, tab, or carriage return | Added `IUA_CSV::neutralize_formula()`, UTF-8 BOM, nosniff header, quoted filename | Dedicated data-provider tests for all markers; 20 tests/35 assertions pass |
+| IUA-SEC-002 | High | `fputcsv` quoting does not stop spreadsheet interpretation of values beginning `=`, `+`, `-`, `@`, tab, or carriage return | Added `PIXCENSUS_CSV::neutralize_formula()`, UTF-8 BOM, nosniff header, quoted filename | Dedicated data-provider tests for all markers; 20 tests/35 assertions pass |
 | IUA-PERF-001 | Medium | Concurrent full-site scans and an unbounded options result could exhaust workers/memory; result option could autoload | Atomic expiring lock, non-autoloaded writes, options batches of 500, plugin-option exclusion, bulk cap, safe iterator failure | Unit/static checks and successful scan-lock assertion in wp-env smoke |
 | IUA-SEC-003 | Medium | CDN aliases/rewrites accepted malformed, excessive, overly broad values, increasing CPU and false classifications | Pure validator: host-only aliases, max 20 aliases/rules, byte limits, HTTP(S)/path sources, upload-path targets, explicit rejection | Valid/invalid/long/count unit matrix passes |
 | IUA-SC-001 | Medium | Mutable GitHub Action tags and PHPUnit 9.6.24 advisory `CVE-2026-24765` weakened development supply chain | Pinned checkout v5, setup-node v5, setup-php 2.35.5 by SHA; upgraded PHPUnit to 9.6.35; least-privilege workflow | Composer audit after update and final workflow review |

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
 const tag = process.argv[2];
-const main = fs.readFileSync('image-usage-audit.php', 'utf8');
+const main = fs.readFileSync('pixcensus-media-audit.php', 'utf8');
 const version = main.match(/^\s*\*\s*Version:\s*(\d+\.\d+\.\d+)\s*$/m)?.[1];
 
 if (!version) {

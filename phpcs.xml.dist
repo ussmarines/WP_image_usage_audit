@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<ruleset name="Image Usage Audit">
+<ruleset name="PixCensus — Media Usage Audit">
 	<description>WordPress coding standards and PHP 7.4 compatibility.</description>
 	<config name="testVersion" value="7.4-" />
 
-	<file>image-usage-audit.php</file>
+	<file>pixcensus-media-audit.php</file>
 	<file>includes</file>
 	<file>views</file>
 	<file>uninstall.php</file>

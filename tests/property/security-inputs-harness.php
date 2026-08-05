@@ -19,8 +19,8 @@ if ( ! function_exists( 'wp_parse_url' ) ) {
 	}
 }
 
-require_once dirname( __DIR__, 2 ) . '/includes/class-iua-cdn-settings.php';
-require_once dirname( __DIR__, 2 ) . '/includes/class-iua-csv.php';
+require_once dirname( __DIR__, 2 ) . '/includes/class-pixcensus-cdn-settings.php';
+require_once dirname( __DIR__, 2 ) . '/includes/class-pixcensus-csv.php';
 
 /**
  * Stop the harness with an actionable, case-specific failure.
@@ -29,7 +29,7 @@ require_once dirname( __DIR__, 2 ) . '/includes/class-iua-csv.php';
  * @param string $message Failure message.
  * @return void
  */
-function iua_property_require( bool $condition, string $message ): void {
+function pixcensus_property_require( bool $condition, string $message ): void {
 	if ( ! $condition ) {
 		fwrite( STDERR, $message . PHP_EOL );
 		exit( 1 );
@@ -37,64 +37,64 @@ function iua_property_require( bool $condition, string $message ): void {
 }
 
 try {
-	$iua_payload = json_decode( stream_get_contents( STDIN ), true, 512, JSON_THROW_ON_ERROR );
-} catch ( Throwable $iua_exception ) {
-	fwrite( STDERR, 'Invalid property-test payload: ' . $iua_exception->getMessage() . PHP_EOL );
+	$pixcensus_payload = json_decode( stream_get_contents( STDIN ), true, 512, JSON_THROW_ON_ERROR );
+} catch ( Throwable $pixcensus_exception ) {
+	fwrite( STDERR, 'Invalid property-test payload: ' . $pixcensus_exception->getMessage() . PHP_EOL );
 	exit( 1 );
 }
 
-$iua_cases = isset( $iua_payload['cases'] ) && is_array( $iua_payload['cases'] ) ? $iua_payload['cases'] : array();
-$iua_assertions = 0;
+$pixcensus_cases = isset( $pixcensus_payload['cases'] ) && is_array( $pixcensus_payload['cases'] ) ? $pixcensus_payload['cases'] : array();
+$pixcensus_assertions = 0;
 
-foreach ( $iua_cases as $iua_index => $iua_case ) {
-	iua_property_require( is_array( $iua_case ), "Case {$iua_index}: case must be an array." );
+foreach ( $pixcensus_cases as $pixcensus_index => $pixcensus_case ) {
+	pixcensus_property_require( is_array( $pixcensus_case ), "Case {$pixcensus_index}: case must be an array." );
 
-	$iua_aliases  = isset( $iua_case['aliases'] ) ? (string) $iua_case['aliases'] : '';
-	$iua_rewrites = isset( $iua_case['rewrites'] ) ? (string) $iua_case['rewrites'] : '';
-	$iua_csv      = isset( $iua_case['csv'] ) ? (string) $iua_case['csv'] : '';
-	$iua_first    = IUA_CDN_Settings::validate( $iua_aliases, $iua_rewrites );
-	$iua_second   = IUA_CDN_Settings::validate( $iua_aliases, $iua_rewrites );
+	$pixcensus_aliases  = isset( $pixcensus_case['aliases'] ) ? (string) $pixcensus_case['aliases'] : '';
+	$pixcensus_rewrites = isset( $pixcensus_case['rewrites'] ) ? (string) $pixcensus_case['rewrites'] : '';
+	$pixcensus_csv      = isset( $pixcensus_case['csv'] ) ? (string) $pixcensus_case['csv'] : '';
+	$pixcensus_first    = PIXCENSUS_CDN_Settings::validate( $pixcensus_aliases, $pixcensus_rewrites );
+	$pixcensus_second   = PIXCENSUS_CDN_Settings::validate( $pixcensus_aliases, $pixcensus_rewrites );
 
-	iua_property_require( $iua_first === $iua_second, "Case {$iua_index}: CDN validation is not deterministic." );
-	iua_property_require(
-		isset( $iua_first['valid'], $iua_first['aliases'], $iua_first['rewrites'], $iua_first['errors'] )
-		&& is_bool( $iua_first['valid'] )
-		&& is_string( $iua_first['aliases'] )
-		&& is_string( $iua_first['rewrites'] )
-		&& is_array( $iua_first['errors'] ),
-		"Case {$iua_index}: CDN validation returned an invalid schema."
+	pixcensus_property_require( $pixcensus_first === $pixcensus_second, "Case {$pixcensus_index}: CDN validation is not deterministic." );
+	pixcensus_property_require(
+		isset( $pixcensus_first['valid'], $pixcensus_first['aliases'], $pixcensus_first['rewrites'], $pixcensus_first['errors'] )
+		&& is_bool( $pixcensus_first['valid'] )
+		&& is_string( $pixcensus_first['aliases'] )
+		&& is_string( $pixcensus_first['rewrites'] )
+		&& is_array( $pixcensus_first['errors'] ),
+		"Case {$pixcensus_index}: CDN validation returned an invalid schema."
 	);
-	iua_property_require( $iua_first['valid'] === empty( $iua_first['errors'] ), "Case {$iua_index}: validity and errors disagree." );
-	iua_property_require( strlen( $iua_first['aliases'] ) <= 4096, "Case {$iua_index}: aliases output exceeded its byte limit." );
-	iua_property_require( strlen( $iua_first['rewrites'] ) <= 8192, "Case {$iua_index}: rewrites output exceeded its byte limit." );
+	pixcensus_property_require( $pixcensus_first['valid'] === empty( $pixcensus_first['errors'] ), "Case {$pixcensus_index}: validity and errors disagree." );
+	pixcensus_property_require( strlen( $pixcensus_first['aliases'] ) <= 4096, "Case {$pixcensus_index}: aliases output exceeded its byte limit." );
+	pixcensus_property_require( strlen( $pixcensus_first['rewrites'] ) <= 8192, "Case {$pixcensus_index}: rewrites output exceeded its byte limit." );
 
-	$iua_alias_count = '' === $iua_first['aliases'] ? 0 : count( explode( ', ', $iua_first['aliases'] ) );
-	$iua_rule_count  = '' === $iua_first['rewrites'] ? 0 : count( explode( "\n", $iua_first['rewrites'] ) );
-	iua_property_require( $iua_alias_count <= 20, "Case {$iua_index}: aliases output exceeded its item limit." );
-	iua_property_require( $iua_rule_count <= 20, "Case {$iua_index}: rewrites output exceeded its item limit." );
+	$pixcensus_alias_count = '' === $pixcensus_first['aliases'] ? 0 : count( explode( ', ', $pixcensus_first['aliases'] ) );
+	$pixcensus_rule_count  = '' === $pixcensus_first['rewrites'] ? 0 : count( explode( "\n", $pixcensus_first['rewrites'] ) );
+	pixcensus_property_require( $pixcensus_alias_count <= 20, "Case {$pixcensus_index}: aliases output exceeded its item limit." );
+	pixcensus_property_require( $pixcensus_rule_count <= 20, "Case {$pixcensus_index}: rewrites output exceeded its item limit." );
 
-	$iua_normalized = IUA_CDN_Settings::validate( $iua_first['aliases'], $iua_first['rewrites'] );
-	iua_property_require( true === $iua_normalized['valid'], "Case {$iua_index}: normalized CDN settings are not valid." );
-	iua_property_require( $iua_first['aliases'] === $iua_normalized['aliases'], "Case {$iua_index}: alias normalization is not idempotent." );
-	iua_property_require( $iua_first['rewrites'] === $iua_normalized['rewrites'], "Case {$iua_index}: rewrite normalization is not idempotent." );
+	$pixcensus_normalized = PIXCENSUS_CDN_Settings::validate( $pixcensus_first['aliases'], $pixcensus_first['rewrites'] );
+	pixcensus_property_require( true === $pixcensus_normalized['valid'], "Case {$pixcensus_index}: normalized CDN settings are not valid." );
+	pixcensus_property_require( $pixcensus_first['aliases'] === $pixcensus_normalized['aliases'], "Case {$pixcensus_index}: alias normalization is not idempotent." );
+	pixcensus_property_require( $pixcensus_first['rewrites'] === $pixcensus_normalized['rewrites'], "Case {$pixcensus_index}: rewrite normalization is not idempotent." );
 
-	$iua_csv_output = IUA_CSV::neutralize_formula( $iua_csv );
-	iua_property_require( $iua_csv_output === IUA_CSV::neutralize_formula( $iua_csv_output ), "Case {$iua_index}: CSV neutralization is not idempotent." );
+	$pixcensus_csv_output = PIXCENSUS_CSV::neutralize_formula( $pixcensus_csv );
+	pixcensus_property_require( $pixcensus_csv_output === PIXCENSUS_CSV::neutralize_formula( $pixcensus_csv_output ), "Case {$pixcensus_index}: CSV neutralization is not idempotent." );
 
-	$iua_is_formula = 1 === preg_match( '/^[\x00-\x20]*[=+\-@]/', $iua_csv ) || 1 === preg_match( '/^[\t\r\n]/', $iua_csv );
-	if ( $iua_is_formula ) {
-		iua_property_require( 0 === strpos( $iua_csv_output, "'" ), "Case {$iua_index}: a dangerous CSV formula remained active." );
+	$pixcensus_is_formula = 1 === preg_match( '/^[\x00-\x20]*[=+\-@]/', $pixcensus_csv ) || 1 === preg_match( '/^[\t\r\n]/', $pixcensus_csv );
+	if ( $pixcensus_is_formula ) {
+		pixcensus_property_require( 0 === strpos( $pixcensus_csv_output, "'" ), "Case {$pixcensus_index}: a dangerous CSV formula remained active." );
 	} else {
-		iua_property_require( $iua_csv === $iua_csv_output, "Case {$iua_index}: a safe CSV value changed." );
+		pixcensus_property_require( $pixcensus_csv === $pixcensus_csv_output, "Case {$pixcensus_index}: a safe CSV value changed." );
 	}
 
-	$iua_assertions += 13;
+	$pixcensus_assertions += 13;
 }
 
 echo json_encode(
 	array(
 		'result'     => 'pass',
-		'cases'      => count( $iua_cases ),
-		'assertions' => $iua_assertions,
+		'cases'      => count( $pixcensus_cases ),
+		'assertions' => $pixcensus_assertions,
 	)
 );
