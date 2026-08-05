@@ -2,11 +2,11 @@ const fc = require('fast-check');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const seed = Number.parseInt(process.env.IUA_PROPERTY_SEED || '20260801', 10);
-const numRuns = Number.parseInt(process.env.IUA_PROPERTY_RUNS || '500', 10);
+const seed = Number.parseInt(process.env.PIXCENSUS_PROPERTY_SEED || '20260801', 10);
+const numRuns = Number.parseInt(process.env.PIXCENSUS_PROPERTY_RUNS || '500', 10);
 
 if (!Number.isInteger(seed) || !Number.isInteger(numRuns) || numRuns < 1 || numRuns > 2000) {
-	throw new Error('IUA_PROPERTY_SEED and IUA_PROPERTY_RUNS must be bounded integers.');
+	throw new Error('PIXCENSUS_PROPERTY_SEED and PIXCENSUS_PROPERTY_RUNS must be bounded integers.');
 }
 
 const boundedText = fc.string({ maxLength: 512 });
@@ -66,6 +66,6 @@ console.log(
 		seed,
 		cases: numRuns,
 		assertions: result.assertions,
-		production: ['IUA_CDN_Settings::validate', 'IUA_CSV::neutralize_formula'],
+		production: ['PIXCENSUS_CDN_Settings::validate', 'PIXCENSUS_CSV::neutralize_formula'],
 	})
 );

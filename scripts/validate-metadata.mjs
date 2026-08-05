@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 
-const version = '3.0.0';
+const version = '3.0.1';
 const donationUrl = 'https://paypal.me/ussmarinesdot';
-const main = fs.readFileSync('image-usage-audit.php', 'utf8');
+const main = fs.readFileSync('pixcensus-media-audit.php', 'utf8');
 const readme = fs.readFileSync('readme.txt', 'utf8');
 const funding = fs.readFileSync('.github/FUNDING.yml', 'utf8');
-const pot = fs.readFileSync('languages/image-usage-audit.pot', 'utf8');
+const pot = fs.readFileSync('languages/pixcensus-media-audit.pot', 'utf8');
 const license = fs.readFileSync('LICENSE', 'utf8');
 
 const donateLinkMatch = readme.match(/^Donate link:\s*(\S+)\s*$/m);
@@ -13,15 +13,15 @@ const expectedFunding = `custom:\n  - "${donationUrl}"`;
 
 const checks = [
 	[main.includes(`Version: ${version}`), 'plugin header version'],
-	[main.includes(`define( 'IUA_VERSION', '${version}' )`), 'IUA_VERSION'],
+	[main.includes(`define( 'PIXCENSUS_VERSION', '${version}' )`), 'PIXCENSUS_VERSION'],
 	[readme.includes(`Stable tag: ${version}`), 'readme stable tag'],
 	[donateLinkMatch !== null && donateLinkMatch[1] === donationUrl, 'WordPress.org donate link'],
 	[
 		funding.replace(/\r\n/g, '\n').trim() === expectedFunding,
 		'GitHub funding link',
 	],
-	[pot.includes(`Project-Id-Version: Image Usage Audit ${version}`), 'POT project version'],
-	[main.includes('Text Domain: image-usage-audit'), 'plugin text domain'],
+	[pot.includes(`Project-Id-Version: PixCensus — Media Usage Audit ${version}`), 'POT project version'],
+	[main.includes('Text Domain: pixcensus-media-audit'), 'plugin text domain'],
 	[pot.includes('Language-Team:'), 'POT metadata'],
 	[license.includes('GNU GENERAL PUBLIC LICENSE'), 'GPL heading'],
 	[license.includes('Version 2, June 1991'), 'GPL version'],

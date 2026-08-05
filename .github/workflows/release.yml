@@ -40,30 +40,31 @@ jobs:
       - run: npm audit --audit-level=high
       - run: npm run validate:metadata
       - run: npm run validate:config
+      - run: npm run validate:branding
       - run: npm run build:zip
       - run: npx wp-env start
       - run: npx wp-env run cli wp plugin deactivate WP_image_usage_audit
-      - run: npx wp-env run cli wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/image-usage-audit.zip --activate
-      - run: npx wp-env run cli wp plugin is-active image-usage-audit
+      - run: npx wp-env run cli wp plugin install /var/www/html/wp-content/plugins/WP_image_usage_audit/dist/pixcensus-media-audit.zip --activate
+      - run: npx wp-env run cli wp plugin is-active pixcensus-media-audit
       - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/ajax-setup.php
       - run: npm run test:ajax
       - run: npx wp-env run cli wp eval-file /var/www/html/wp-content/plugins/WP_image_usage_audit/tests/integration/smoke.php
       - run: npx wp-env run cli wp plugin install plugin-check --version=2.0.0 --activate
-      - run: npx wp-env run cli wp plugin check image-usage-audit
+      - run: npx wp-env run cli wp plugin check pixcensus-media-audit
       - name: Stop WordPress
         if: always()
-        run: npx wp-env stop
+        run: npx wp-env stop || true
       - name: Attest tested ZIP
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
         with:
-          subject-path: dist/image-usage-audit.zip
+          subject-path: dist/pixcensus-media-audit.zip
       - name: Upload tested release files
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-files
           path: |
-            dist/image-usage-audit.zip
-            dist/image-usage-audit.zip.sha256
+            dist/pixcensus-media-audit.zip
+            dist/pixcensus-media-audit.zip.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 14
@@ -87,8 +88,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd release
-          sha256sum --check --strict image-usage-audit.zip.sha256
-          gh attestation verify image-usage-audit.zip --repo "$GITHUB_REPOSITORY"
+          sha256sum --check --strict pixcensus-media-audit.zip.sha256
+          gh attestation verify pixcensus-media-audit.zip --repo "$GITHUB_REPOSITORY"
       - name: Publish immutable GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -99,10 +100,10 @@ jobs:
             --draft \
             --verify-tag \
             --generate-notes \
-            --title "Image Usage Audit ${RELEASE_TAG#v}"
+            --title "PixCensus — Media Usage Audit ${RELEASE_TAG#v}"
           gh release upload "$RELEASE_TAG" \
-            release/image-usage-audit.zip \
-            release/image-usage-audit.zip.sha256 \
+            release/pixcensus-media-audit.zip \
+            release/pixcensus-media-audit.zip.sha256 \
             --repo "$GITHUB_REPOSITORY"
           gh release edit "$RELEASE_TAG" \
             --repo "$GITHUB_REPOSITORY" \

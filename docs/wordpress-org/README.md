@@ -2,12 +2,12 @@
 
 ## Submission identity
 
-- Plugin: **Image Usage Audit**
-- Preferred slug: `image-usage-audit`
+- Plugin: **PixCensus — Media Usage Audit**
+- Preferred slug: `pixcensus-media-audit`
 - WordPress.org account: `ussmarines`
-- Submission version: `3.0.0`
-- Git commit used for the public 3.0.0 release: `722b7047dbd9754337dd0d7c4e360c0ff8be1267`
-- Expected SHA-256 for the public `image-usage-audit.zip`: `Read the checksum from the v3.0.0 release asset image-usage-audit.zip.sha256`
+- Submission version: `3.0.1`
+- Git commit used for the public 3.0.1 release: `722b7047dbd9754337dd0d7c4e360c0ff8be1267`
+- Expected SHA-256 for the public `pixcensus-media-audit.zip`: `Read the checksum from the v3.0.1 release asset pixcensus-media-audit.zip.sha256`
 
 ## Current preparation status
 
@@ -17,8 +17,8 @@ The plugin package is technically ready for manual review:
 - WordPress 5.9 minimum;
 - PHP 7.4 minimum;
 - tested through WordPress 7.0;
-- synchronized plugin version and stable tag at 3.0.0;
-- text domain and preferred slug set to `image-usage-audit`;
+- synchronized plugin version and stable tag at 3.0.1;
+- text domain and preferred slug set to `pixcensus-media-audit`;
 - non-destructive behavior;
 - no telemetry, remote executable code, or external service dependency;
 - capability, nonce, validation, sanitization, escaping, and CSV formula protections;
@@ -27,12 +27,12 @@ The plugin package is technically ready for manual review:
 ## Before submitting
 
 1. Sign in to WordPress.org as `ussmarines` and verify the profile email address.
-2. Download `image-usage-audit.zip` from the public `v3.0.0` GitHub release.
+2. Download `pixcensus-media-audit.zip` from the public `v3.0.1` GitHub release.
 3. Run `scripts/verify-wordpress-org-submission.ps1` against the downloaded ZIP.
 4. Open the official new-plugin form at `https://wordpress.org/plugins/developers/add/`.
 5. Upload the verified installation ZIP, not the repository source archive.
 6. Paste the overview from `submission-form.txt` into the reviewer notes or description field.
-7. Confirm the preferred slug is `image-usage-audit` before final submission.
+7. Confirm the preferred slug is `pixcensus-media-audit` before final submission.
 8. Keep the confirmation email and reply in the same thread if the review team requests changes.
 
 Do not create a second submission for reviewer corrections. Send a complete corrected ZIP through the existing review thread.
@@ -50,4 +50,4 @@ Do not create a second submission for reviewer corrections. Send a complete corr
 
 ## Important release constraint
 
-The existing 3.0.0 release ZIP, checksum, tag, and attestation must remain immutable. These preparation files are repository-only material and must not be inserted into the already published 3.0.0 ZIP.
+The existing 3.0.1 release ZIP, checksum, tag, and attestation must remain immutable. These preparation files are repository-only material and must not be inserted into the already published 3.0.1 ZIP.

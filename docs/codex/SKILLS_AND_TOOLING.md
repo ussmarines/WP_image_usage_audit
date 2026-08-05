@@ -90,7 +90,7 @@ Project skills are detected from the existing `.agents/skills/` location in this
 | `wp-wpcli-and-ops` | WordPress/agent-skills `trunk`, GPL-2.0-or-later | Safe WP-CLI, Plugin Check, POT and multisite operations. |
 | `wp-i18n-workflow` | mralaminahamed/wp-dev-skills `trunk`, MIT | POT/PO/MO/JS translation workflow and translator comments. |
 | `wp-multisite` | mralaminahamed/wp-dev-skills `trunk`, MIT | Site switching, network activation and uninstall safety. |
-| `iua-quality-gate` | Local, project-specific | Scope-aware checks, ledger reuse, metadata and ZIP validation with read-only Git. |
+| `pixcensus-quality-gate` | Local, project-specific | Scope-aware checks, ledger reuse, metadata and ZIP validation with read-only Git. |
 
 The official source was active on 2026-07-08; the community source was active on 2026-07-04. The selected community folders contain instructions, references and evals only; no installer or executable script. Their README, licence and `SKILL.md` files were reviewed before installation.
 
@@ -106,7 +106,7 @@ Global availability: `gh-fix-ci`, `skill-creator` and `skill-installer` are avai
 - `blueprint`: only if Playground becomes a maintained test environment.
 - `wp-background-processing`: only after measurements show the synchronous scanner is inadequate.
 - `wp-database`: only for a custom table or schema migration.
-- `iua-scanner-regression`: only when scanner changes become frequent/complex.
+- `pixcensus-scanner-regression`: only when scanner changes become frequent/complex.
 - `deep-security-scan`: only for an exceptional post-architecture or major-release audit.
 
 WordPress Playground CLI 3.1.44 (official GPL-2.0-or-later source) was evaluated but not added: `@wordpress/env` remains the primary runtime, and adding a WebAssembly/SQLite fallback now would duplicate the test chain without proving a complementary smoke path. Its network downloads would not resolve the observed Docker DNS blocker.

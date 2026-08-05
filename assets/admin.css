@@ -1,39 +1,41 @@
 :root {
-	--iua-border: #d4e1e9;
-	--iua-soft: #f3f8fb;
-	--iua-accent: #147c96;
-	--iua-accent-strong: #0d536d;
-	--iua-teal: #45dbe0;
-	--iua-navy: #0a1830;
-	--iua-muted: #52606d;
+	--pixcensus-border: #cfdae8;
+	--pixcensus-soft: #f4f7fb;
+	--pixcensus-accent: #177f88;
+	--pixcensus-accent-strong: #075a67;
+	--pixcensus-teal: #38e4c4;
+	--pixcensus-cyan: #55c9ff;
+	--pixcensus-violet: #786fff;
+	--pixcensus-navy: #07162b;
+	--pixcensus-muted: #526174;
 }
 
-#iua-admin .iua-hero {
+#pixcensus-admin .pixcensus-hero {
 	position: relative;
 	display: grid;
 	grid-template-columns: auto minmax(0, 1fr) auto;
 	gap: 18px;
 	align-items: center;
 	overflow: hidden;
-	background: radial-gradient(circle at 82% 35%, rgba(69, 219, 224, 0.24), transparent 34%), linear-gradient(135deg, var(--iua-navy), #123b58 64%, #125a73);
-	border: 1px solid #1d6079;
-	border-radius: 16px;
+	background: radial-gradient(circle at 78% 28%, rgba(56, 228, 196, 0.28), transparent 30%), radial-gradient(circle at 92% 78%, rgba(120, 111, 255, 0.24), transparent 34%), linear-gradient(135deg, var(--pixcensus-navy), #102f52 58%, #0b6670);
+	border: 1px solid rgba(85, 201, 255, 0.42);
+	border-radius: 18px;
 	box-shadow: 0 12px 30px rgba(10, 24, 48, 0.16);
 	padding: 22px 24px;
 	margin-bottom: 18px;
 }
 
-#iua-admin .iua-hero::after {
+#pixcensus-admin .pixcensus-hero::after {
 	content: "";
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
 	background-image: linear-gradient(rgba(125, 195, 216, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 195, 216, 0.06) 1px, transparent 1px);
-	background-size: 34px 34px;
+	background-size: 30px 30px;
 	mask-image: linear-gradient(90deg, transparent 28%, #000);
 }
 
-#iua-admin .iua-brand-mark {
+#pixcensus-admin .pixcensus-brand-mark {
 	position: relative;
 	z-index: 1;
 	display: block;
@@ -42,13 +44,13 @@
 	filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.22));
 }
 
-#iua-admin .iua-hero-copy,
-#iua-admin .iua-version { position: relative; z-index: 1; }
+#pixcensus-admin .pixcensus-hero-copy,
+#pixcensus-admin .pixcensus-version { position: relative; z-index: 1; }
 
-#iua-admin .iua-hero h1 { color: #fff; font-size: 30px; line-height: 1.15; margin: 0 0 5px; }
-#iua-admin .iua-hero .iua-sub { color: #cde1ec; font-size: 14px; }
+#pixcensus-admin .pixcensus-hero h1 { color: #fff; font-size: 30px; line-height: 1.15; margin: 0 0 5px; }
+#pixcensus-admin .pixcensus-hero .pixcensus-sub { color: #cde1ec; font-size: 14px; }
 
-#iua-admin .iua-version {
+#pixcensus-admin .pixcensus-version {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -62,28 +64,28 @@
 	letter-spacing: 0.03em;
 }
 
-#iua-admin .description { color: var(--iua-muted); }
+#pixcensus-admin .description { color: var(--pixcensus-muted); }
 
-#iua-admin .iua-grid {
+#pixcensus-admin .pixcensus-grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 16px;
 	align-items: start;
 }
 
-#iua-admin .iua-card {
+#pixcensus-admin .pixcensus-card {
 	background: #fff;
-	border: 1px solid var(--iua-border);
+	border: 1px solid var(--pixcensus-border);
 	border-radius: 12px;
 	box-shadow: 0 4px 14px rgba(10, 24, 48, 0.05);
 	padding: 16px;
 }
 
-#iua-admin .iua-card h2 {
+#pixcensus-admin .pixcensus-card h2 {
 	margin-top: 0;
 }
 
-#iua-admin .iua-toolbar {
+#pixcensus-admin .pixcensus-toolbar {
 	display: flex;
 	gap: 10px;
 	align-items: center;
@@ -92,36 +94,36 @@
 	margin: 8px 0 12px;
 }
 
-#iua-admin .iua-left,
-#iua-admin .iua-right,
-#iua-admin .iua-actions {
+#pixcensus-admin .pixcensus-left,
+#pixcensus-admin .pixcensus-right,
+#pixcensus-admin .pixcensus-actions {
 	display: flex;
 	gap: 8px;
 	align-items: center;
 	flex-wrap: wrap;
 }
 
-#iua-admin .iua-form-row {
+#pixcensus-admin .pixcensus-form-row {
 	display: block;
 	margin-bottom: 12px;
 }
 
-#iua-admin .iua-form-row input[type="text"],
-#iua-admin .iua-form-row textarea {
+#pixcensus-admin .pixcensus-form-row input[type="text"],
+#pixcensus-admin .pixcensus-form-row textarea {
 	width: 100%;
 	margin-top: 6px;
 }
 
-#iua-admin .iua-quick input[type="search"] {
+#pixcensus-admin .pixcensus-quick input[type="search"] {
 	height: 30px;
-	border: 1px solid var(--iua-border);
+	border: 1px solid var(--pixcensus-border);
 	border-radius: 8px;
 	padding: 0 10px;
 	min-width: 220px;
 }
 
-#iua-admin .iua-chip,
-#iua-admin .iua-badge {
+#pixcensus-admin .pixcensus-chip,
+#pixcensus-admin .pixcensus-badge {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -133,57 +135,57 @@
 	border: 1px solid #cfe6f8;
 }
 
-#iua-admin .iua-badge {
+#pixcensus-admin .pixcensus-badge {
 	background: #f0f6fc;
 }
 
-#iua-admin table.widefat thead th {
+#pixcensus-admin table.widefat thead th {
 	position: sticky;
 	top: 0;
 	background: #f6f7f7;
 	z-index: 1;
 }
 
-#iua-admin .iua-thumb img {
+#pixcensus-admin .pixcensus-thumb img {
 	border-radius: 6px;
-	border: 1px solid var(--iua-border);
+	border: 1px solid var(--pixcensus-border);
 }
 
-#iua-admin.iua-compact table.widefat td,
-#iua-admin.iua-compact table.widefat th {
+#pixcensus-admin.pixcensus-compact table.widefat td,
+#pixcensus-admin.pixcensus-compact table.widefat th {
 	padding-top: 6px;
 	padding-bottom: 6px;
 }
 
-#iua-admin.iua-compact .iua-thumb img {
+#pixcensus-admin.pixcensus-compact .pixcensus-thumb img {
 	max-width: 48px !important;
 }
 
-#iua-admin .iua-columns {
+#pixcensus-admin .pixcensus-columns {
 	position: relative;
 }
 
-#iua-admin .iua-columns-panel {
+#pixcensus-admin .pixcensus-columns-panel {
 	position: absolute;
 	right: 0;
 	top: 36px;
 	z-index: 10;
 	background: #fff;
-	border: 1px solid var(--iua-border);
+	border: 1px solid var(--pixcensus-border);
 	border-radius: 8px;
 	padding: 10px;
 	min-width: 220px;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-#iua-admin .iua-columns-panel label {
+#pixcensus-admin .pixcensus-columns-panel label {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin: 6px 0;
 }
 
-#iua-admin .iua-columns-actions {
+#pixcensus-admin .pixcensus-columns-actions {
 	display: flex;
 	justify-content: space-between;
 	gap: 12px;
@@ -191,41 +193,53 @@
 	margin-top: 8px;
 }
 
-#iua-admin .iua-inline-form {
+#pixcensus-admin .pixcensus-inline-form {
 	margin: 0;
 }
 
-#iua-admin .iua-prov-more ul,
-#iua-admin td[data-col="provenance"] ul {
+#pixcensus-admin .pixcensus-prov-more ul,
+#pixcensus-admin td[data-col="provenance"] ul {
 	margin: 0;
 	padding-left: 16px;
 }
 
-#iua-admin .iua-provenance-toggle {
+#pixcensus-admin .pixcensus-provenance-toggle {
 	margin: 6px 0 0;
 }
 
-#iua-admin .iua-muted-dash {
+#pixcensus-admin .pixcensus-muted-dash {
 	color: #888;
 }
 
 @media (max-width: 960px) {
-	#iua-admin .iua-grid { grid-template-columns: 1fr; }
-	#iua-admin .iua-hero { grid-template-columns: auto minmax(0, 1fr); }
-	#iua-admin .iua-version { grid-column: 2; justify-self: start; }
+	#pixcensus-admin .pixcensus-grid { grid-template-columns: 1fr; }
+	#pixcensus-admin .pixcensus-hero { grid-template-columns: auto minmax(0, 1fr); }
+	#pixcensus-admin .pixcensus-version { grid-column: 2; justify-self: start; }
 }
 
 @media (max-width: 600px) {
-	#iua-admin .iua-hero { grid-template-columns: 1fr; padding: 20px; }
-	#iua-admin .iua-brand-mark { width: 64px; height: 64px; }
-	#iua-admin .iua-version { grid-column: 1; }
+	#pixcensus-admin .pixcensus-hero { grid-template-columns: 1fr; padding: 20px; }
+	#pixcensus-admin .pixcensus-brand-mark { width: 64px; height: 64px; }
+	#pixcensus-admin .pixcensus-version { grid-column: 1; }
 }
 
-#iua-admin .button-primary { background: var(--iua-accent-strong); border-color: var(--iua-accent-strong); }
-#iua-admin .button-primary:hover,
-#iua-admin .button-primary:focus { background: var(--iua-accent); border-color: var(--iua-accent); }
-#iua-admin a:focus,
-#iua-admin button:focus,
-#iua-admin input:focus,
-#iua-admin textarea:focus,
-#iua-admin select:focus { box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--iua-teal); }
+#pixcensus-admin .button-primary { background: var(--pixcensus-accent-strong); border-color: var(--pixcensus-accent-strong); }
+#pixcensus-admin .button-primary:hover,
+#pixcensus-admin .button-primary:focus { background: var(--pixcensus-accent); border-color: var(--pixcensus-accent); }
+#pixcensus-admin a:focus,
+#pixcensus-admin button:focus,
+#pixcensus-admin input:focus,
+#pixcensus-admin textarea:focus,
+#pixcensus-admin select:focus { box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--pixcensus-teal); }
+
+#pixcensus-admin .pixcensus-hero::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 4px;
+	background: linear-gradient(var(--pixcensus-teal), var(--pixcensus-violet));
+}
+#pixcensus-admin .pixcensus-card { transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+#pixcensus-admin .pixcensus-card:hover { border-color: #a9c7d9; box-shadow: 0 9px 24px rgba(7, 22, 43, .08); transform: translateY(-1px); }

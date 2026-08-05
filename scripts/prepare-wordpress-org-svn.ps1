@@ -2,8 +2,8 @@ param(
 	[Parameter(Mandatory = $true)][string] $PluginZip,
 	[Parameter(Mandatory = $true)][string] $WorkDir,
 	[Parameter(Mandatory = $true)][string] $AssetsDir,
-	[string] $Slug = 'image-usage-audit',
-	[string] $Version = '3.0.0',
+	[string] $Slug = 'pixcensus-media-audit',
+	[string] $Version = '3.0.1',
 	[string] $WordPressUser = 'ussmarines',
 	[switch] $Commit
 )
@@ -13,7 +13,7 @@ if (-not (Test-Path -LiteralPath $PluginZip -PathType Leaf)) { throw "Plugin ZIP
 if (-not (Test-Path -LiteralPath $AssetsDir -PathType Container)) { throw "Assets directory not found: $AssetsDir" }
 if (Test-Path -LiteralPath $WorkDir) { throw "Working directory already exists: $WorkDir" }
 $svnUrl = "https://plugins.svn.wordpress.org/$Slug"
-$temp = Join-Path ([System.IO.Path]::GetTempPath()) ('iua-svn-' + [guid]::NewGuid().ToString('N'))
+$temp = Join-Path ([System.IO.Path]::GetTempPath()) ('pixcensus-svn-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temp | Out-Null
 try {
 	svn checkout $svnUrl $WorkDir
@@ -36,7 +36,7 @@ try {
 		svn status
 		if ($Commit) {
 			if ((Read-Host 'Type PUBLISH to commit') -ne 'PUBLISH') { throw 'SVN publication cancelled.' }
-			svn commit -m "Publish Image Usage Audit $Version" --username $WordPressUser
+			svn commit -m "Publish PixCensus — Media Usage Audit $Version" --username $WordPressUser
 		} else { Write-Host 'No SVN commit performed. Review svn status and svn diff.' -ForegroundColor Green }
 	}
 	finally { Pop-Location }

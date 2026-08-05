@@ -6,14 +6,14 @@ Approval creates an SVN repository but does not publish the plugin automatically
 
 1. Generate a WordPress.org SVN password from the WordPress.org profile settings.
 2. Install Apache Subversion or TortoiseSVN and confirm `svn --version` works.
-3. Download and verify the public `image-usage-audit.zip` release package.
+3. Download and verify the public `pixcensus-media-audit.zip` release package.
 4. Run `scripts/prepare-wordpress-org-svn.ps1` with the approved slug, version, ZIP path, empty working directory, and `.wordpress-org` as the asset source.
 5. Review `svn status` and `svn diff` before committing.
 
 ## Expected layout
 
 ```text
-image-usage-audit/
+pixcensus-media-audit/
 ├── assets/
 │   ├── banner-772x250.png
 │   ├── banner-1544x500.png
@@ -21,17 +21,17 @@ image-usage-audit/
 │   ├── icon-256x256.png
 │   └── screenshot-N.png
 ├── tags/
-│   └── 3.0.0/
+│   └── 3.0.1/
 └── trunk/
 ```
 
-The WordPress.org directory graphics belong in the SVN root `/assets`. Runtime CSS and JavaScript remain inside the plugin package under `/trunk/assets` and `/tags/3.0.0/assets`.
+The WordPress.org directory graphics belong in the SVN root `/assets`. Runtime CSS and JavaScript remain inside the plugin package under `/trunk/assets` and `/tags/3.0.1/assets`.
 
 ## Final checks
 
 - plugin files are directly inside `/trunk`, not inside a second nested plugin directory;
-- plugin header version and `Stable tag` are both `3.0.0`;
-- `/tags/3.0.0` matches `/trunk` for the first publication;
+- plugin header version and `Stable tag` are both `3.0.1`;
+- `/tags/3.0.1` matches `/trunk` for the first publication;
 - no ZIP archives, test fixtures, repository metadata, or development dependencies are committed;
 - screenshots contain no private information;
 - every screenshot has a matching readme caption;
@@ -41,7 +41,7 @@ The WordPress.org directory graphics belong in the SVN root `/assets`. Runtime C
 Commit only after review:
 
 ```powershell
-svn commit -m "Publish Image Usage Audit 3.0.0" --username ussmarines
+svn commit -m "Publish PixCensus — Media Usage Audit 3.0.1" --username ussmarines
 ```
 
 After publication, install the plugin from WordPress.org on a clean test site and verify the displayed version, activation, scan flow, directory graphics, and screenshots.
